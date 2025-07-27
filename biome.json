@@ -17,7 +17,10 @@
 			},
 			"correctness": {
 				"useExhaustiveDependencies": "off",
-				"noUnusedImports": "error",
+				"noUnusedImports": {
+					"level": "error",
+					"fix": "safe"
+				},
 				"noUnusedFunctionParameters": "warn"
 			},
 			"style": {
