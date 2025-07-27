@@ -61,8 +61,7 @@ export const createCheckoutLink: CreateCheckoutLink = async (options) => {
 				price: productId,
 			},
 		],
-		customer: customerId,
-		customer_email: email,
+		...(customerId ? { customer: customerId } : { customer_email: email }),
 		...(type === "one-time"
 			? {
 					payment_intent_data: {
