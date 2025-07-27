@@ -45,10 +45,6 @@ export default async function middleware(req: NextRequest) {
 		return NextResponse.next();
 	}
 
-	if (!appConfig.ui.marketing.enabled) {
-		return NextResponse.redirect(new URL("/app", origin));
-	}
-
 	const pathsWithoutLocale = [
 		"/onboarding",
 		"/new-organization",
@@ -58,6 +54,10 @@ export default async function middleware(req: NextRequest) {
 
 	if (pathsWithoutLocale.some((path) => pathname.startsWith(path))) {
 		return NextResponse.next();
+	}
+
+	if (!appConfig.ui.marketing.enabled) {
+		return NextResponse.redirect(new URL("/app", origin));
 	}
 
 	return intlMiddleware(req);
