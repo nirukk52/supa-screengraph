@@ -1,4 +1,4 @@
-import { apiClient } from "@shared/lib/api-client";
+import { apiClient } from "@shared/lib/hono-client";
 import { createQueryKeyWithParams } from "@shared/lib/query-client";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 

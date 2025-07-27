@@ -1,4 +1,4 @@
-import { apiClient } from "@shared/lib/api-client";
+import { apiClient } from "@shared/lib/hono-client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { InferRequestType } from "hono";
 

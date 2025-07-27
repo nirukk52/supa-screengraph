@@ -11,7 +11,7 @@ import {
 } from "@saas/organizations/lib/api";
 import { purchasesQueryKey } from "@saas/payments/lib/api";
 import { useRouter } from "@shared/hooks/router";
-import { apiClient } from "@shared/lib/api-client";
+import { apiClient } from "@shared/lib/hono-client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import nProgress from "nprogress";

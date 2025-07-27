@@ -1,6 +1,9 @@
 {
 	"dependencies": {
 		"@hono/zod-validator": "^0.7.0",
+		"@orpc/client": "^1.7.5",
+		"@orpc/openapi": "^1.7.5",
+		"@orpc/server": "^1.7.5",
 		"@repo/ai": "workspace:*",
 		"@repo/auth": "workspace:*",
 		"@repo/config": "workspace:*",
@@ -13,6 +16,7 @@
 		"@repo/utils": "workspace:*",
 		"@scalar/hono-api-reference": "^0.9.3",
 		"@sindresorhus/slugify": "^2.2.1",
+		"cookie": "^1.0.2",
 		"hono": "^4.8.4",
 		"hono-openapi": "^0.4.8",
 		"nanoid": "^5.1.5",

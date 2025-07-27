@@ -4,6 +4,7 @@ import { getBaseUrl } from "@repo/utils";
 import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
 import { openAPISpecs } from "hono-openapi";
+import { handler } from "../orpc/handler";
 import { mergeOpenApiSchemas } from "./lib/openapi-schema";
 import { corsMiddleware } from "./middleware/cors";
 import { loggerMiddleware } from "./middleware/logger";
@@ -11,7 +12,6 @@ import { adminRouter } from "./routes/admin/router";
 import { aiRouter } from "./routes/ai";
 import { authRouter } from "./routes/auth";
 import { contactRouter } from "./routes/contact/router";
-import { healthRouter } from "./routes/health";
 import { newsletterRouter } from "./routes/newsletter";
 import { organizationsRouter } from "./routes/organizations/router";
 import { paymentsRouter } from "./routes/payments/router";
@@ -24,6 +24,18 @@ app.use(loggerMiddleware);
 app.use(corsMiddleware);
 
 const appRouter = app
+	.use("/*", async (c, next) => {
+		const { matched, response } = await handler.handle(c.req.raw, {
+			prefix: "/api",
+			context: {},
+		});
+
+		if (matched) {
+			return c.newResponse(response.body, response);
+		}
+
+		await next();
+	})
 	.route("/", authRouter)
 	.route("/", webhooksRouter)
 	.route("/", aiRouter)
@@ -32,8 +44,7 @@ const appRouter = app
 	.route("/", contactRouter)
 	.route("/", newsletterRouter)
 	.route("/", organizationsRouter)
-	.route("/", adminRouter)
-	.route("/", healthRouter);
+	.route("/", adminRouter);
 
 app.get(
 	"/app-openapi",

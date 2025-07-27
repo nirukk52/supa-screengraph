@@ -1,6 +1,6 @@
 import type { OrganizationMetadata } from "@repo/auth";
 import { authClient } from "@repo/auth/client";
-import { apiClient } from "@shared/lib/api-client";
+import { apiClient } from "@shared/lib/hono-client";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 export const organizationListQueryKey = ["user", "organizations"] as const;
