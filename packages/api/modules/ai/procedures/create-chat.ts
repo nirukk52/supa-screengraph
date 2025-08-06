@@ -40,10 +40,7 @@ export const createChat = protectedProcedure
 		});
 
 		if (!chat) {
-			throw new ORPCError(
-				"INTERNAL_SERVER_ERROR",
-				"Failed to create chat",
-			);
+			throw new ORPCError("INTERNAL_SERVER_ERROR");
 		}
 
 		return { chat };
