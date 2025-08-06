@@ -13,7 +13,7 @@ import { verifyOrganizationMembership } from "../../organizations/lib/membership
 export const addMessageToChat = protectedProcedure
 	.route({
 		method: "POST",
-		path: "/ai/chats/:id/messages",
+		path: "/ai/chats/{id}/messages",
 		tags: ["AI"],
 		summary: "Add message to chat",
 		description:

@@ -7,7 +7,7 @@ import { verifyOrganizationMembership } from "../../organizations/lib/membership
 export const deleteChat = protectedProcedure
 	.route({
 		method: "DELETE",
-		path: "/ai/chats/:id",
+		path: "/ai/chats/{id}",
 		tags: ["AI"],
 		summary: "Delete chat",
 		description: "Delete a chat by id",

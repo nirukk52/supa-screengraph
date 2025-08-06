@@ -7,7 +7,7 @@ import { verifyOrganizationMembership } from "../../organizations/lib/membership
 export const updateChat = protectedProcedure
 	.route({
 		method: "PUT",
-		path: "/ai/chats/:id",
+		path: "/ai/chats/{id}",
 		tags: ["AI"],
 		summary: "Update chat",
 		description: "Update a chat by id",

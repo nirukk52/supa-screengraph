@@ -7,7 +7,7 @@ import { verifyOrganizationMembership } from "../../organizations/lib/membership
 export const findChat = protectedProcedure
 	.route({
 		method: "GET",
-		path: "/ai/chats/:id",
+		path: "/ai/chats/{id}",
 		tags: ["AI"],
 		summary: "Get chat",
 		description: "Get a chat by id",

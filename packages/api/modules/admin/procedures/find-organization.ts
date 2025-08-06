@@ -6,7 +6,7 @@ import { adminProcedure } from "../../../orpc/procedures";
 export const findOrganization = adminProcedure
 	.route({
 		method: "GET",
-		path: "/admin/organizations/:id",
+		path: "/admin/organizations/{id}",
 		tags: ["Administration"],
 		summary: "Find organization by ID",
 	})

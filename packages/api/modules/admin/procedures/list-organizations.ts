@@ -36,7 +36,7 @@ export const listOrganizations = adminProcedure
 export const getOrganizationById = adminProcedure
 	.route({
 		method: "GET",
-		path: "/admin/organizations/:id",
+		path: "/admin/organizations/{id}",
 		tags: ["Administration"],
 	})
 	.input(
