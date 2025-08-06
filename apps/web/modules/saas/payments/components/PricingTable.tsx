@@ -2,10 +2,11 @@
 import { LocaleLink } from "@i18n/routing";
 import { type Config, config } from "@repo/config";
 import { usePlanData } from "@saas/payments/hooks/plan-data";
-import { useCreateCheckoutLinkMutation } from "@saas/payments/lib/api";
 import type { PlanId } from "@saas/payments/types";
 import { useLocaleCurrency } from "@shared/hooks/locale-currency";
 import { useRouter } from "@shared/hooks/router";
+import { orpc } from "@shared/lib/orpc-query-utils";
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "@ui/components/button";
 import { Tabs, TabsList, TabsTrigger } from "@ui/components/tabs";
 import { cn } from "@ui/lib";
@@ -41,7 +42,9 @@ export function PricingTable({
 
 	const { planData } = usePlanData();
 
-	const createCheckoutLinkMutation = useCreateCheckoutLinkMutation();
+	const createCheckoutLinkMutation = useMutation(
+		orpc.payments.createCheckoutLink.mutationOptions(),
+	);
 
 	const onSelectPlan = async (planId: PlanId, productId?: string) => {
 		if (!(userId || organizationId)) {

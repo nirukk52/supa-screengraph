@@ -205,7 +205,7 @@ model AiChat {
     user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
     title          String?
     /// [Array<{role: "user" | "assistant"; content: string;}>]
-    messages       Json          @default("[]") /// @zod.custom.use(z.array(z.object({ role: z.enum(['user', 'assistant']), content: z.string() })))
+    messages       Json          @default("[]") /// @zod.custom.use(z.array(z.object({ role: z.enum(['user', 'assistant', 'system]), parts: z.array(z.object({ type: z.enum(['text', 'image']), text: z.string() })) })))
     createdAt      DateTime      @default(now())
     updatedAt      DateTime      @updatedAt
 

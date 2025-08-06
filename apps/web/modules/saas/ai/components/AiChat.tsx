@@ -1,46 +1,66 @@
 "use client";
 
-import {
-	aiChatListQueryKey,
-	useAiChatListQuery,
-	useAiChatQuery,
-	useCreateAiChatMutation,
-} from "@saas/ai/lib/api";
+import { type UIMessage, useChat } from "@ai-sdk/react";
+import { eventIteratorToStream } from "@orpc/client";
 import { SidebarContentLayout } from "@saas/shared/components/SidebarContentLayout";
-import { useQueryClient } from "@tanstack/react-query";
+import { orpcClient } from "@shared/lib/orpc-client";
+import { orpc } from "@shared/lib/orpc-query-utils";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@ui/components/button";
 import { Textarea } from "@ui/components/textarea";
 import { cn } from "@ui/lib";
-import { type Message, useChat } from "ai/react";
 import { EllipsisIcon, PlusIcon, SendIcon } from "lucide-react";
 import { useFormatter } from "next-intl";
 import { useQueryState } from "nuqs";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 export function AiChat({ organizationId }: { organizationId?: string }) {
 	const formatter = useFormatter();
 	const queryClient = useQueryClient();
-	const { data: chats, status: chatsStatus } =
-		useAiChatListQuery(organizationId);
+	const [input, setInput] = useState("");
+	const { data, status: chatsStatus } = useQuery(
+		orpc.ai.chats.list.queryOptions({
+			input: {
+				organizationId,
+			},
+		}),
+	);
 	const [chatId, setChatId] = useQueryState("chatId");
-	const { data: currentChat } = useAiChatQuery(chatId ?? "new");
-	const createChatMutation = useCreateAiChatMutation();
-	const {
-		messages,
-		input,
-		handleInputChange,
-		handleSubmit,
-		isLoading,
-		setMessages,
-	} = useChat({
-		api: `/api/ai/chats/${chatId}/messages`,
-		credentials: "include",
-		initialMessages: [],
+	const currentChatQuery = useQuery(
+		orpc.ai.chats.find.queryOptions({
+			input: {
+				id: chatId ?? "new",
+			},
+		}),
+	);
+	const createChatMutation = useMutation(
+		orpc.ai.chats.create.mutationOptions(),
+	);
+	const { messages, setMessages, status, sendMessage } = useChat({
+		transport: {
+			async sendMessages(options: any) {
+				return eventIteratorToStream(
+					await orpcClient.ai.chats.messages.add(
+						{
+							id: options.chatId,
+							messages: options.messages,
+						},
+						{ signal: options.abortSignal },
+					),
+				);
+			},
+			reconnectToStream() {
+				throw new Error("Unsupported");
+			},
+		},
 	});
+
+	const chats = data?.chats ?? [];
+	const currentChat = currentChatQuery.data?.chat ?? null;
 
 	useEffect(() => {
 		if (currentChat?.messages?.length) {
-			setMessages(currentChat.messages as unknown as Message[]);
+			setMessages(currentChat.messages as unknown as UIMessage[]);
 		}
 	}, [currentChat]);
 
@@ -49,9 +69,13 @@ export function AiChat({ organizationId }: { organizationId?: string }) {
 			organizationId,
 		});
 		await queryClient.invalidateQueries({
-			queryKey: aiChatListQueryKey(organizationId),
+			queryKey: orpc.ai.chats.list.queryKey({
+				input: {
+					organizationId,
+				},
+			}),
 		});
-		setChatId(newChat.id);
+		setChatId(newChat.chat.id);
 	}, [createChatMutation]);
 
 	useEffect(() => {
@@ -81,6 +105,23 @@ export function AiChat({ organizationId }: { organizationId?: string }) {
 			) ?? []
 		);
 	}, [chats]);
+
+	const handleSubmit = useCallback(
+		async (
+			e:
+				| React.FormEvent<HTMLFormElement>
+				| React.KeyboardEvent<HTMLTextAreaElement>,
+		) => {
+			e.preventDefault();
+			await sendMessage({
+				text: input,
+			});
+			setInput("");
+		},
+		[input, sendMessage],
+	);
+
+	console.log(messages);
 
 	return (
 		<SidebarContentLayout
@@ -151,12 +192,16 @@ export function AiChat({ organizationId }: { organizationId?: string }) {
 										: "bg-secondary/10",
 								)}
 							>
-								{message.content}
+								{message.parts?.map((part, index) =>
+									part.type === "text" ? (
+										<span key={index}>{part.text}</span>
+									) : null,
+								)}
 							</div>
 						</div>
 					))}
 
-					{isLoading && (
+					{status === "streaming" && (
 						<div className="flex justify-start">
 							<div className="flex max-w-2xl items-center gap-2 rounded-lg bg-secondary/10 px-4 py-2 text-foreground">
 								<EllipsisIcon className="size-6 animate-pulse" />
@@ -171,7 +216,7 @@ export function AiChat({ organizationId }: { organizationId?: string }) {
 				>
 					<Textarea
 						value={input}
-						onChange={handleInputChange}
+						onChange={(e) => setInput(e.target.value)}
 						disabled={!hasChat}
 						placeholder="Chat with your AI..."
 						className="min-h-8 rounded-none border-none bg-transparent p-0 focus:outline-hidden focus-visible:ring-0 shadow-none"

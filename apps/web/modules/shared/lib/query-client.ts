@@ -1,4 +1,3 @@
-import { serializer } from "@repo/api/orpc/serializer";
 import {
 	defaultShouldDehydrateQuery,
 	QueryClient,
@@ -15,15 +14,6 @@ export function createQueryClient() {
 				shouldDehydrateQuery: (query) =>
 					defaultShouldDehydrateQuery(query) ||
 					query.state.status === "pending",
-				serializeData(data) {
-					const [json, meta] = serializer.serialize(data);
-					return { json, meta };
-				},
-			},
-			hydrate: {
-				deserializeData(data) {
-					return serializer.deserialize(data.json, data.meta);
-				},
 			},
 		},
 	});

@@ -1,11 +1,10 @@
 import { createORPCClient, onError } from "@orpc/client";
 import { RPCLink } from "@orpc/client/fetch";
 import type { ApiRouterClient } from "@repo/api/orpc/router";
-import { logger } from "@repo/logs";
 import { getBaseUrl } from "@repo/utils";
 
 const link = new RPCLink({
-	url: `${getBaseUrl()}/api`,
+	url: `${getBaseUrl()}/api/rpc`,
 	headers: async () => {
 		if (typeof window !== "undefined") {
 			return {};
@@ -16,7 +15,7 @@ const link = new RPCLink({
 	},
 	interceptors: [
 		onError((error) => {
-			logger.error(error);
+			console.error(error);
 		}),
 	],
 });
