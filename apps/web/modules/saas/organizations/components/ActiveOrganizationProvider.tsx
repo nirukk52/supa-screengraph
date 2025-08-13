@@ -61,10 +61,7 @@ export function ActiveOrganizationProvider({
 			return;
 		}
 
-		await queryClient.setQueryData(
-			activeOrganizationQueryKey(newActiveOrganization.slug),
-			newActiveOrganization,
-		);
+		await refetchActiveOrganization();
 
 		if (config.organizations.enableBilling) {
 			await queryClient.prefetchQuery({
