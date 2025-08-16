@@ -39,14 +39,14 @@ export const createCheckoutLink: CreateCheckoutLink = async (options) => {
 		{
 			productOptions: {
 				redirectUrl,
-				enabledVariants: [Number.parseInt(productId)],
+				enabledVariants: [Number.parseInt(productId, 10)],
 			},
 			checkoutData: {
 				email,
 				name,
 				variantQuantities: [
 					{
-						variantId: Number.parseInt(productId),
+						variantId: Number.parseInt(productId, 10),
 						quantity: seats ?? 1,
 					},
 				],

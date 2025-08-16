@@ -23,11 +23,11 @@
 		"zod-openapi": "4.2.4"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.1.0",
+		"@biomejs/biome": "2.2.0",
 		"@repo/tsconfig": "workspace:*",
 		"@types/react": "19.1.8",
 		"encoding": "^0.1.13",
-		"typescript": "5.8.3"
+		"typescript": "5.9.2"
 	},
 	"main": "./index.ts",
 	"name": "@repo/api",

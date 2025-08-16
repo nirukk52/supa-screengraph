@@ -21,7 +21,8 @@
 					"level": "error",
 					"fix": "safe"
 				},
-				"noUnusedFunctionParameters": "warn"
+				"noUnusedFunctionParameters": "warn",
+				"useUniqueElementIds": "off"
 			},
 			"style": {
 				"noUnusedTemplateLiteral": {
@@ -44,12 +45,7 @@
 	},
 	"assist": { "actions": { "source": { "organizeImports": "on" } } },
 	"files": {
-		"includes": [
-			"**",
-			"!packages/database/prisma/zod/index.ts",
-			"!tooling/tailwind/tailwind-animate.css",
-			"!packages/database/prisma/zod/index.ts"
-		]
+		"includes": ["**", "!zod/index.ts", "!tailwind-animate.css"]
 	},
 	"javascript": {
 		"jsxRuntime": "reactClassic"
