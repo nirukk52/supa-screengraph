@@ -1,9 +1,6 @@
 import type { z } from "zod";
 import { db } from "../client";
-import type {
-	PurchaseCreateOneSchema,
-	PurchaseUpdateOneSchema,
-} from "../zod/schemas";
+import type { PurchaseSchema } from "../zod";
 
 export async function getPurchaseById(id: string) {
 	return db.purchase.findUnique({
@@ -36,7 +33,7 @@ export async function getPurchaseBySubscriptionId(subscriptionId: string) {
 }
 
 export async function createPurchase(
-	purchase: z.infer<typeof PurchaseCreateOneSchema>,
+	purchase: Omit<z.infer<typeof PurchaseSchema>, "id">,
 ) {
 	const created = await db.purchase.create({
 		data: purchase,
@@ -45,9 +42,7 @@ export async function createPurchase(
 	return getPurchaseById(created.id);
 }
 
-export async function updatePurchase(
-	purchase: z.infer<typeof PurchaseUpdateOneSchema>,
-) {
+export async function updatePurchase(purchase: z.infer<typeof PurchaseSchema>) {
 	const updated = await db.purchase.update({
 		where: {
 			id: purchase.id,

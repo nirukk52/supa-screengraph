@@ -1,11 +1,12 @@
 {
 	"mode": "custom",
 	"output": "./zod",
-	"useMultipleFiles": false,
 	"singleFileName": "index.ts",
+	"useMultipleFiles": false,
+	"placeSingleFileAtRoot": true,
 	"pureModels": true,
 	"variants": {
-		"pure": { "enabled": false, "suffix": ".model" },
+		"pure": { "enabled": true, "suffix": ".model" },
 		"input": { "enabled": false, "suffix": ".input" },
 		"result": { "enabled": false, "suffix": ".result" }
 	},

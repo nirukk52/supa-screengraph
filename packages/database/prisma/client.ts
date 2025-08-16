@@ -7,13 +7,7 @@ const prismaClientSingleton = () => {
 declare global {
 	var prisma: undefined | ReturnType<typeof prismaClientSingleton>;
 	namespace PrismaJson {
-		type ChatMessages = Array<{
-			role: "user" | "assistant" | "system";
-			parts: Array<{
-				type: "text" | "image";
-				text?: string;
-			}>;
-		}>;
+		type ChatMessages = Array<object>;
 	}
 }
 

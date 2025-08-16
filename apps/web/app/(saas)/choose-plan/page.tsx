@@ -42,7 +42,7 @@ export default async function ChoosePlanPage() {
 		getPurchases(organizationId),
 	);
 
-	if (error) {
+	if (error || !purchases) {
 		throw new Error("Failed to fetch purchases");
 	}
 

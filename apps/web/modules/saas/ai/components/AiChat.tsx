@@ -38,11 +38,11 @@ export function AiChat({ organizationId }: { organizationId?: string }) {
 	);
 	const { messages, setMessages, status, sendMessage } = useChat({
 		transport: {
-			async sendMessages(options: any) {
+			async sendMessages(options) {
 				return eventIteratorToStream(
 					await orpcClient.ai.chats.messages.add(
 						{
-							id: options.chatId,
+							chatId: options.chatId,
 							messages: options.messages,
 						},
 						{ signal: options.abortSignal },
