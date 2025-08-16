@@ -21,7 +21,8 @@
 					"level": "error",
 					"fix": "safe"
 				},
-				"noUnusedFunctionParameters": "warn"
+				"noUnusedFunctionParameters": "warn",
+				"useUniqueElementIds": "off"
 			},
 			"style": {
 				"noUnusedTemplateLiteral": {

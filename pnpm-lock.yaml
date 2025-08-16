@@ -485,17 +485,17 @@ importers:
         specifier: ^2.2.2
         version: 2.2.2
       '@prisma/client':
-        specifier: 6.11.1
-        version: 6.11.1(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2)
+        specifier: 6.14.0
+        version: 6.14.0(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2)
       '@repo/config':
         specifier: workspace:*
         version: link:../../config
       drizzle-orm:
         specifier: ^0.44.2
-        version: 0.44.2(@opentelemetry/api@1.9.0)(@prisma/client@6.11.1(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2))(kysely@0.28.5)(pg@8.16.3)(prisma@6.14.0(typescript@5.9.2))
+        version: 0.44.2(@opentelemetry/api@1.9.0)(@prisma/client@6.14.0(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2))(kysely@0.28.5)(pg@8.16.3)(prisma@6.14.0(typescript@5.9.2))
       drizzle-zod:
         specifier: 0.7.1
-        version: 0.7.1(drizzle-orm@0.44.2(@opentelemetry/api@1.9.0)(@prisma/client@6.11.1(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2))(kysely@0.28.5)(pg@8.16.3)(prisma@6.14.0(typescript@5.9.2)))(zod@3.25.76)
+        version: 0.7.1(drizzle-orm@0.44.2(@opentelemetry/api@1.9.0)(@prisma/client@6.14.0(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2))(kysely@0.28.5)(pg@8.16.3)(prisma@6.14.0(typescript@5.9.2)))(zod@3.25.76)
       pg:
         specifier: ^8.16.0
         version: 8.16.3
@@ -523,10 +523,10 @@ importers:
         version: 6.14.0(typescript@5.9.2)
       prisma-json-types-generator:
         specifier: 3.5.2
-        version: 3.5.2(@prisma/client@6.11.1(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2))(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2)
+        version: 3.5.2(@prisma/client@6.14.0(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2))(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2)
       zod-prisma-types:
         specifier: ^3.2.4
-        version: 3.2.4(@prisma/client@6.11.1(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2))(prisma@6.14.0(typescript@5.9.2))
+        version: 3.2.4(@prisma/client@6.14.0(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2))(prisma@6.14.0(typescript@5.9.2))
 
   packages/i18n:
     dependencies:
@@ -2195,8 +2195,8 @@ packages:
       '@modelcontextprotocol/sdk':
         optional: true
 
-  '@prisma/client@6.11.1':
-    resolution: {integrity: sha512-5CLFh8QP6KxRm83pJ84jaVCeSVPQr8k0L2SEtOJHwdkS57/VQDcI/wQpGmdyOZi+D9gdNabdo8tj1Uk+w+upsQ==}
+  '@prisma/client@6.14.0':
+    resolution: {integrity: sha512-8E/Nk3eL5g7RQIg/LUj1ICyDmhD053STjxrPxUtCRybs2s/2sOEcx9NpITuAOPn07HEpWBfhAVe1T/HYWXUPOw==}
     engines: {node: '>=18.18'}
     peerDependencies:
       prisma: '*'
@@ -7986,7 +7986,7 @@ snapshots:
       standardwebhooks: 1.0.0
       zod: 3.25.76
 
-  '@prisma/client@6.11.1(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2)':
+  '@prisma/client@6.14.0(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2)':
     optionalDependencies:
       prisma: 6.14.0(typescript@5.9.2)
       typescript: 5.9.2
@@ -9896,17 +9896,17 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.44.2(@opentelemetry/api@1.9.0)(@prisma/client@6.11.1(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2))(kysely@0.28.5)(pg@8.16.3)(prisma@6.14.0(typescript@5.9.2)):
+  drizzle-orm@0.44.2(@opentelemetry/api@1.9.0)(@prisma/client@6.14.0(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2))(kysely@0.28.5)(pg@8.16.3)(prisma@6.14.0(typescript@5.9.2)):
     optionalDependencies:
       '@opentelemetry/api': 1.9.0
-      '@prisma/client': 6.11.1(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2)
+      '@prisma/client': 6.14.0(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2)
       kysely: 0.28.5
       pg: 8.16.3
       prisma: 6.14.0(typescript@5.9.2)
 
-  drizzle-zod@0.7.1(drizzle-orm@0.44.2(@opentelemetry/api@1.9.0)(@prisma/client@6.11.1(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2))(kysely@0.28.5)(pg@8.16.3)(prisma@6.14.0(typescript@5.9.2)))(zod@3.25.76):
+  drizzle-zod@0.7.1(drizzle-orm@0.44.2(@opentelemetry/api@1.9.0)(@prisma/client@6.14.0(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2))(kysely@0.28.5)(pg@8.16.3)(prisma@6.14.0(typescript@5.9.2)))(zod@3.25.76):
     dependencies:
-      drizzle-orm: 0.44.2(@opentelemetry/api@1.9.0)(@prisma/client@6.11.1(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2))(kysely@0.28.5)(pg@8.16.3)(prisma@6.14.0(typescript@5.9.2))
+      drizzle-orm: 0.44.2(@opentelemetry/api@1.9.0)(@prisma/client@6.14.0(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2))(kysely@0.28.5)(pg@8.16.3)(prisma@6.14.0(typescript@5.9.2))
       zod: 3.25.76
 
   dunder-proto@1.0.1:
@@ -11622,9 +11622,9 @@ snapshots:
 
   prettier@3.6.2: {}
 
-  prisma-json-types-generator@3.5.2(@prisma/client@6.11.1(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2))(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2):
+  prisma-json-types-generator@3.5.2(@prisma/client@6.14.0(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2))(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2):
     dependencies:
-      '@prisma/client': 6.11.1(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2)
+      '@prisma/client': 6.14.0(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2)
       '@prisma/generator-helper': 6.14.0
       prisma: 6.14.0(typescript@5.9.2)
       semver: 7.7.2
@@ -12543,9 +12543,9 @@ snapshots:
     dependencies:
       zod: 3.25.76
 
-  zod-prisma-types@3.2.4(@prisma/client@6.11.1(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2))(prisma@6.14.0(typescript@5.9.2)):
+  zod-prisma-types@3.2.4(@prisma/client@6.14.0(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2))(prisma@6.14.0(typescript@5.9.2)):
     dependencies:
-      '@prisma/client': 6.11.1(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2)
+      '@prisma/client': 6.14.0(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2)
       '@prisma/generator-helper': 6.11.1
       code-block-writer: 12.0.0
       lodash: 4.17.21
