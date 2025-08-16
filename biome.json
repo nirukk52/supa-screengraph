@@ -48,8 +48,7 @@
 		"includes": [
 			"**",
 			"!packages/database/prisma/zod/index.ts",
-			"!tooling/tailwind/tailwind-animate.css",
-			"!packages/database/prisma/zod/index.ts"
+			"!tooling/tailwind/tailwind-animate.css"
 		]
 	},
 	"javascript": {
