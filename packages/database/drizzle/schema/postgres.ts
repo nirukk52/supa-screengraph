@@ -204,13 +204,7 @@ export const aiChat = pgTable("aiChat", {
 	}),
 	userId: text("userId").references(() => user.id, { onDelete: "cascade" }),
 	title: text("title"),
-	messages:
-		json("messages").$type<
-			{
-				role: "user" | "assistant";
-				content: string;
-			}[]
-		>(),
+	messages: json("messages").$type<Array<object>>(),
 	createdAt: timestamp("createdAt").defaultNow().notNull(),
 	updatedAt: timestamp("updatedAt"),
 });
