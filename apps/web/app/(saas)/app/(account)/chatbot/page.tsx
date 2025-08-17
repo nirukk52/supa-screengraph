@@ -17,7 +17,7 @@ export default async function AiDemoPage() {
 		queryKey: orpc.ai.chats.list.queryKey({
 			input: {},
 		}),
-		queryFn: async () => chats,
+		queryFn: async () => ({ chats }),
 	});
 
 	if (chats.length > 0) {

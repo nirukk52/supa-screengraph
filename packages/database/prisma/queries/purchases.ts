@@ -33,7 +33,10 @@ export async function getPurchaseBySubscriptionId(subscriptionId: string) {
 }
 
 export async function createPurchase(
-	purchase: Omit<z.infer<typeof PurchaseSchema>, "id">,
+	purchase: Omit<
+		z.infer<typeof PurchaseSchema>,
+		"id" | "createdAt" | "updatedAt"
+	>,
 ) {
 	const created = await db.purchase.create({
 		data: purchase,
@@ -42,7 +45,11 @@ export async function createPurchase(
 	return getPurchaseById(created.id);
 }
 
-export async function updatePurchase(purchase: z.infer<typeof PurchaseSchema>) {
+export async function updatePurchase(
+	purchase: Partial<
+		Omit<z.infer<typeof PurchaseSchema>, "createdAt" | "updatedAt">
+	> & { id: string },
+) {
 	const updated = await db.purchase.update({
 		where: {
 			id: purchase.id,

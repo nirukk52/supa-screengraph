@@ -31,7 +31,7 @@ export default async function AiDemoPage({
 				organizationId,
 			},
 		}),
-		queryFn: async () => chats,
+		queryFn: async () => ({ chats }),
 	});
 
 	if (chats.length > 0) {

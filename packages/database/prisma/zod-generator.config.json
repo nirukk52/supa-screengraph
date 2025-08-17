@@ -5,6 +5,7 @@
 	"useMultipleFiles": false,
 	"placeSingleFileAtRoot": true,
 	"pureModels": true,
+	"optionalFieldBehavior": "nullish",
 	"variants": {
 		"pure": { "enabled": true, "suffix": ".model" },
 		"input": { "enabled": false, "suffix": ".input" },
