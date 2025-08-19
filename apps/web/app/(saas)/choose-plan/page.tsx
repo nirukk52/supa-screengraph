@@ -4,6 +4,7 @@ import { getOrganizationList, getSession } from "@saas/auth/lib/server";
 import { PricingTable } from "@saas/payments/components/PricingTable";
 import { getPurchases } from "@saas/payments/lib/server";
 import { AuthWrapper } from "@saas/shared/components/AuthWrapper";
+import { attemptAsync } from "es-toolkit";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 
@@ -37,7 +38,14 @@ export default async function ChoosePlanPage() {
 		organizationId = organization.id;
 	}
 
-	const purchases = await getPurchases(organizationId);
+	const [error, purchases] = await attemptAsync(() =>
+		getPurchases(organizationId),
+	);
+
+	if (error || !purchases) {
+		throw new Error("Failed to fetch purchases");
+	}
+
 	const { activePlan } = createPurchasesHelper(purchases);
 
 	if (activePlan) {

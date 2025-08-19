@@ -1,16 +1,13 @@
 "use client";
 
 import { authClient } from "@repo/auth/client";
-import {
-	adminOrganizationsQueryKey,
-	useAdminOrganizationsQuery,
-} from "@saas/admin/lib/api";
 import { getAdminPath } from "@saas/admin/lib/links";
 import { OrganizationLogo } from "@saas/organizations/components/OrganizationLogo";
 import { useConfirmationAlert } from "@saas/shared/components/ConfirmationAlertProvider";
 import { Pagination } from "@saas/shared/components/Pagination";
 import { Spinner } from "@shared/components/Spinner";
-import { useQueryClient } from "@tanstack/react-query";
+import { orpc } from "@shared/lib/orpc-query-utils";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
 	flexRender,
@@ -75,11 +72,15 @@ export function OrganizationList() {
 		setDebouncedSearchTerm(searchTerm);
 	}, [searchTerm]);
 
-	const { data, isLoading } = useAdminOrganizationsQuery({
-		itemsPerPage: ITEMS_PER_PAGE,
-		currentPage,
-		searchTerm: debouncedSearchTerm,
-	});
+	const { data, isLoading } = useQuery(
+		orpc.admin.organizations.list.queryOptions({
+			input: {
+				itemsPerPage: ITEMS_PER_PAGE,
+				currentPage,
+				searchTerm: debouncedSearchTerm,
+			},
+		}),
+	);
 
 	useEffect(() => {
 		setCurrentPage(1);
@@ -100,7 +101,7 @@ export function OrganizationList() {
 				loading: t("admin.organizations.deleteOrganization.deleting"),
 				success: () => {
 					queryClient.invalidateQueries({
-						queryKey: adminOrganizationsQueryKey,
+						queryKey: orpc.admin.organizations.list.key(),
 					});
 					return t("admin.organizations.deleteOrganization.deleted");
 				},

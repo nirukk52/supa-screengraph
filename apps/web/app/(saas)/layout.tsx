@@ -4,10 +4,9 @@ import { sessionQueryKey } from "@saas/auth/lib/api";
 import { getOrganizationList, getSession } from "@saas/auth/lib/server";
 import { ActiveOrganizationProvider } from "@saas/organizations/components/ActiveOrganizationProvider";
 import { organizationListQueryKey } from "@saas/organizations/lib/api";
-import { purchasesQueryKey } from "@saas/payments/lib/api";
-import { getPurchases } from "@saas/payments/lib/server";
 import { ConfirmationAlertProvider } from "@saas/shared/components/ConfirmationAlertProvider";
 import { Document } from "@shared/components/Document";
+import { orpc } from "@shared/lib/orpc-query-utils";
 import { getServerQueryClient } from "@shared/lib/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { redirect } from "next/navigation";
@@ -39,10 +38,11 @@ export default async function SaaSLayout({ children }: PropsWithChildren) {
 	}
 
 	if (config.users.enableBilling) {
-		await queryClient.prefetchQuery({
-			queryKey: purchasesQueryKey(),
-			queryFn: () => getPurchases(),
-		});
+		await queryClient.prefetchQuery(
+			orpc.payments.listPurchases.queryOptions({
+				input: {},
+			}),
+		);
 	}
 
 	return (

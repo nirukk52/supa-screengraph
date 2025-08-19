@@ -4,9 +4,9 @@
 		"@prisma/client": "6.14.0",
 		"@repo/config": "workspace:*",
 		"drizzle-orm": "^0.44.2",
-		"drizzle-zod": "0.7.1",
+		"drizzle-zod": "0.8.3",
 		"pg": "^8.16.0",
-		"zod": "^3.25.76"
+		"zod": "^4.0.14"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.2.0",
@@ -16,7 +16,7 @@
 		"drizzle-kit": "^0.31.1",
 		"prisma": "6.14.0",
 		"prisma-json-types-generator": "3.5.2",
-		"zod-prisma-types": "^3.2.4"
+		"prisma-zod-generator": "^1.12.2"
 	},
 	"main": "./index.ts",
 	"name": "@repo/database",

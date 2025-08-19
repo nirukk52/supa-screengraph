@@ -1,6 +1,6 @@
 import type { z } from "zod";
 import { db } from "../client";
-import type { UserUncheckedUpdateInputSchema } from "../zod";
+import type { UserSchema } from "../zod";
 
 export async function getUsers({
 	limit,
@@ -102,7 +102,7 @@ export async function createUserAccount({
 }
 
 export async function updateUser(
-	user: z.infer<typeof UserUncheckedUpdateInputSchema> & { id: string },
+	user: Partial<z.infer<typeof UserSchema>> & { id: string },
 ) {
 	return await db.user.update({
 		where: {
