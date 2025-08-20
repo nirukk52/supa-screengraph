@@ -5,7 +5,12 @@ import { eventIteratorToStream } from "@orpc/client";
 import { SidebarContentLayout } from "@saas/shared/components/SidebarContentLayout";
 import { orpcClient } from "@shared/lib/orpc-client";
 import { orpc } from "@shared/lib/orpc-query-utils";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+	skipToken,
+	useMutation,
+	useQuery,
+	useQueryClient,
+} from "@tanstack/react-query";
 import { Button } from "@ui/components/button";
 import { Textarea } from "@ui/components/textarea";
 import { cn } from "@ui/lib";
@@ -30,15 +35,23 @@ export function AiChat({ organizationId }: { organizationId?: string }) {
 	const [chatId, setChatId] = useQueryState("chatId");
 	const currentChatQuery = useQuery(
 		orpc.ai.chats.find.queryOptions({
-			input: {
-				id: chatId ?? "new",
-			},
+			input: chatId
+				? {
+						id: chatId,
+					}
+				: skipToken,
 		}),
 	);
+
 	const createChatMutation = useMutation(
 		orpc.ai.chats.create.mutationOptions(),
 	);
+
+	const chats = data?.chats ?? [];
+	const currentChat = currentChatQuery.data?.chat ?? null;
+
 	const { messages, setMessages, status, sendMessage } = useChat({
+		id: chatId ?? "new",
 		transport: {
 			async sendMessages(options) {
 				if (!chatId) {
@@ -61,14 +74,32 @@ export function AiChat({ organizationId }: { organizationId?: string }) {
 		},
 	});
 
-	const chats = data?.chats ?? [];
-	const currentChat = currentChatQuery.data?.chat ?? null;
+	useEffect(() => {
+		if (messages.length && currentChat?.messages) {
+			queryClient.setQueryData(
+				orpc.ai.chats.find.queryKey({
+					input: { id: chatId ?? "new" },
+				}),
+				(oldData) => {
+					if (!oldData) {
+						return undefined;
+					}
+					return {
+						chat: {
+							...oldData.chat,
+							messages: messages,
+						},
+					};
+				},
+			);
+		}
+	}, [messages]);
 
 	useEffect(() => {
-		if (currentChat?.messages?.length) {
+		if (currentChat?.messages) {
 			setMessages(currentChat.messages as unknown as UIMessage[]);
 		}
-	}, [currentChat]);
+	}, [currentChat?.messages]);
 
 	const createNewChat = useCallback(async () => {
 		const newChat = await createChatMutation.mutateAsync({
@@ -81,6 +112,7 @@ export function AiChat({ organizationId }: { organizationId?: string }) {
 				},
 			}),
 		});
+
 		setChatId(newChat.chat.id);
 	}, [createChatMutation]);
 
@@ -112,27 +144,24 @@ export function AiChat({ organizationId }: { organizationId?: string }) {
 		);
 	}, [chats]);
 
-	const handleSubmit = useCallback(
-		async (
-			e:
-				| React.FormEvent<HTMLFormElement>
-				| React.KeyboardEvent<HTMLTextAreaElement>,
-		) => {
-			const text = input.trim();
-			setInput("");
-			e.preventDefault();
+	const handleSubmit = async (
+		e:
+			| React.FormEvent<HTMLFormElement>
+			| React.KeyboardEvent<HTMLTextAreaElement>,
+	) => {
+		const text = input.trim();
+		setInput("");
+		e.preventDefault();
 
-			try {
-				await sendMessage({
-					text,
-				});
-			} catch {
-				toast.error("Failed to send message");
-				setInput(text);
-			}
-		},
-		[input, sendMessage],
-	);
+		try {
+			await sendMessage({
+				text,
+			});
+		} catch {
+			toast.error("Failed to send message");
+			setInput(text);
+		}
+	};
 
 	useEffect(() => {
 		if (messagesContainerRef.current) {
