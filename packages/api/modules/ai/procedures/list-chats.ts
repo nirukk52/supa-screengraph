@@ -1,4 +1,5 @@
 import { ORPCError } from "@orpc/client";
+import type { UIMessage } from "@repo/ai";
 import { getAiChatsByOrganizationId, getAiChatsByUserId } from "@repo/database";
 import { z } from "zod";
 import { protectedProcedure } from "../../../orpc/procedures";
@@ -43,5 +44,10 @@ export const listChats = protectedProcedure
 					userId: context.user.id,
 				}));
 
-		return { chats };
+		return {
+			chats: chats.map((chat) => ({
+				...chat,
+				messages: (chat.messages ?? []) as unknown as UIMessage[],
+			})),
+		};
 	});

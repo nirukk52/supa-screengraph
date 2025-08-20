@@ -14,10 +14,6 @@ generator zod {
     config   = "./zod-generator.config.json"
 }
 
-generator json {
-    provider = "prisma-json-types-generator"
-}
-
 model User {
     id                 String       @id @default(cuid())
     name               String

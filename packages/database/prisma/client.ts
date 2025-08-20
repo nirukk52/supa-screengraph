@@ -6,9 +6,6 @@ const prismaClientSingleton = () => {
 
 declare global {
 	var prisma: undefined | ReturnType<typeof prismaClientSingleton>;
-	namespace PrismaJson {
-		type ChatMessages = Array<object>;
-	}
 }
 
 // biome-ignore lint/suspicious/noRedeclare: This is a singleton

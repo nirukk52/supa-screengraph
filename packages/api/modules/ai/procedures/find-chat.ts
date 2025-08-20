@@ -1,4 +1,5 @@
 import { ORPCError } from "@orpc/client";
+import type { UIMessage } from "@repo/ai";
 import { getAiChatById } from "@repo/database";
 import { z } from "zod";
 import { protectedProcedure } from "../../../orpc/procedures";
@@ -39,5 +40,10 @@ export const findChat = protectedProcedure
 			throw new ORPCError("FORBIDDEN");
 		}
 
-		return { chat };
+		return {
+			chat: {
+				...chat,
+				messages: (chat.messages ?? []) as unknown as UIMessage[],
+			},
+		};
 	});

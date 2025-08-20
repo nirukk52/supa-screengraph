@@ -69,7 +69,7 @@ export async function updateAiChat({
 }: {
 	id: string;
 	title?: string;
-	messages?: PrismaJson.ChatMessages;
+	messages?: Array<object>;
 }) {
 	return await db.aiChat.update({
 		where: {
