@@ -3,10 +3,10 @@
 		"@paralleldrive/cuid2": "^2.2.2",
 		"@prisma/client": "6.14.0",
 		"@repo/config": "workspace:*",
-		"drizzle-orm": "^0.44.2",
+		"drizzle-orm": "^0.44.4",
 		"drizzle-zod": "0.8.3",
 		"pg": "^8.16.0",
-		"zod": "^4.0.14"
+		"zod": "^4.0.17"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.2.0",
