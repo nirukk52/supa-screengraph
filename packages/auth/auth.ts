@@ -206,7 +206,7 @@ export const auth = betterAuth({
 		admin(),
 		passkey(),
 		magicLink({
-			disableSignUp: true,
+			disableSignUp: false,
 			sendMagicLink: async ({ email, url }, request) => {
 				const locale = getLocaleFromRequest(request);
 				await sendEmail({
