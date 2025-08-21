@@ -38,10 +38,6 @@ export default async function middleware(req: NextRequest) {
 			return NextResponse.redirect(new URL("/", origin));
 		}
 
-		if (sessionCookie && pathname !== "/auth/reset-password") {
-			return NextResponse.redirect(new URL("/app", origin));
-		}
-
 		return NextResponse.next();
 	}
 
@@ -50,6 +46,7 @@ export default async function middleware(req: NextRequest) {
 		"/new-organization",
 		"/choose-plan",
 		"/organization-invitation",
+		"/no-session",
 	];
 
 	if (pathsWithoutLocale.some((path) => pathname.startsWith(path))) {
