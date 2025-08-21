@@ -46,7 +46,6 @@ export default async function middleware(req: NextRequest) {
 		"/new-organization",
 		"/choose-plan",
 		"/organization-invitation",
-		"/no-session",
 	];
 
 	if (pathsWithoutLocale.some((path) => pathname.startsWith(path))) {
