@@ -44,7 +44,7 @@ importers:
         version: 3.2.12(next@15.5.0(@opentelemetry/api@1.9.0)(@playwright/test@1.55.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       '@fumadocs/content-collections':
         specifier: ^1.2.0
-        version: 1.2.1(@content-collections/core@0.10.0(typescript@5.9.2))(@content-collections/mdx@0.2.2(@content-collections/core@0.10.0(typescript@5.9.2))(acorn@8.15.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(fumadocs-core@15.7.1(@types/react@19.0.0)(next@15.5.0(@opentelemetry/api@1.9.0)(@playwright/test@1.55.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react-dom@19.1.1(react@19.1.1))(react@19.1.1))
+        version: 1.2.1(@content-collections/core@0.11.0(typescript@5.9.2))(@content-collections/mdx@0.2.2(@content-collections/core@0.11.0(typescript@5.9.2))(acorn@8.15.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(fumadocs-core@15.7.1(@types/react@19.0.0)(next@15.5.0(@opentelemetry/api@1.9.0)(@playwright/test@1.55.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react-dom@19.1.1(react@19.1.1))(react@19.1.1))
       '@hookform/resolvers':
         specifier: ^5.2.1
         version: 5.2.1(react-hook-form@7.62.0(react@19.1.1))
@@ -257,14 +257,14 @@ importers:
         specifier: 2.2.0
         version: 2.2.0
       '@content-collections/core':
-        specifier: ^0.10.0
-        version: 0.10.0(typescript@5.9.2)
+        specifier: ^0.11.0
+        version: 0.11.0(typescript@5.9.2)
       '@content-collections/mdx':
         specifier: ^0.2.2
-        version: 0.2.2(@content-collections/core@0.10.0(typescript@5.9.2))(acorn@8.15.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+        version: 0.2.2(@content-collections/core@0.11.0(typescript@5.9.2))(acorn@8.15.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       '@content-collections/next':
-        specifier: ^0.2.6
-        version: 0.2.6(@content-collections/core@0.10.0(typescript@5.9.2))(next@15.5.0(@opentelemetry/api@1.9.0)(@playwright/test@1.55.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))
+        specifier: ^0.2.7
+        version: 0.2.7(@content-collections/core@0.11.0(typescript@5.9.2))(next@15.5.0(@opentelemetry/api@1.9.0)(@playwright/test@1.55.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))
       '@mdx-js/mdx':
         specifier: ^3.1.0
         version: 3.1.0(acorn@8.15.0)
@@ -543,8 +543,8 @@ importers:
         specifier: 6.14.0
         version: 6.14.0(typescript@5.9.2)
       prisma-zod-generator:
-        specifier: ^1.14.0
-        version: 1.14.0(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2)
+        specifier: ^1.16.1
+        version: 1.16.1(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2)(zod@4.0.17)
 
   packages/i18n:
     dependencies:
@@ -1206,13 +1206,13 @@ packages:
       react: '>=18.0.0'
       react-dom: '>=18.0.0'
 
-  '@content-collections/core@0.10.0':
-    resolution: {integrity: sha512-GDBYbvhoj9lHNlarY5wr+3PoO3m9GBMjftio9NXatLuZaenY+EHHNCcbbA3J+c06Q7WBYwNoLAaMX2I5N0duAg==}
+  '@content-collections/core@0.11.0':
+    resolution: {integrity: sha512-k6g6AESyLLIYNu4KiBUFAPAq01mqeAZ/2QLmp97iBZLOURWfFrvo3zDGBPtCrXtKYgkRlWxOyLRpIjKqD6aNjw==}
     peerDependencies:
       typescript: ^5.0.2
 
-  '@content-collections/integrations@0.2.1':
-    resolution: {integrity: sha512-AyEcS2MmcOXSYt6vNmJsAiu6EBYjtNiwYGUVUmpG3llm8Gt8uiNrhIhlHyv3cuk+N8KJ2PWemLcMqtQJ+sW3bA==}
+  '@content-collections/integrations@0.3.0':
+    resolution: {integrity: sha512-He+TXQC94LO/1bNygTioh3J5H0K/mkFVPVkIrM5kHybprvi5bRmGa91ViZ6K6icFAzGH4jFD0iasR56fZcMGTA==}
     peerDependencies:
       '@content-collections/core': 0.x
 
@@ -1223,8 +1223,8 @@ packages:
       react: '>= 18'
       react-dom: '>= 18'
 
-  '@content-collections/next@0.2.6':
-    resolution: {integrity: sha512-gbVgtnXD7Qad95ENjL99LvrXoBtRTL8N0aZc5gz5NIK/yKBlpTZI6/CKVQMmROtGrqLOwcBdWlGUIzZPwpUBVA==}
+  '@content-collections/next@0.2.7':
+    resolution: {integrity: sha512-9IOyOgMrubACDw5ZQ4a2e68MoH+gvKv1J0H2Jbe2wcDqiuXvr4rIznPAYG/jRJLqKoT8PN2FrbrjeVt7cEbxTQ==}
     peerDependencies:
       '@content-collections/core': 0.x
       next: ^12 || ^13 || ^14 || ^15
@@ -5278,9 +5278,11 @@ packages:
     engines: {node: '>=14'}
     hasBin: true
 
-  prisma-zod-generator@1.14.0:
-    resolution: {integrity: sha512-9dOcGNdwjU5A4X8gTS43RF77BPMkpfU76B3Z4Nta6GEUI6AMKMhxCnb6/ol/vP0OpVVDKaXVYZFDiEp8TbuNpA==}
+  prisma-zod-generator@1.16.1:
+    resolution: {integrity: sha512-kyxHB5F6Xs+UopEo1soAtvxkEHtWI8ok2jHGfxyKoTinNyp3TWzrSJWoyEwwnkrKmGm9jqz48ksKaXw/jdwePQ==}
     hasBin: true
+    peerDependencies:
+      zod: '>=3.25.0 <5'
 
   prisma@6.14.0:
     resolution: {integrity: sha512-QEuCwxu+Uq9BffFw7in8In+WfbSUN0ewnaSUKloLkbJd42w6EyFckux4M0f7VwwHlM3A8ssaz4OyniCXlsn0WA==}
@@ -7125,7 +7127,7 @@ snapshots:
       react: 19.1.1
       react-dom: 19.1.1(react@19.1.1)
 
-  '@content-collections/core@0.10.0(typescript@5.9.2)':
+  '@content-collections/core@0.11.0(typescript@5.9.2)':
     dependencies:
       '@standard-schema/spec': 1.0.0
       camelcase: 8.0.0
@@ -7141,13 +7143,13 @@ snapshots:
       yaml: 2.8.1
       zod: 3.25.76
 
-  '@content-collections/integrations@0.2.1(@content-collections/core@0.10.0(typescript@5.9.2))':
+  '@content-collections/integrations@0.3.0(@content-collections/core@0.11.0(typescript@5.9.2))':
     dependencies:
-      '@content-collections/core': 0.10.0(typescript@5.9.2)
+      '@content-collections/core': 0.11.0(typescript@5.9.2)
 
-  '@content-collections/mdx@0.2.2(@content-collections/core@0.10.0(typescript@5.9.2))(acorn@8.15.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
+  '@content-collections/mdx@0.2.2(@content-collections/core@0.11.0(typescript@5.9.2))(acorn@8.15.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
     dependencies:
-      '@content-collections/core': 0.10.0(typescript@5.9.2)
+      '@content-collections/core': 0.11.0(typescript@5.9.2)
       esbuild: 0.25.9
       mdx-bundler: 10.1.1(acorn@8.15.0)(esbuild@0.25.9)
       react: 19.1.1
@@ -7157,10 +7159,10 @@ snapshots:
       - acorn
       - supports-color
 
-  '@content-collections/next@0.2.6(@content-collections/core@0.10.0(typescript@5.9.2))(next@15.5.0(@opentelemetry/api@1.9.0)(@playwright/test@1.55.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))':
+  '@content-collections/next@0.2.7(@content-collections/core@0.11.0(typescript@5.9.2))(next@15.5.0(@opentelemetry/api@1.9.0)(@playwright/test@1.55.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))':
     dependencies:
-      '@content-collections/core': 0.10.0(typescript@5.9.2)
-      '@content-collections/integrations': 0.2.1(@content-collections/core@0.10.0(typescript@5.9.2))
+      '@content-collections/core': 0.11.0(typescript@5.9.2)
+      '@content-collections/integrations': 0.3.0(@content-collections/core@0.11.0(typescript@5.9.2))
       next: 15.5.0(@opentelemetry/api@1.9.0)(@playwright/test@1.55.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
 
   '@drizzle-team/brocli@0.10.2': {}
@@ -7393,10 +7395,10 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
-  '@fumadocs/content-collections@1.2.1(@content-collections/core@0.10.0(typescript@5.9.2))(@content-collections/mdx@0.2.2(@content-collections/core@0.10.0(typescript@5.9.2))(acorn@8.15.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(fumadocs-core@15.7.1(@types/react@19.0.0)(next@15.5.0(@opentelemetry/api@1.9.0)(@playwright/test@1.55.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react-dom@19.1.1(react@19.1.1))(react@19.1.1))':
+  '@fumadocs/content-collections@1.2.1(@content-collections/core@0.11.0(typescript@5.9.2))(@content-collections/mdx@0.2.2(@content-collections/core@0.11.0(typescript@5.9.2))(acorn@8.15.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(fumadocs-core@15.7.1(@types/react@19.0.0)(next@15.5.0(@opentelemetry/api@1.9.0)(@playwright/test@1.55.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react-dom@19.1.1(react@19.1.1))(react@19.1.1))':
     dependencies:
-      '@content-collections/core': 0.10.0(typescript@5.9.2)
-      '@content-collections/mdx': 0.2.2(@content-collections/core@0.10.0(typescript@5.9.2))(acorn@8.15.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+      '@content-collections/core': 0.11.0(typescript@5.9.2)
+      '@content-collections/mdx': 0.2.2(@content-collections/core@0.11.0(typescript@5.9.2))(acorn@8.15.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       fumadocs-core: 15.7.1(@types/react@19.0.0)(next@15.5.0(@opentelemetry/api@1.9.0)(@playwright/test@1.55.0)(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
 
   '@hapi/hoek@9.3.0': {}
@@ -11550,7 +11552,7 @@ snapshots:
 
   prettier@3.6.2: {}
 
-  prisma-zod-generator@1.14.0(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2):
+  prisma-zod-generator@1.16.1(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2)(zod@4.0.17):
     dependencies:
       '@prisma/client': 6.14.0(prisma@6.14.0(typescript@5.9.2))(typescript@5.9.2)
       '@prisma/generator-helper': 6.14.0
