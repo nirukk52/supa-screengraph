@@ -96,7 +96,6 @@
 		"autoprefixer": "10.4.21",
 		"dotenv": "^17.2.1",
 		"dotenv-cli": "^10.0.0",
-		"markdown-toc": "^1.2.0",
 		"mdx": "^0.3.1",
 		"postcss": "8.5.6",
 		"rehype-img-size": "^1.0.1",
