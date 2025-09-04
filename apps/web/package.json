@@ -47,7 +47,6 @@
 		"fumadocs-ui": "^15.7.1",
 		"hono": "^4.9.4",
 		"input-otp": "^1.4.2",
-		"jotai": "2.13.1",
 		"js-cookie": "^3.0.5",
 		"lucide-react": "^0.541.0",
 		"next": "15.5.0",
