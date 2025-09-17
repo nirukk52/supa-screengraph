@@ -34,7 +34,7 @@ export default async function AccountSettingsPage() {
 	const userAccounts = await getUserAccounts();
 
 	const userHasPassword = userAccounts?.some(
-		(account) => account.provider === "credential",
+		(account) => account.providerId === "credential",
 	);
 
 	const queryClient = getServerQueryClient();
@@ -54,11 +54,7 @@ export default async function AccountSettingsPage() {
 	return (
 		<SettingsList>
 			{config.auth.enablePasswordLogin &&
-				(userHasPassword ? (
-					<ChangePasswordForm />
-				) : (
-					<SetPasswordForm />
-				))}
+				(userHasPassword ? <ChangePasswordForm /> : <SetPasswordForm />)}
 			{config.auth.enableSocialLogin && <ConnectedAccountsBlock />}
 			{config.auth.enablePasskeys && <PasskeysBlock />}
 			{config.auth.enableTwoFactor && <TwoFactorBlock />}
