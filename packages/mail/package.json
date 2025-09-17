@@ -1,16 +1,16 @@
 {
 	"dependencies": {
-		"@react-email/components": "^0.5.0",
-		"@react-email/render": "^1.2.0",
+		"@react-email/components": "^0.5.3",
+		"@react-email/render": "^1.2.3",
 		"@repo/config": "workspace:*",
 		"@repo/i18n": "workspace:*",
 		"@repo/logs": "workspace:*",
-		"next-intl": "4.3.5",
+		"next-intl": "4.3.9",
 		"nodemailer": "^7.0.6",
 		"react": "19.1.1",
 		"react-dom": "19.1.1",
-		"react-email": "^4.2.8",
-		"use-intl": "^4.3.5"
+		"react-email": "^4.2.11",
+		"use-intl": "^4.3.9"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.2.2",
