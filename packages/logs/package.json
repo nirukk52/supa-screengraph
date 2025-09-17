@@ -4,9 +4,9 @@
 		"consola": "^3.4.2"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.2.2",
+		"@biomejs/biome": "2.2.4",
 		"@repo/tsconfig": "workspace:*",
-		"@types/node": "^24.3.1"
+		"@types/node": "^24.5.1"
 	},
 	"main": "./index.ts",
 	"name": "@repo/logs",
