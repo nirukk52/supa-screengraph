@@ -54,7 +54,11 @@ export default async function AccountSettingsPage() {
 	return (
 		<SettingsList>
 			{config.auth.enablePasswordLogin &&
-				(userHasPassword ? <ChangePasswordForm /> : <SetPasswordForm />)}
+				(userHasPassword ? (
+					<ChangePasswordForm />
+				) : (
+					<SetPasswordForm />
+				))}
 			{config.auth.enableSocialLogin && <ConnectedAccountsBlock />}
 			{config.auth.enablePasskeys && <PasskeysBlock />}
 			{config.auth.enableTwoFactor && <TwoFactorBlock />}

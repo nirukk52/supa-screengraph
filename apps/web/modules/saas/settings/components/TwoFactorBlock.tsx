@@ -189,8 +189,12 @@ export function TwoFactorBlock() {
 					<DialogHeader>
 						<DialogTitle>
 							{dialogView === "password"
-								? t("settings.account.security.twoFactor.dialog.password.title")
-								: t("settings.account.security.twoFactor.dialog.totpUrl.title")}
+								? t(
+										"settings.account.security.twoFactor.dialog.password.title",
+									)
+								: t(
+										"settings.account.security.twoFactor.dialog.totpUrl.title",
+									)}
 						</DialogTitle>
 					</DialogHeader>
 
@@ -259,7 +263,9 @@ export function TwoFactorBlock() {
 										</Label>
 										<Input
 											value={totpCode}
-											onChange={(e) => setTotpCode(e.target.value)}
+											onChange={(e) =>
+												setTotpCode(e.target.value)
+											}
 										/>
 									</FormItem>
 								</div>
