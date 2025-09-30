@@ -17,9 +17,9 @@
 		"@biomejs/biome": "2.2.4",
 		"@repo/tsconfig": "workspace:*",
 		"@tailwindcss/line-clamp": "^0.4.4",
-		"@types/node": "24.5.1",
-		"@types/nodemailer": "^7.0.0",
-		"@types/react": "19.1.13"
+		"@types/node": "24.6.0",
+		"@types/nodemailer": "^7.0.2",
+		"@types/react": "19.1.16"
 	},
 	"main": "./index.ts",
 	"name": "@repo/mail",
