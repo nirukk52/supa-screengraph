@@ -1,0 +1,32 @@
+#!/bin/sh
+
+commit_msg_file="$1"
+first_line="$(sed -n '1p' "$commit_msg_file")"
+
+# Enforce Conventional Commits and subject length <= 72
+type_scope_pattern='^(build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test)(\([a-z0-9\-\/]+\))?: '
+
+echo "$first_line" | grep -E -q "$type_scope_pattern" || {
+  echo "⛔ Invalid commit message format. Use: <type>(<scope>): <subject>" >&2
+  echo "   types: build|chore|ci|docs|feat|fix|perf|refactor|revert|style|test" >&2
+  exit 1
+}
+
+# Subject must start lowercase and be <= 72 chars
+subject_len=${#first_line}
+subject_start="$(printf %s "$first_line" | cut -c1)"
+
+case "$subject_start" in
+  [A-Z])
+    echo "⛔ Subject must start in lowercase." >&2
+    exit 1
+    ;;
+esac
+
+if [ "$subject_len" -gt 72 ]; then
+  echo "⛔ Subject too long ($subject_len). Max 72 characters." >&2
+  exit 1
+fi
+
+exit 0
+

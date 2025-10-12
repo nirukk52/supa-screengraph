@@ -8,19 +8,21 @@
 		"lint": "biome lint . ",
 		"check": "biome check",
 		"clean": "turbo clean",
-		"format": "biome format . --write"
+		"format": "biome format . --write",
+		"prepare": "husky"
 	},
 	"engines": {
 		"node": ">=20"
 	},
 	"packageManager": "pnpm@10.14.0",
 	"devDependencies": {
-		"@biomejs/biome": "2.2.4",
+		"@biomejs/biome": "2.2.5",
 		"@repo/tsconfig": "workspace:*",
-		"@types/node": "^24.6.0",
+		"@types/node": "^24.7.2",
 		"dotenv-cli": "^10.0.0",
+		"husky": "^9.1.6",
 		"turbo": "^2.5.8",
-		"typescript": "5.9.2"
+		"typescript": "5.9.3"
 	},
 	"pnpm": {
 		"overrides": {

@@ -4,6 +4,10 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: write
+  pull-requests: write
+
 env:
   DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
@@ -12,12 +16,31 @@ jobs:
     name: Lint code
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          # Ensure we check out the source branch, not the merge commit
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0
+          persist-credentials: true
       - name: Setup Biome
         uses: biomejs/setup-biome@v2
         with:
           version: latest
-      - name: Run Biome
+      - name: Apply Biome fixes
+        run: biome check . --write
+      - name: Commit and push fixes (same-repo PRs only)
+        if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain)" ]; then
+            git add -A
+            git commit -m "chore(ci): apply biome autofix"
+            git push
+          fi
+      - name: Verify Biome (no changes pending)
         run: biome ci .
   e2e:
     name: Run e2e tests
