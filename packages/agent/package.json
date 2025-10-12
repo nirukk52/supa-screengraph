@@ -4,8 +4,8 @@
 	"version": "0.1.0",
 	"description": "Python agent service",
 	"scripts": {
-		"dev": "uv run uvicorn agent.main:app --reload --port 8001",
-		"start": "uv run uvicorn agent.main:app --host 0.0.0.0 --port 8001",
+		"dev": "sh -c 'uv run uvicorn agent.main:app --reload --port ${AGENT_PORT:-8001}'",
+		"start": "sh -c 'uv run uvicorn agent.main:app --host 0.0.0.0 --port ${AGENT_PORT:-8001}'",
 		"test": "uv run pytest",
 		"test:watch": "uv run pytest-watch",
 		"lint": "uv run ruff check .",
