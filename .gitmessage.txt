@@ -1,0 +1,16 @@
+# Conventional Commit format
+# <type>(<scope>): <subject>
+#
+# types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
+# scope: optional; package or area, e.g., apps/web, packages/api
+# subject: imperative, lower-case, no trailing period, <= 72 chars
+
+feat(scope): short summary of changes
+
+# Body: motivation, context, and what changed
+
+# BREAKING CHANGE: describe what changed and migration steps
+
+# Footer: issue/PR references
+# Closes #123
+
