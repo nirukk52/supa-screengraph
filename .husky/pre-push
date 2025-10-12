@@ -1,0 +1,2 @@
+# Run all tests across workspace before push
+pnpm -r --if-present test
