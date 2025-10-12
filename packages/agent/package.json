@@ -1,0 +1,17 @@
+{
+	"name": "@repo/agent",
+	"private": true,
+	"version": "0.1.0",
+	"description": "Python agent service",
+	"scripts": {
+		"dev": "uv run uvicorn agent.main:app --reload --port 8001",
+		"start": "uv run uvicorn agent.main:app --host 0.0.0.0 --port 8001",
+		"test": "uv run pytest",
+		"test:watch": "uv run pytest-watch",
+		"lint": "uv run ruff check .",
+		"format": "uv run ruff format .",
+		"type-check": "uv run mypy src",
+		"clean": "rm -rf dist build *.egg-info .pytest_cache .ruff_cache .mypy_cache __pycache__"
+	}
+}
+
