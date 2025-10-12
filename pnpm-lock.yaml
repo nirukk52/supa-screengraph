@@ -323,6 +323,8 @@ importers:
         specifier: workspace:*
         version: link:../tooling/typescript
 
+  packages/agent: {}
+
   packages/ai:
     dependencies:
       '@ai-sdk/anthropic':
