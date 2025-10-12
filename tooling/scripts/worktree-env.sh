@@ -67,12 +67,10 @@ fi
 
 git worktree add "$worktree_path" "$base_ref"
 
-# Build target .env from .env.local.example, .example.env, or .env
+# Build target .env from .env.example or fallback to .env
 source_env=""
-if [[ -f .env.local.example ]]; then
-  source_env=".env.local.example"
-elif [[ -f .example.env ]]; then
-  source_env=".example.env"
+if [[ -f .env.example ]]; then
+  source_env=".env.example"
 elif [[ -f .env ]]; then
   source_env=".env"
 fi
