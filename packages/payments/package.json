@@ -29,6 +29,7 @@
 	"name": "@repo/payments",
 	"scripts": {
 		"type-check": "tsc --noEmit",
+		"test": "pnpm run test:webhook",
 		"test:webhook": "tsx ./provider/dodopayments/test-webhook.ts"
 	},
 	"types": "./**/.ts",

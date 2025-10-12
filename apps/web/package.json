@@ -105,6 +105,7 @@
 		"dev": "next dev --turbo",
 		"e2e": "pnpm exec playwright test --ui",
 		"e2e:ci": "pnpm exec playwright install && pnpm exec playwright test",
+		"test": "pnpm exec playwright install && pnpm exec playwright test",
 		"lint": "next lint",
 		"shadcn-ui": "pnpm dlx shadcn@latest",
 		"start": "next start",

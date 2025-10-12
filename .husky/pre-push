@@ -2,8 +2,4 @@
 . /Users/priyankalalge/RealSaas/Screengraph/feat-ci-improvements/.husky/_/husky.sh
 
 # Run all tests across workspace before push
-echo "Running Python agent tests..."
-pnpm --filter @repo/agent test
-
-echo "Running Playwright e2e tests..."
-pnpm --filter @repo/web e2e:ci
+pnpm -r --if-present test
