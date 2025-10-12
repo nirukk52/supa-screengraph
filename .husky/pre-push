@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+. /Users/priyankalalge/RealSaas/Screengraph/feat-ci-improvements/.husky/_/husky.sh
+
+# Run tests across workspace before push
+pnpm -r --if-present test

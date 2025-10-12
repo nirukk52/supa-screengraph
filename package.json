@@ -9,6 +9,7 @@
 		"check": "biome check",
 		"clean": "turbo clean",
 		"format": "biome format . --write",
+		"test": "pnpm -r --if-present test",
 		"prepare": "husky"
 	},
 	"engines": {
@@ -20,7 +21,7 @@
 		"@repo/tsconfig": "workspace:*",
 		"@types/node": "^24.7.2",
 		"dotenv-cli": "^10.0.0",
-		"husky": "^9.1.6",
+		"husky": "^9.1.7",
 		"turbo": "^2.5.8",
 		"typescript": "5.9.3"
 	},
