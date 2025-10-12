@@ -67,12 +67,14 @@ fi
 
 git worktree add "$worktree_path" "$base_ref"
 
-# Build target .env from .env.example or fallback to .env
+# Build target .env from base repo's .env (with real credentials)
+# Fallback to .env.example if .env doesn't exist (first-time setup)
 source_env=""
-if [[ -f .env.example ]]; then
-  source_env=".env.example"
-elif [[ -f .env ]]; then
+if [[ -f .env ]]; then
   source_env=".env"
+elif [[ -f .env.example ]]; then
+  source_env=".env.example"
+  echo "Warning: Using .env.example as source. Copy .env.example → .env and add real credentials."
 fi
 
 if [[ -n "$source_env" ]]; then
