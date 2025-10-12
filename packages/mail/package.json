@@ -14,10 +14,10 @@
 		"use-intl": "^4.3.9"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.2.4",
+		"@biomejs/biome": "2.2.5",
 		"@repo/tsconfig": "workspace:*",
 		"@tailwindcss/line-clamp": "^0.4.4",
-		"@types/node": "24.6.0",
+		"@types/node": "24.7.2",
 		"@types/nodemailer": "^7.0.2",
 		"@types/react": "19.1.16"
 	},
