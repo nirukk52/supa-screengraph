@@ -67,44 +67,53 @@ fi
 
 git worktree add "$worktree_path" "$base_ref"
 
-# Build target .env from .example.env or .env
+# Build target .env from .env.local.example, .example.env, or .env
 source_env=""
-if [[ -f .example.env ]]; then
+if [[ -f .env.local.example ]]; then
+  source_env=".env.local.example"
+elif [[ -f .example.env ]]; then
   source_env=".example.env"
 elif [[ -f .env ]]; then
   source_env=".env"
 fi
 
 if [[ -n "$source_env" ]]; then
-  # Apply offset to all *_PORT=NNNN assignments
+  # Copy all lines; apply offset only to *_PORT=NNNN assignments
   awk -v OFF="$OFFSET" '
     BEGIN{ OFS="" }
-    /^[[:space:]]*#/ { print $0; next }
-    /^[[:space:]]*$/ { print $0; next }
     {
+      # Check if line contains *_PORT=number
       if ($0 ~ /^[[:space:]]*[A-Za-z0-9_]+_PORT[[:space:]]*=/) {
         split($0, a, "=")
         key=a[1]; val=a[2]
         gsub(/^[[:space:]]+|[[:space:]]+$/, "", key)
         gsub(/^[[:space:]]+|[[:space:]]+$/, "", val)
+        # Remove quotes if present
+        gsub(/^["\047]|["\047]$/, "", val)
         if (val ~ /^[0-9]+$/) {
           port=val+OFF
           print key, "=", port
         } else {
           print $0
         }
-      } else if ($0 ~ /^[[:space:]]*PLAYWRIGHT_BASE_URL[[:space:]]*=/) {
-        # Recompute PLAYWRIGHT_BASE_URL from WEB_PORT if present later
-        print $0
       } else {
+        # Copy everything else as-is
         print $0
       }
     }
   ' "$source_env" > "$worktree_path/.env"
 
-  # If WEB_PORT present, recompute PLAYWRIGHT_BASE_URL accordingly
+  # If WEB_PORT present, update URLs that reference localhost:3000
   if grep -q '^WEB_PORT=' "$worktree_path/.env"; then
     web_port=$(grep '^WEB_PORT=' "$worktree_path/.env" | tail -n1 | cut -d= -f2)
+    
+    # Update NEXT_PUBLIC_SITE_URL
+    if grep -q '^NEXT_PUBLIC_SITE_URL=' "$worktree_path/.env"; then
+      sed -i '' -e "s#^NEXT_PUBLIC_SITE_URL=.*#NEXT_PUBLIC_SITE_URL=\"http://localhost:${web_port}\"#" "$worktree_path/.env" 2>/dev/null || \
+      sed -i -e "s#^NEXT_PUBLIC_SITE_URL=.*#NEXT_PUBLIC_SITE_URL=\"http://localhost:${web_port}\"#" "$worktree_path/.env"
+    fi
+    
+    # Update PLAYWRIGHT_BASE_URL
     if grep -q '^PLAYWRIGHT_BASE_URL=' "$worktree_path/.env"; then
       sed -i '' -e "s#^PLAYWRIGHT_BASE_URL=.*#PLAYWRIGHT_BASE_URL=http://localhost:${web_port}#" "$worktree_path/.env" 2>/dev/null || \
       sed -i -e "s#^PLAYWRIGHT_BASE_URL=.*#PLAYWRIGHT_BASE_URL=http://localhost:${web_port}#" "$worktree_path/.env"
