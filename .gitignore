@@ -42,3 +42,6 @@ dist/
 # other 
 .react-email/
 .content-collections/
+
+# vercel
+.vercel
