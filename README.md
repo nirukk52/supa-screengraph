@@ -1,6 +1,9 @@
-# supastarter for Next.js
+# Some background
+We are building our SAAS on top of supastarter starter repo>
 
-supastarter is the ultimate starter kit for production-ready, scalable SaaS applications.
+# What we are building
+A modular SAAS app.
+A SAAS app where you can connect your apk file and it crawls through your android app and genarates a screengraph.
 
 ## Helpful links
 
