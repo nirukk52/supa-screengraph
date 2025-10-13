@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 import { execSync, spawn } from "node:child_process";
-import { readFileSync, existsSync } from "node:fs";
-import { join, dirname } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -15,10 +15,10 @@ function parseEnvFile(filePath) {
 	if (!existsSync(filePath)) {
 		return {};
 	}
-	
+
 	const content = readFileSync(filePath, "utf8");
 	const env = {};
-	
+
 	for (const line of content.split("\n")) {
 		const trimmed = line.trim();
 		if (trimmed && !trimmed.startsWith("#")) {
@@ -29,35 +29,35 @@ function parseEnvFile(filePath) {
 			}
 		}
 	}
-	
+
 	return env;
 }
 
 function getPortsFromEnv() {
 	const ports = new Set(DEFAULT_PORTS);
-	
+
 	// Check root .env files
 	const envFiles = [
 		".env",
 		".env.local",
 		".env.example",
-		".env.local.example"
+		".env.local.example",
 	];
-	
+
 	for (const envFile of envFiles) {
 		const envPath = join(ROOT_DIR, envFile);
 		const env = parseEnvFile(envPath);
-		
+
 		// Look for common port environment variables
 		const portKeys = [
 			"PORT",
-			"NEXT_PUBLIC_PORT", 
+			"NEXT_PUBLIC_PORT",
 			"AGENT_PORT",
 			"WEB_PORT",
 			"API_PORT",
-			"DB_PORT"
+			"DB_PORT",
 		];
-		
+
 		for (const key of portKeys) {
 			if (env[key]) {
 				const port = Number.parseInt(env[key], 10);
@@ -67,7 +67,7 @@ function getPortsFromEnv() {
 			}
 		}
 	}
-	
+
 	return Array.from(ports);
 }
 
