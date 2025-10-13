@@ -4,6 +4,7 @@
 	"scripts": {
 		"build": "npx dotenv-cli -c -- turbo build",
 		"dev": "npx dotenv-cli -c -- turbo dev --concurrency 15",
+		"dev:restart": "node tooling/scripts/dev-restart.js",
 		"start": "npx dotenv-cli -c -- turbo start",
 		"lint": "biome lint . ",
 		"check": "biome check",
