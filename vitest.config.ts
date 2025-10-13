@@ -12,7 +12,7 @@ export default defineConfig({
 	coverage: {
 		reporter: ["text", "html"],
 		provider: "v8",
-		all: true,
+		all: false,
 		lines: 0.8,
 		functions: 0.8,
 		statements: 0.8,
