@@ -1,0 +1,13 @@
+# Default owners
+* @priyankalalge
+
+# Packages
+/packages/** @priyankalalge
+
+# Features
+/packages/features/** @priyankalalge
+
+# Apps
+/apps/** @priyankalalge
+
+

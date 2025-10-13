@@ -10,7 +10,9 @@
 		"clean": "turbo clean",
 		"format": "biome format . --write",
 		"test": "pnpm -r --if-present test",
-		"prepare": "husky"
+		"prepare": "husky",
+		"lint:arch": "node tooling/arch/check-arch.js && node tooling/arch/check-sizes.js && node tooling/arch/check-literals.js",
+		"scaffold": "ts-node tooling/scripts/scaffold/index.ts"
 	},
 	"engines": {
 		"node": ">=20"
@@ -22,6 +24,9 @@
 		"@types/node": "^24.7.2",
 		"dotenv-cli": "^10.0.0",
 		"husky": "^9.1.7",
+		"@commitlint/cli": "^19.5.0",
+		"@commitlint/config-conventional": "^19.5.0",
+		"ts-node": "^10.9.2",
 		"turbo": "^2.5.8",
 		"typescript": "5.9.3"
 	},
