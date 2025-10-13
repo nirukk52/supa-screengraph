@@ -163,6 +163,37 @@
 		"note": "Use Cursor MCP Graphiti tools directly (no local proxy). group_id=screengraph"
 	},
 
+	"cursor_persona_attachment": {
+		"how_to_attach": "Cursor does not have built-in 24/7 persona persistence. Use one of these methods:",
+		"methods": [
+			{
+				"method": "workspace_rules",
+				"recommended": true,
+				"description": "Create .cursorrules in project root - automatically loaded in every chat",
+				"implementation": "The extensive rules in .cursorrules act as a persistent persona"
+			},
+			{
+				"method": "manual_mention",
+				"recommended": false,
+				"description": "Type @persona-ian-botts-cto.json at the start of each chat session",
+				"implementation": "Loads persona for that specific chat only"
+			},
+			{
+				"method": "cursorrules_reference",
+				"recommended": true,
+				"description": "Add reference in .cursorrules to this persona file",
+				"implementation": "In .cursorrules: 'Load and follow guidelines from .mcp/persona-ian-botts-cto.json'"
+			},
+			{
+				"method": "always_applied_rules",
+				"recommended": true,
+				"description": "Set in Cursor Settings → Rules → Always Applied Rules",
+				"implementation": "These rules apply to all workspaces and chat sessions"
+			}
+		],
+		"current_setup": "Workspace uses .cursorrules with 25 coding rules, Graphiti requirements, and architectural principles that function as a persistent persona across all chat sessions"
+	},
+
 	"execution_contract": {
 		"past_references_in_adr": true,
 		"emit_receipt_after_write": true,

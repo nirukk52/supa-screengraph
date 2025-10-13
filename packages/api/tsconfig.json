@@ -1,5 +1,11 @@
 {
 	"extends": "@repo/tsconfig/react-library.json",
+	"compilerOptions": {
+		"paths": {
+			"@sg/feature-agents-run": ["../features/agents-run/src/index.ts"],
+			"@sg/feature-agents-run/*": ["../features/agents-run/src/*"]
+		}
+	},
 	"include": ["**/*.ts"],
 	"exclude": ["dist", "build", "node_modules"]
 }

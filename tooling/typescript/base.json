@@ -17,7 +17,21 @@
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
 		"strict": true,
-		"strictNullChecks": true
+		"strictNullChecks": true,
+		"paths": {
+			"@sg/agents-contracts/*": ["../../packages/agents-contracts/*"],
+			"@sg/eventbus-inmemory/*": ["../../packages/eventbus-inmemory/*"],
+			"@sg/eventbus/*": ["../../packages/eventbus/*"],
+			"@sg/queue-inmemory/*": ["../../packages/queue-inmemory/*"],
+			"@sg/queue/*": ["../../packages/queue/*"],
+			"@sg/feature-agents-run": [
+				"../../packages/features/agents-run/src/index.ts"
+			],
+			"@sg/feature-agents-run/*": [
+				"../../packages/features/agents-run/src/*"
+			],
+			"@repo/api/*": ["../../packages/api/*"]
+		}
 	},
 	"display": "Default",
 	"exclude": ["node_modules", "dist", ".next", "build"]

@@ -1,0 +1,22 @@
+{
+	"name": "@sg/agents-contracts",
+	"version": "0.0.0",
+	"private": true,
+	"sg:layer": "contracts",
+	"sg:scope": "agents",
+	"main": "dist/index.js",
+	"types": "src/index.ts",
+	"exports": {
+		".": {
+			"types": "./src/index.ts",
+			"default": "./src/index.ts"
+		}
+	},
+	"scripts": {
+		"build": "tsc -b",
+		"test": "vitest"
+	},
+	"dependencies": {
+		"zod": "^4.1.11"
+	}
+}

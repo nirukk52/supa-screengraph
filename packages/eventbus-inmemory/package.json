@@ -1,0 +1,22 @@
+{
+	"name": "@sg/eventbus-inmemory",
+	"version": "0.0.0",
+	"private": true,
+	"sg:layer": "infra",
+	"sg:scope": "eventbus",
+	"main": "dist/index.js",
+	"types": "src/index.ts",
+	"exports": {
+		".": {
+			"import": "./src/index.ts",
+			"require": "./src/index.ts"
+		}
+	},
+	"scripts": {
+		"build": "tsc -b"
+	},
+	"dependencies": {
+		"@sg/eventbus": "workspace:*",
+		"@sg/agents-contracts": "workspace:*"
+	}
+}

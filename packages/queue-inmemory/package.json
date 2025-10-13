@@ -1,0 +1,21 @@
+{
+	"name": "@sg/queue-inmemory",
+	"version": "0.0.0",
+	"private": true,
+	"sg:layer": "infra",
+	"sg:scope": "queue",
+	"main": "dist/index.js",
+	"types": "src/index.ts",
+	"exports": {
+		".": {
+			"import": "./src/index.ts",
+			"require": "./src/index.ts"
+		}
+	},
+	"scripts": {
+		"build": "tsc -b"
+	},
+	"dependencies": {
+		"@sg/queue": "workspace:*"
+	}
+}

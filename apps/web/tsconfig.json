@@ -10,7 +10,25 @@
 			"@i18n": ["./modules/i18n"],
 			"@i18n/*": ["./modules/i18n/*"],
 			"@shared/*": ["./modules/shared/*"],
-			"content-collections": ["./.content-collections/generated"]
+			"content-collections": ["./.content-collections/generated"],
+			"@repo/api": ["../../packages/api/index.ts"],
+			"@repo/api/*": ["../../packages/api/*"],
+			"@sg/feature-agents-run": [
+				"../../packages/features/agents-run/src/index.ts"
+			],
+			"@sg/feature-agents-run/*": [
+				"../../packages/features/agents-run/src/*"
+			],
+			"@sg/agents-contracts": [
+				"../../packages/agents-contracts/src/index.ts"
+			],
+			"@sg/agents-contracts/*": ["../../packages/agents-contracts/src/*"],
+			"@sg/eventbus": ["../../packages/eventbus/src"],
+			"@sg/eventbus-inmemory": [
+				"../../packages/eventbus-inmemory/src/index.ts"
+			],
+			"@sg/queue": ["../../packages/queue/src"],
+			"@sg/queue-inmemory": ["../../packages/queue-inmemory/src/index.ts"]
 		}
 	},
 	"include": [

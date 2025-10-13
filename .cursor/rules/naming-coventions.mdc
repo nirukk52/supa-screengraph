@@ -9,3 +9,5 @@ This rule describes what naming conventions to use for files, folders, component
 - Use PascalCase for component names
 - Use camelCase for variables and method names
 - Favor named exports for components.
+
+- Persona gate: ensure `@persona-ian-botts-cto.json` is attached before proceeding.

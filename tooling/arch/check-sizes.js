@@ -3,8 +3,8 @@
 // - Max file lines: 150
 // - Max function lines: 75 (approximate brace-based)
 
-const fs = require("fs");
-const path = require("path");
+const fs = require("node:fs");
+const path = require("node:path");
 
 const MAX_FILE_LINES = 150;
 const MAX_FUNC_LINES = 75;
@@ -12,7 +12,9 @@ const MAX_FUNC_LINES = 75;
 const roots = ["packages", "apps"]; // scan these
 
 function walk(dir, acc) {
-	if (!fs.existsSync(dir)) return;
+	if (!fs.existsSync(dir)) {
+		return;
+	}
 	for (const entry of fs.readdirSync(dir)) {
 		const full = path.join(dir, entry);
 		const stat = fs.statSync(full);
@@ -26,8 +28,12 @@ function walk(dir, acc) {
 
 function shouldCheck(file) {
 	// skip tests and contracts
-	if (/\/tests\//.test(file)) return false;
-	if (/\/src\/contracts\//.test(file)) return false;
+	if (/\/tests\//.test(file)) {
+		return false;
+	}
+	if (/\/src\/contracts\//.test(file)) {
+		return false;
+	}
 	return true;
 }
 
@@ -89,11 +95,15 @@ function checkFunctions(content) {
 }
 
 const files = [];
-for (const r of roots) walk(path.join(process.cwd(), r), files);
+for (const r of roots) {
+	walk(path.join(process.cwd(), r), files);
+}
 
 const violations = [];
 for (const f of files) {
-	if (!shouldCheck(f)) continue;
+	if (!shouldCheck(f)) {
+		continue;
+	}
 	const content = fs.readFileSync(f, "utf8");
 	const fileLines = countFileLines(content);
 	if (fileLines > MAX_FILE_LINES) {
@@ -102,12 +112,16 @@ for (const f of files) {
 		);
 	}
 	const funcErrs = checkFunctions(content);
-	for (const e of funcErrs) violations.push(`${f}: ${e}`);
+	for (const e of funcErrs) {
+		violations.push(`${f}: ${e}`);
+	}
 }
 
 if (violations.length) {
 	console.error("\nSize violations:");
-	for (const v of violations) console.error(" -", v);
+	for (const v of violations) {
+		console.error(" -", v);
+	}
 	process.exit(1);
 } else {
 	console.log("Size checks passed.");

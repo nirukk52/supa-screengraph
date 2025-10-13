@@ -18,3 +18,5 @@ This rule describes the basic project structure of the repository and where to f
   - `packages/storage` contains providers for storing files and images
   - `packages/utils` contains utility functions
   - `config` contains the application configuration
+
+- Persona gate: ensure `@persona-ian-botts-cto.json` is attached before proceeding.

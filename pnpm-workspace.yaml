@@ -2,4 +2,6 @@ packages:
   - config
   - apps/*
   - packages/*
+  - packages/**
+  - packages/features/*
   - tooling/*

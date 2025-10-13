@@ -1,5 +1,7 @@
 # supa-screengraph
 
+[![codecov](https://codecov.io/gh/nirukk52/supa-screengraph/branch/main/graph/badge.svg)](https://codecov.io/gh/nirukk52/supa-screengraph)
+
 ## Some background
 We are building our SAAS on top of supastarter starter repo.
 

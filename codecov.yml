@@ -1,0 +1,32 @@
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 100.0
+        informational: true
+    patch:
+      default:
+        target: 0.8
+        threshold: 0.01
+ignore:
+  - "packages/database/prisma/generated/**"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/node_modules/**"
+  - "vitest.config.ts"
+flags:
+  agents-contracts:
+    paths:
+      - packages/agents-contracts
+  eventbus:
+    paths:
+      - packages/eventbus
+  queue:
+    paths:
+      - packages/queue
+  agents-run:
+    paths:
+      - packages/features/agents-run
+
+
