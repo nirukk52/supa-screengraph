@@ -9,3 +9,5 @@ This rule describes guidelines for creating UI and styling components:
 - Implement responsive design with Tailwind CSS; use a mobile-first approach.
 - Use the `cn` function for class name concatenation.
 - The global theme variables and tailwind config are defined in `tooling/tailwind/theme.css`.
+
+- Persona gate: ensure `@persona-ian-botts-cto.json` is attached before proceeding.

@@ -1,4 +1,4 @@
-import type { QueuePort } from "@sg/queue/src/port";
+import type { QueuePort } from "@sg/queue";
 
 type Handler<T> = (data: T) => Promise<void>;
 

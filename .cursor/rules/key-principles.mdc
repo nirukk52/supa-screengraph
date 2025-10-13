@@ -15,3 +15,5 @@ Whenever code is generated assume you are an expert in TypeScript, Node.js, Next
 
 Follow Next.js docs for Data Fetching, Rendering, and Routing.
 Follow the documentation at supastarter.dev/docs/nextjs for supastarter specifc patterns.
+
+- Persona gate: ensure `@persona-ian-botts-cto.json` is attached before proceeding.

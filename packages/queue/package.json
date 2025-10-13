@@ -5,7 +5,13 @@
 	"sg:layer": "application",
 	"sg:scope": "queue",
 	"main": "dist/index.js",
-	"types": "dist/index.d.ts",
+	"types": "src/index.ts",
+	"exports": {
+		".": {
+			"import": "./src/index.ts",
+			"require": "./src/index.ts"
+		}
+	},
 	"scripts": {
 		"build": "tsc -b"
 	}

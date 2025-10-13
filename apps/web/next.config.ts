@@ -1,3 +1,4 @@
+import path from "node:path";
 import { withContentCollections } from "@content-collections/next";
 // @ts-expect-error - PrismaPlugin is not typed
 import { PrismaPlugin } from "@prisma/nextjs-monorepo-workaround-plugin";
@@ -64,6 +65,35 @@ const nextConfig: NextConfig = {
 		if (isServer) {
 			config.plugins.push(new PrismaPlugin());
 		}
+
+		// Resolve local workspace packages without publishing
+		config.resolve = config.resolve || {};
+		config.resolve.alias = {
+			...(config.resolve.alias || {}),
+			"@repo/api": path.resolve(__dirname, "../../packages/api"),
+			"@repo/api/*": path.resolve(__dirname, "../../packages/api"),
+			"@sg/agents-contracts": path.resolve(
+				__dirname,
+				"../../packages/agents-contracts/src",
+			),
+			"@sg/eventbus": path.resolve(
+				__dirname,
+				"../../packages/eventbus/src",
+			),
+			"@sg/eventbus-inmemory": path.resolve(
+				__dirname,
+				"../../packages/eventbus-inmemory/src",
+			),
+			"@sg/queue": path.resolve(__dirname, "../../packages/queue/src"),
+			"@sg/queue-inmemory": path.resolve(
+				__dirname,
+				"../../packages/queue-inmemory/src",
+			),
+			"@sg/feature-agents-run": path.resolve(
+				__dirname,
+				"../../packages/features/agents-run/src",
+			),
+		};
 
 		return config;
 	},

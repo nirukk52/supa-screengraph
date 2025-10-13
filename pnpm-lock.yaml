@@ -75,6 +75,9 @@ importers:
       '@orpc/client':
         specifier: ^1.9.0
         version: 1.9.0(@opentelemetry/api@1.9.0)
+      '@orpc/server':
+        specifier: ^1.9.0
+        version: 1.9.0(@opentelemetry/api@1.9.0)
       '@orpc/tanstack-query':
         specifier: ^1.9.0
         version: 1.9.0(@opentelemetry/api@1.9.0)(@orpc/client@1.9.0(@opentelemetry/api@1.9.0))(@tanstack/query-core@5.90.2)
@@ -147,6 +150,24 @@ importers:
       '@repo/utils':
         specifier: workspace:*
         version: link:../../packages/utils
+      '@sg/agents-contracts':
+        specifier: workspace:*
+        version: link:../../packages/agents-contracts
+      '@sg/eventbus':
+        specifier: workspace:*
+        version: link:../../packages/eventbus
+      '@sg/eventbus-inmemory':
+        specifier: workspace:*
+        version: link:../../packages/eventbus-inmemory
+      '@sg/feature-agents-run':
+        specifier: workspace:*
+        version: link:../../packages/features/agents-run
+      '@sg/queue':
+        specifier: workspace:*
+        version: link:../../packages/queue
+      '@sg/queue-inmemory':
+        specifier: workspace:*
+        version: link:../../packages/queue-inmemory
       '@sindresorhus/slugify':
         specifier: ^3.0.0
         version: 3.0.0
@@ -433,9 +454,24 @@ importers:
       '@scalar/hono-api-reference':
         specifier: ^0.9.19
         version: 0.9.19(hono@4.9.8)
+      '@sg/agents-contracts':
+        specifier: workspace:*
+        version: link:../agents-contracts
+      '@sg/eventbus':
+        specifier: workspace:*
+        version: link:../eventbus
+      '@sg/eventbus-inmemory':
+        specifier: workspace:*
+        version: link:../eventbus-inmemory
       '@sg/feature-agents-run':
         specifier: workspace:*
         version: link:../features/agents-run
+      '@sg/queue':
+        specifier: workspace:*
+        version: link:../queue
+      '@sg/queue-inmemory':
+        specifier: workspace:*
+        version: link:../queue-inmemory
       '@sindresorhus/slugify':
         specifier: ^3.0.0
         version: 3.0.0
@@ -569,6 +605,9 @@ importers:
 
   packages/features/agents-run:
     dependencies:
+      '@orpc/server':
+        specifier: ^1.9.0
+        version: 1.9.0(@opentelemetry/api@1.9.0)
       '@sg/agents-contracts':
         specifier: workspace:*
         version: link:../../agents-contracts

@@ -12,7 +12,8 @@
 		"test": "pnpm -r --if-present test",
 		"prepare": "husky",
 		"lint:arch": "node tooling/arch/check-arch.js && node tooling/arch/check-sizes.js && node tooling/arch/check-literals.js",
-		"scaffold": "ts-node tooling/scripts/scaffold/index.ts"
+		"scaffold": "ts-node tooling/scripts/scaffold/index.ts",
+		"pr:check": "pnpm -w install && pnpm biome ci . && pnpm -w vitest run --coverage --reporter=dot && pnpm --filter database generate && pnpm --filter web e2e:ci"
 	},
 	"engines": {
 		"node": ">=20"

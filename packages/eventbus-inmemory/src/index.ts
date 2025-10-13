@@ -1,5 +1,5 @@
 import type { AgentEvent } from "@sg/agents-contracts";
-import type { EventBusPort } from "@sg/eventbus/src/port";
+import type { EventBusPort } from "@sg/eventbus";
 
 export class InMemoryEventBus implements EventBusPort {
 	private topics = new Map<string, Set<(e: AgentEvent) => void>>();
