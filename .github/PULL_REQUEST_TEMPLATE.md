@@ -20,3 +20,9 @@
 - Diagram:
 
 
+## Copilot Review Note
+
+- What should Copilot focus on (files, risks, invariants)?
+- Any non-obvious constraints or contracts to uphold?
+
+

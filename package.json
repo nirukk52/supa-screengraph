@@ -11,6 +11,7 @@
 		"clean": "turbo clean",
 		"format": "biome format . --write",
 		"test": "pnpm -r --if-present test",
+		"test:affected": "node tooling/scripts/test/affected.ts",
 		"prepare": "husky",
 		"lint:arch": "node tooling/arch/check-arch.js && node tooling/arch/check-sizes.js && node tooling/arch/check-literals.js",
 		"scaffold": "ts-node tooling/scripts/scaffold/index.ts",

@@ -1,12 +1,25 @@
 #!/bin/sh
-# Run fast unit tests for TS workspace only (skip Python agent)
-pnpm -w vitest run --reporter=dot || exit 1
+
+# Optional skip
+if [ "$SKIP_TESTS" = "1" ]; then
+  echo "SKIP_TESTS=1 set; skipping tests"
+else
+  # Determine affected tests (fallback to full suite)
+  patterns="$(node tooling/scripts/test/affected.ts 2>/dev/null || echo '')"
+  if [ -z "$patterns" ] || [ "$patterns" = "NO_AFFECTED" ]; then
+    echo "Running full unit test suite (no affected tests detected)"
+    pnpm -w vitest run --reporter=dot || exit 1
+  else
+    echo "Running affected tests:"
+    echo "$patterns"
+    pnpm -w vitest run --reporter=dot -- $(echo "$patterns" | tr '\n' ' ') || exit 1
+  fi
+fi
 
 # Enforce Claude update trailer and docs rule
 last_msg="$(git log -1 --pretty=%B)"
 case "$last_msg" in
   *"Claude-Update: yes"*)
-    # require CLAUDE docs changed in the last commit
     if ! git show --name-only --pretty="" HEAD | grep -E "^(CLAUDE/|CLAUDE.md)" >/dev/null; then
       echo "Claude-Update: yes but no CLAUDE docs changed in last commit" >&2
       exit 1

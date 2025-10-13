@@ -67,6 +67,19 @@ function main() {
 		for (const dir of ["unit", "integration"]) {
 			write(path.join(base, "tests", dir, ".keep"), "");
 		}
+		// basic spec template
+		write(
+			path.join(base, "tests", "unit", "sample.spec.ts"),
+			'import { describe, it, expect } from "vitest";\n\n' +
+				"describe('sample', () => {\n" +
+				"  it('works', () => {\n" +
+				"    // Arrange\n\n" +
+				"    // Act\n\n" +
+				"    // Assert\n" +
+				"    expect(true).toBe(true);\n" +
+				"  });\n" +
+				"});\n",
+		);
 		console.log(`Scaffolded package at ${base}`);
 		return;
 	}
@@ -119,6 +132,35 @@ function main() {
 		for (const dir of ["unit", "integration"]) {
 			write(path.join(base, "tests", dir, ".keep"), "");
 		}
+		// feature spec templates
+		write(
+			path.join(base, "tests", "unit", "feature.spec.ts"),
+			'import { describe, it, expect } from "vitest";\n\n' +
+				"describe('feature', () => {\n" +
+				"  it('bootstrap', () => {\n" +
+				"    expect(true).toBe(true);\n" +
+				"  });\n" +
+				"});\n",
+		);
+		write(
+			path.join(
+				base,
+				"src",
+				"application",
+				"usecases",
+				"__tests__",
+				"example-usecase.spec.ts",
+			),
+			'import { describe, it, expect } from "vitest";\n\n' +
+				"describe('example usecase', () => {\n" +
+				"  it('arrange-act-assert', () => {\n" +
+				"    // Arrange\n\n" +
+				"    // Act\n\n" +
+				"    // Assert\n" +
+				"    expect(true).toBe(true);\n" +
+				"  });\n" +
+				"});\n",
+		);
 		console.log(`Scaffolded feature at ${base}`);
 		return;
 	}
