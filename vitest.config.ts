@@ -10,7 +10,7 @@ export default defineConfig({
 		testTimeout: 10000,
 	},
 	coverage: {
-		reporter: ["lcov", "text-summary"],
+		reporter: ["text", "json", "lcov"],
 		provider: "v8",
 		include: ["packages/**/src/**/*.{ts,tsx}"],
 		exclude: [

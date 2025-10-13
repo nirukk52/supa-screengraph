@@ -20,7 +20,7 @@ jobs:
       - name: Install
         run: pnpm -w install
       - name: Test with coverage
-        run: pnpm -w vitest run --coverage --coverage.reporter=lcov,text-summary
+        run: pnpm -w vitest run --coverage
       - name: Upload coverage to Codecov (patch only)
         if: ${{ env.CODECOV_TOKEN != '' }}
         uses: codecov/codecov-action@v5
