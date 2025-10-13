@@ -1,2 +1,21 @@
+#!/bin/sh
 # Run all tests across workspace before push
 pnpm -r --if-present test
+
+# Enforce Claude update trailer and docs rule
+last_msg="$(git log -1 --pretty=%B)"
+case "$last_msg" in
+  *"Claude-Update: yes"*)
+    # require CLAUDE docs changed in the last commit
+    if ! git show --name-only --pretty="" HEAD | grep -E "^(CLAUDE/|CLAUDE.md)" >/dev/null; then
+      echo "Claude-Update: yes but no CLAUDE docs changed in last commit" >&2
+      exit 1
+    fi
+    ;;
+  *"Claude-Update: no"*)
+    ;;
+  *)
+    echo "Missing required commit trailer: 'Claude-Update: yes|no'" >&2
+    exit 1
+    ;;
+esac

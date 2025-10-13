@@ -2,8 +2,8 @@
 // Simple metadata-driven architecture checks using sg:layer and sg:scope in package.json.
 // No external deps required. Validates package-to-package dependencies.
 
-const fs = require("fs");
-const path = require("path");
+const fs = require("node:fs");
+const path = require("node:path");
 
 const repoRoot = process.cwd();
 const packagesDir = path.join(repoRoot, "packages");
@@ -16,11 +16,15 @@ function readJSON(p) {
 }
 
 function collectPackages() {
-	if (!fs.existsSync(packagesDir)) return;
+	if (!fs.existsSync(packagesDir)) {
+		return;
+	}
 	const scopes = fs.readdirSync(packagesDir);
 	for (const entry of scopes) {
 		const full = path.join(packagesDir, entry);
-		if (!fs.statSync(full).isDirectory()) continue;
+		if (!fs.statSync(full).isDirectory()) {
+			continue;
+		}
 
 		// features are under packages/features/* or regular packages under packages/*
 		if (entry === "features") {
@@ -73,9 +77,13 @@ function validate() {
 
 	// 1) No cross-feature deps
 	for (const p of Object.values(pkgs)) {
-		if (p.layer !== "feature") continue;
+		if (p.layer !== "feature") {
+			continue;
+		}
 		for (const d of p.deps) {
-			if (!names.has(d)) continue; // external dep
+			if (!names.has(d)) {
+				continue; // external dep
+			}
 			const dep = pkgs[d];
 			if (dep.layer === "feature" && dep.scope !== p.scope) {
 				errs.push(
@@ -88,7 +96,9 @@ function validate() {
 	// 2) Layer direction (no back-edges)
 	for (const p of Object.values(pkgs)) {
 		for (const d of p.deps) {
-			if (!names.has(d)) continue;
+			if (!names.has(d)) {
+				continue;
+			}
 			const dep = pkgs[d];
 			const allowed = allowMatrix[p.layer] || new Set();
 			if (!allowed.has(dep.layer)) {
@@ -101,7 +111,9 @@ function validate() {
 
 	if (errs.length) {
 		console.error("\nArchitecture violations:");
-		for (const e of errs) console.error(" -", e);
+		for (const e of errs) {
+			console.error(" -", e);
+		}
 		process.exit(1);
 	} else {
 		console.log("Architecture checks passed.");

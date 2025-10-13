@@ -9,6 +9,8 @@
 		"@biomejs/biome": "2.2.5",
 		"@repo/tsconfig": "workspace:*",
 		"@types/node": "^24.7.2",
+		"vitest": "^2.0.5",
+		"@vitest/coverage-v8": "^2.0.5",
 		"nanoid": "^5.1.6",
 		"tsx": "^4.20.6"
 	},

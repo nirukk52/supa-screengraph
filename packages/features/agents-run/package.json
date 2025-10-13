@@ -1,0 +1,20 @@
+{
+	"name": "@sg/feature-agents-run",
+	"version": "0.0.0",
+	"private": true,
+	"sg:layer": "feature",
+	"sg:scope": "agents-run",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"build": "tsc -b",
+		"dev:feature": "node ./src/infra/workers/run-worker.js"
+	},
+	"dependencies": {
+		"@sg/agents-contracts": "workspace:*",
+		"@sg/eventbus": "workspace:*",
+		"@sg/eventbus-inmemory": "workspace:*",
+		"@sg/queue": "workspace:*",
+		"@sg/queue-inmemory": "workspace:*"
+	}
+}

@@ -1,7 +1,7 @@
 #!/usr/bin/env ts-node
 
-import fs from "fs";
-import path from "path";
+import fs from "node:fs";
+import path from "node:path";
 
 type Kind = "package" | "feature";
 
@@ -18,11 +18,15 @@ function write(p: string, content: string) {
 
 function main() {
 	const [, , kind, rawName, ...rest] = process.argv;
-	if (!kind || !rawName) return usage();
+	if (!kind || !rawName) {
+		return usage();
+	}
 	const k = kind as Kind;
 	const name = rawName.toLowerCase();
 	const args = new Map<string, string>();
-	for (let i = 0; i < rest.length; i += 2) args.set(rest[i], rest[i + 1]);
+	for (let i = 0; i < rest.length; i += 2) {
+		args.set(rest[i], rest[i + 1]);
+	}
 
 	if (k === "package") {
 		const scope = args.get("--scope") || "shared";
