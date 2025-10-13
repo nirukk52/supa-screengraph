@@ -1,4 +1,5 @@
 # Milestone 1 — Scaffolding and Boundaries (Retro)
+**Date: 2024-12-19**
 
 ## Planned
 - Scaffold CLI and templates (packages/features) with runnable harness stub
@@ -18,7 +19,7 @@
 - Zero-dep scripts keep CI fast and portable
 - Templates standardize src layout across all modules
 
-## What didn’t
+## What didn't
 - Function size detection is heuristic; may false-positive on complex syntax
 - `ts-node` dependency added for scaffold; acceptable trade-off
 
