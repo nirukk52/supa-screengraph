@@ -14,6 +14,7 @@ ignore:
   - "**/dist/**"
   - "**/build/**"
   - "**/node_modules/**"
+  - "vitest.config.ts"
 flags:
   agents-contracts:
     paths:
