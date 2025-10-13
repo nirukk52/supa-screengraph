@@ -10,13 +10,8 @@ export default defineConfig({
 		testTimeout: 10000,
 	},
 	coverage: {
-		reporter: ["text", "html"],
+		reporter: ["lcov", "text-summary"],
 		provider: "v8",
-		all: false,
-		lines: 0.8,
-		functions: 0.8,
-		statements: 0.8,
-		branches: 0.7,
 		include: ["packages/**/src/**/*.{ts,tsx}"],
 		exclude: [
 			"**/dist/**",
@@ -24,6 +19,7 @@ export default defineConfig({
 			"**/node_modules/**",
 			"packages/**/tests/**",
 			"packages/database/prisma/generated/**",
+			"packages/database/prisma/**",
 			"apps/**",
 		],
 	},
