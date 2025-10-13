@@ -1,0 +1,12 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+This rule enforces AFTER_TASK recording and checks.
+
+- Add a Graphiti episode summarizing decisions, outcomes, and changes.
+- Tag appropriately (e.g., ADR, module, topic); include edges if relevant.
+- Ensure checks are green: lint, type, unit, affected e2e.
+- If UI work, attach screenshots/recordings.
+- Close TODOs and reconcile.

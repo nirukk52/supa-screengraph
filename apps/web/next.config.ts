@@ -7,7 +7,17 @@ import nextIntlPlugin from "next-intl/plugin";
 const withNextIntl = nextIntlPlugin("./modules/i18n/request.ts");
 
 const nextConfig: NextConfig = {
-	transpilePackages: ["@repo/api", "@repo/auth", "@repo/database"],
+	transpilePackages: [
+		"@repo/api",
+		"@repo/auth",
+		"@repo/database",
+		"@sg/feature-agents-run",
+		"@sg/agents-contracts",
+		"@sg/eventbus",
+		"@sg/eventbus-inmemory",
+		"@sg/queue",
+		"@sg/queue-inmemory",
+	],
 	images: {
 		remotePatterns: [
 			{

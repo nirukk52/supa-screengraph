@@ -1,4 +1,4 @@
-import type { AgentEvent } from "@sg/agents-contracts/src/contracts/event-types";
+import type { AgentEvent } from "@sg/agents-contracts";
 
 export interface EventBusPort {
 	publish(topic: string, event: AgentEvent): Promise<void>;

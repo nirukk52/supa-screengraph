@@ -3,4 +3,5 @@ packages:
   - apps/*
   - packages/*
   - packages/**
+  - packages/features/*
   - tooling/*

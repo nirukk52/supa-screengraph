@@ -1,8 +1,5 @@
-import {
-	SCHEMA_VERSION,
-	TOPIC_AGENTS_RUN,
-} from "@sg/agents-contracts/src/contracts/constants";
-import type { DebugTrace } from "@sg/agents-contracts/src/contracts/event-types";
+import type { DebugTrace } from "@sg/agents-contracts";
+import { SCHEMA_VERSION, TOPIC_AGENTS_RUN } from "@sg/agents-contracts";
 import { bus } from "../singletons";
 import { nextSeq } from "./sequencer";
 

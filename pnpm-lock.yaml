@@ -433,6 +433,9 @@ importers:
       '@scalar/hono-api-reference':
         specifier: ^0.9.19
         version: 0.9.19(hono@4.9.8)
+      '@sg/feature-agents-run':
+        specifier: workspace:*
+        version: link:../features/agents-run
       '@sindresorhus/slugify':
         specifier: ^3.0.0
         version: 3.0.0

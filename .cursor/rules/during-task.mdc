@@ -1,0 +1,12 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+This rule describes DURING_TASK behavior while implementing changes.
+
+- Respect discovered Preferences and follow Procedures exactly.
+- Apply relevant Facts; stay consistent with existing knowledge.
+- Capture new requirements immediately via Graphiti episodes.
+- Enforce size limits: file ≤ 150 lines; function ≤ 50 lines; diff ≤ 600 additions.
+- Validate external input and normalize unknowns; no implicit any; no mutation of shared state.

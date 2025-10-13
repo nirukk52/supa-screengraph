@@ -1,8 +1,5 @@
-import {
-	SCHEMA_VERSION,
-	TOPIC_AGENTS_RUN,
-} from "@sg/agents-contracts/src/contracts/constants";
-import type { RunStarted } from "@sg/agents-contracts/src/contracts/event-types";
+import type { RunStarted } from "@sg/agents-contracts";
+import { SCHEMA_VERSION, TOPIC_AGENTS_RUN } from "@sg/agents-contracts";
 import { bus, queue } from "../singletons";
 import { logFn } from "./log";
 import { nextSeq } from "./sequencer";

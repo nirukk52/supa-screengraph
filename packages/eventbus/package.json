@@ -5,7 +5,13 @@
 	"sg:layer": "application",
 	"sg:scope": "eventbus",
 	"main": "dist/index.js",
-	"types": "dist/index.d.ts",
+	"types": "src/port.ts",
+	"exports": {
+		"./src/port": {
+			"import": "./src/port.ts",
+			"require": "./src/port.ts"
+		}
+	},
 	"scripts": {
 		"build": "tsc -b"
 	}

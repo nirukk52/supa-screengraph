@@ -1,4 +1,4 @@
-import type { AgentEvent } from "@sg/agents-contracts/src/contracts/event-types";
+import type { AgentEvent } from "@sg/agents-contracts";
 import type { EventBusPort } from "@sg/eventbus/src/port";
 
 export class InMemoryEventBus implements EventBusPort {

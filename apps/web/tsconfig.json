@@ -10,7 +10,13 @@
 			"@i18n": ["./modules/i18n"],
 			"@i18n/*": ["./modules/i18n/*"],
 			"@shared/*": ["./modules/shared/*"],
-			"content-collections": ["./.content-collections/generated"]
+			"content-collections": ["./.content-collections/generated"],
+			"@sg/feature-agents-run": [
+				"../../packages/features/agents-run/src/index.ts"
+			],
+			"@sg/feature-agents-run/*": [
+				"../../packages/features/agents-run/src/*"
+			]
 		}
 	},
 	"include": [

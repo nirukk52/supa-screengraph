@@ -33,6 +33,10 @@ export default defineConfig({
 				__dirname,
 				"packages/agents-contracts",
 			),
+			"@sg/feature-agents-run": path.resolve(
+				__dirname,
+				"packages/features/agents-run",
+			),
 			"@sg/eventbus": path.resolve(__dirname, "packages/eventbus"),
 			"@sg/eventbus-inmemory": path.resolve(
 				__dirname,

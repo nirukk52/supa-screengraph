@@ -1,5 +1,5 @@
-import { TOPIC_AGENTS_RUN } from "@sg/agents-contracts/src/contracts/constants";
-import type { AgentEvent } from "@sg/agents-contracts/src/contracts/event-types";
+import type { AgentEvent } from "@sg/agents-contracts";
+import { TOPIC_AGENTS_RUN } from "@sg/agents-contracts";
 import { bus } from "../singletons";
 
 export async function* streamRun(runId: string): AsyncIterable<AgentEvent> {

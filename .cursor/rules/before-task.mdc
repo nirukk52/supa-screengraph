@@ -1,0 +1,12 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+This rule enforces BEFORE_TASK gates for every actionable request.
+
+- Verify persona attached: `@persona-ian-botts-cto.json`. If missing, STOP.
+- Run Graphiti BEFORE_TASK: search Preferences and Procedures relevant to the task.
+- Also run search_facts for context and relationships.
+- If Graphiti is unavailable, STOP all work and alert the user.
+- Do not plan or write code until these checks pass.
