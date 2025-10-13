@@ -24,7 +24,9 @@
 			"@sg/eventbus": ["../../packages/eventbus/src"],
 			"@sg/eventbus/*": ["../../packages/eventbus/src/*"],
 			"@sg/eventbus-inmemory": ["../../packages/eventbus-inmemory/src"],
-			"@sg/eventbus-inmemory/*": ["../../packages/eventbus-inmemory/src/*"],
+			"@sg/eventbus-inmemory/*": [
+				"../../packages/eventbus-inmemory/src/*"
+			],
 			"@sg/queue": ["../../packages/queue/src"],
 			"@sg/queue/*": ["../../packages/queue/src/*"],
 			"@sg/queue-inmemory": ["../../packages/queue-inmemory/src"],
