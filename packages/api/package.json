@@ -15,7 +15,6 @@
 		"@repo/payments": "workspace:*",
 		"@repo/storage": "workspace:*",
 		"@repo/utils": "workspace:*",
-		"@sg/feature-agents-run": "workspace:*",
 		"@sg/agents-contracts": "workspace:*",
 		"@sg/eventbus": "workspace:*",
 		"@sg/eventbus-inmemory": "workspace:*",

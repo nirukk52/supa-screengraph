@@ -463,9 +463,6 @@ importers:
       '@sg/eventbus-inmemory':
         specifier: workspace:*
         version: link:../eventbus-inmemory
-      '@sg/feature-agents-run':
-        specifier: workspace:*
-        version: link:../features/agents-run
       '@sg/queue':
         specifier: workspace:*
         version: link:../queue
@@ -773,8 +770,6 @@ importers:
       '@sg/queue':
         specifier: workspace:*
         version: link:../queue
-
-  packages/sample-lib: {}
 
   packages/storage:
     dependencies:
