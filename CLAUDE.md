@@ -21,5 +21,3 @@ Update policy (enforced):
 - Every push must include a commit trailer: `Claude-Update: yes` or `Claude-Update: no`.
 - If `yes`, the most recent commit must modify `CLAUDE.md` or files under `CLAUDE/`.
 - The combined Claude docs cannot exceed six pages (one category per page).
-
-
