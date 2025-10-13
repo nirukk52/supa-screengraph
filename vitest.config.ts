@@ -8,20 +8,20 @@ export default defineConfig({
 			"apps/web/tests/**", // playwright tests
 		],
 		testTimeout: 10000,
-	},
-	coverage: {
-		reporter: ["text", "json", "lcov"],
-		provider: "v8",
-		include: ["packages/**/src/**/*.{ts,tsx}"],
-		exclude: [
-			"**/dist/**",
-			"**/build/**",
-			"**/node_modules/**",
-			"packages/**/tests/**",
-			"packages/database/prisma/generated/**",
-			"packages/database/prisma/**",
-			"apps/**",
-		],
+		coverage: {
+			reporter: ["text", "json", "lcov"],
+			provider: "v8",
+			include: ["packages/**/src/**/*.{ts,tsx}"],
+			exclude: [
+				"**/dist/**",
+				"**/build/**",
+				"**/node_modules/**",
+				"packages/**/tests/**",
+				"packages/database/prisma/generated/**",
+				"packages/database/prisma/**",
+				"apps/**",
+			],
+		},
 	},
 	resolve: {
 		alias: {
