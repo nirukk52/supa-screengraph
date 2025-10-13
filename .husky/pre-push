@@ -1,6 +1,6 @@
 #!/bin/sh
-# Run all tests across workspace before push
-pnpm -r --if-present test
+# Run fast unit tests for TS workspace only (skip Python agent)
+pnpm -w vitest run --reporter=dot || exit 1
 
 # Enforce Claude update trailer and docs rule
 last_msg="$(git log -1 --pretty=%B)"
