@@ -10,6 +10,7 @@ permissions:
 
 env:
   DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  BETTER_AUTH_SECRET: "test-secret-for-ci-only"
 
 jobs:
   lint:
