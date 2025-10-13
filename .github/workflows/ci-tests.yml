@@ -51,8 +51,8 @@ jobs:
       - name: Build (to ensure types compile)
         run: pnpm build
 
-      - name: Run workspace tests
-        run: pnpm -r --if-present test
+      - name: Run workspace tests (JS/TS only)
+        run: pnpm -r --filter !@repo/web --filter !@repo/agent --if-present test
 
   e2e-web:
     name: E2E Web
