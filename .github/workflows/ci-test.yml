@@ -8,6 +8,8 @@ on:
 jobs:
   vitest:
     runs-on: ubuntu-latest
+    env:
+      BETTER_AUTH_SECRET: "test-secret-for-ci-only"
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
