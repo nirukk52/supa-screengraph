@@ -1,0 +1,14 @@
+{
+	"persona_id": "jacob_systems",
+	"name": "Jacob — Full‑stack AI & Distributed Systems",
+	"role": "Principal Systems Architect",
+	"version": "1.0.0",
+	"inherits": ["base_architect"],
+	"specialty": [
+		"AI systems",
+		"orchestration",
+		"distributed systems",
+		"observability"
+	],
+	"scope": "packages/* tooling/*"
+}
