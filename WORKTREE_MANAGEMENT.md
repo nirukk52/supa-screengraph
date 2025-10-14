@@ -43,3 +43,17 @@ This allows:
 - Hook location: `.git/worktrees/supastarter-frontend-dev/hooks/post-checkout`
 - Config: `core.hooksPath` set to worktree-specific hooks directory
 
+## Install Branch Lock Hook (Per Worktree)
+
+Use the installer to pin a worktree to a specific branch:
+
+```bash
+# In the frontend worktree
+bash tooling/scripts/install-branch-lock-hook.sh --branch frontend
+
+# In the base worktree (main)
+bash tooling/scripts/install-branch-lock-hook.sh --branch main
+```
+
+This creates a worktree-local `post-checkout` hook that keeps the worktree on the specified branch.
+
