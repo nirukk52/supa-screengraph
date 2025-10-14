@@ -13,6 +13,9 @@ import { mergeOpenApiSchemas } from "./lib/openapi-schema";
 import { openApiHandler, rpcHandler } from "./orpc/handler";
 import { router } from "./orpc/router";
 
+// Export feature registry for other packages
+export * from "./src/feature-registry";
+
 export const app = new Hono()
 	.basePath("/api")
 	// Logger middleware
