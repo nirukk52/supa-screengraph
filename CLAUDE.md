@@ -12,7 +12,7 @@ This repository maintains a six-page Claude documentation set. Each category mus
 ---
 
 ## Worktree Management
-- [Frontend Worktree Setup](WORKTREE_MANAGEMENT.md) - Branch protection and local development configuration
+- [Worktree Setup & Branch Locking](WORKTREE_MANAGEMENT.md) - Branch protection and parallel development
 
 ---
 
