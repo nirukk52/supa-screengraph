@@ -1,5 +1,5 @@
-import { publicProcedure } from "../../orpc/procedures";
 import { ORPCError } from "@orpc/server";
+import { publicProcedure } from "../../orpc/procedures";
 import { autoRegisterFeatures, getFeature } from "../../src/feature-registry";
 
 // Auto-register all available features
