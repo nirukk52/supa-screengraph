@@ -8,6 +8,10 @@ on:
 jobs:
   vitest:
     runs-on: ubuntu-latest
+    env:
+      BETTER_AUTH_SECRET: "test-secret-for-ci-only"
+      DATABASE_URL: "postgresql://test:test@localhost:5432/test"
+      NEXT_PUBLIC_SITE_URL: "http://localhost:3000"
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4

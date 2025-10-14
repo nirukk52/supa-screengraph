@@ -109,13 +109,13 @@
 	"private": true,
 	"scripts": {
 		"build": "next build",
-		"dev": "next dev --turbo",
+		"dev": "sh -c \"PORT=${WEB_PORT:-3000} next dev --turbo\"",
 		"e2e": "pnpm exec playwright test --ui",
 		"e2e:ci": "pnpm exec playwright install && pnpm exec playwright test",
 		"test": "pnpm exec playwright install && pnpm exec playwright test",
 		"lint": "next lint",
 		"shadcn-ui": "pnpm dlx shadcn@latest",
-		"start": "next start",
+		"start": "sh -c \"PORT=${WEB_PORT:-3000} next start\"",
 		"type-check": "tsc --noEmit"
 	},
 	"version": "0.0.0"
