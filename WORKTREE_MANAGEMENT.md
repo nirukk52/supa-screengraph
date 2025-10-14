@@ -26,13 +26,15 @@ A git post-checkout hook monitors branch switches and prevents working on the ma
 
 ## Environment Configuration
 
-⚠️ **Important: Each worktree has its own `.env` file**
+⚠️ **Important: Each worktree has its own `.env` file with unique ports**
 
 - **`.env`** - Different per worktree (gitignored, unique to each workspace)
+  - Ports are unique per worktree (e.g., 3000, 3010, 3100)
+  - Allows running multiple worktrees simultaneously without conflicts
 - **`.env.example`** - Same across all worktrees (tracked in git, shared template)
 
 This allows:
-- Running multiple worktrees simultaneously with different ports
+- Running multiple worktrees simultaneously without port conflicts
 - Isolated environment configurations per development stream
 - Shared template for onboarding and consistency
 
