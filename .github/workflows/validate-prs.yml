@@ -48,6 +48,21 @@ jobs:
           fi
       - name: Verify Biome (no changes pending)
         run: biome ci .
+  unit:
+    name: Unit tests (Vitest + coverage)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+      - uses: pnpm/action-setup@v4
+      - name: Install deps
+        run: pnpm install
+      - name: Generate DB types
+        run: pnpm --filter database generate
+      - name: Run unit tests with coverage (70% gates)
+        run: pnpm -w vitest run --coverage --reporter=dot
   e2e:
     name: Run e2e tests
     timeout-minutes: 60

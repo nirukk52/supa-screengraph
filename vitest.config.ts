@@ -22,6 +22,12 @@ export default defineConfig({
 			"packages/database/prisma/**",
 			"apps/**",
 		],
+		thresholds: {
+			lines: 70,
+			functions: 70,
+			branches: 70,
+			statements: 70,
+		},
 	},
 	resolve: {
 		alias: {
