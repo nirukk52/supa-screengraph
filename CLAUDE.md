@@ -12,6 +12,7 @@ This repository maintains a six-page Claude documentation set. Each category mus
 ---
 
 ## Worktree Management
+- [Status Report (read before tasks)](docs/status/STATUS_REPORT.md)
 - [Worktree Setup & Branch Locking](WORKTREE_MANAGEMENT.md) - Branch protection and parallel development
 
 ---
