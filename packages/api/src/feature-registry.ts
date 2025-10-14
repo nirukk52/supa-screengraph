@@ -90,19 +90,22 @@ export function getProcedureFeatures(): FeatureDefinition[] {
 
 // Auto-registration helper for features that export a registry function
 export function autoRegisterFeatures(): void {
-	// This will be called during API initialization to auto-register
-	// all features that export a register function
-	try {
-		// Import and register agents-run feature
-		const { registerAgentsRunFeature } = require("@sg/feature-agents-run");
-		if (typeof registerAgentsRunFeature === "function") {
-			registerAgentsRunFeature();
-		}
-	} catch (error) {
-		// Feature not available - that's ok
-		console.warn(
-			"Could not auto-register agents-run feature:",
-			error.message,
-		);
-	}
+	// Fire-and-forget dynamic import to avoid top-level await
+	void import("@sg/feature-agents-run")
+		.then((mod) => {
+			const { registerAgentsRunFeature } = mod as {
+				registerAgentsRunFeature?: () => void;
+			};
+			if (typeof registerAgentsRunFeature === "function") {
+				registerAgentsRunFeature();
+			}
+		})
+		.catch((error: unknown) => {
+			const err = error as { message?: string };
+			// Feature not available - that's ok
+			console.warn(
+				"Could not auto-register agents-run feature:",
+				err?.message ?? String(error),
+			);
+		});
 }

@@ -14,6 +14,8 @@ export interface AgentsRunFeatureConfig {
 	retryAttempts?: number;
 }
 
+let agentsRunConfig: AgentsRunFeatureConfig | undefined;
+
 export function registerAgentsRunFeature(config: AgentsRunFeatureConfig = {}) {
 	registerFeature({
 		id: "agents-run",
@@ -26,12 +28,12 @@ export function registerAgentsRunFeature(config: AgentsRunFeatureConfig = {}) {
 		// to avoid circular dependencies
 	});
 
-	// Store feature configuration for later use
-	(globalThis as any).__agentsRunConfig = config;
+	// Store feature configuration in module scope
+	agentsRunConfig = config;
 }
 
 export function getAgentsRunConfig(): AgentsRunFeatureConfig {
-	return (globalThis as any).__agentsRunConfig || {};
+	return agentsRunConfig || {};
 }
 
 // Auto-register if this module is imported

@@ -1,4 +1,5 @@
 import { publicProcedure } from "../../orpc/procedures";
+import { ORPCError } from "@orpc/server";
 import { autoRegisterFeatures, getFeature } from "../../src/feature-registry";
 
 // Auto-register all available features
@@ -12,29 +13,37 @@ export const agentsRouter = publicProcedure.prefix("/api").router({
 function getDynamicAgentRoutes() {
 	const agentsFeature = getFeature("agents-run");
 
+	// Provide typed default procedures so the router shape is always valid
+	const disabledProcedure = publicProcedure
+		.route({ method: "GET", path: "/__agents_disabled__" })
+		.handler(() => {
+			throw new ORPCError("NOT_FOUND");
+		});
+
+	const routes = {
+		getStreamRun: disabledProcedure,
+		postCancelRun: disabledProcedure,
+		postStartRun: disabledProcedure,
+	};
+
 	if (!agentsFeature) {
 		console.warn("agents-run feature not registered");
-		return {};
+		return routes;
 	}
 
 	try {
-		// Dynamically load the feature's router
-		const {
-			getStreamRun,
-			postCancelRun,
-			postStartRun,
-		} = require("@sg/feature-agents-run");
-
-		return {
-			"agents/stream": getStreamRun,
-			"agents/cancel": postCancelRun,
-			"agents/start": postStartRun,
-		};
+		// Dynamically load the feature's API handlers if present
+		const mod = require("@sg/feature-agents-run");
+		if (mod.getStreamRun) routes.getStreamRun = mod.getStreamRun;
+		if (mod.postCancelRun) routes.postCancelRun = mod.postCancelRun;
+		if (mod.postStartRun) routes.postStartRun = mod.postStartRun;
 	} catch (error) {
+		const err = error as { message?: string };
 		console.warn(
 			"Could not load agents-run feature routes:",
-			error.message,
+			err?.message ?? String(error),
 		);
-		return {};
 	}
+
+	return routes;
 }
