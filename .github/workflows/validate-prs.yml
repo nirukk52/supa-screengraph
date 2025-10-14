@@ -9,8 +9,9 @@ permissions:
   pull-requests: write
 
 env:
-  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://test:test@localhost:5432/test' }}
   BETTER_AUTH_SECRET: "test-secret-for-ci-only"
+  NEXT_PUBLIC_SITE_URL: "http://localhost:3000"
 
 jobs:
   lint:
