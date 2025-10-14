@@ -587,8 +587,6 @@ importers:
         specifier: ^1.25.0
         version: 1.25.0(magicast@0.3.5)(prisma@6.17.1(magicast@0.3.5)(typescript@5.9.3))(typescript@5.9.3)(zod@4.1.11)
 
-  packages/database/prisma/generated/client: {}
-
   packages/eventbus: {}
 
   packages/eventbus-inmemory:
