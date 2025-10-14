@@ -11,6 +11,11 @@ This repository maintains a six-page Claude documentation set. Each category mus
 
 ---
 
+## Worktree Management
+- [Frontend Worktree Setup](WORKTREE_MANAGEMENT.md) - Branch protection and local development configuration
+
+---
+
 ## Retros
 - [Milestone 1 - Scaffolding and Boundaries](docs/retro/milestone-1.md) (2024-12-19)
 - [Milestone 3 Setup](docs/retro/milestone-3-setup.md) (2024-12-19)
