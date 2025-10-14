@@ -24,6 +24,18 @@ A git post-checkout hook monitors branch switches and prevents working on the ma
 3. Merge back to `frontend` when ready
 4. Frontend branch will be merged to main separately
 
+## Environment Configuration
+
+⚠️ **Important: Each worktree has its own `.env` file**
+
+- **`.env`** - Different per worktree (gitignored, unique to each workspace)
+- **`.env.example`** - Same across all worktrees (tracked in git, shared template)
+
+This allows:
+- Running multiple worktrees simultaneously with different ports
+- Isolated environment configurations per development stream
+- Shared template for onboarding and consistency
+
 ## Configuration
 
 - Hook location: `.git/worktrees/supastarter-frontend-dev/hooks/post-checkout`
