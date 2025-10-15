@@ -21,7 +21,38 @@ export default defineConfig({
 			"packages/database/prisma/generated/**",
 			"packages/database/prisma/**",
 			"apps/**",
+			// Config and tooling
+			"**/*.config.{ts,js}",
+			"**/config/**",
+			"**/tooling/**",
+			// Entry points and indexes
+			"**/index.ts",
+			"**/index.tsx",
+			// Generated types and schemas
+			"**/types.ts",
+			"**/schema.ts",
+			"**/generated/**",
+			// UI (covered by e2e)
+			"**/components/**/*.tsx",
+			"**/modules/**/components/**",
+			"apps/web/modules/**",
+			// Next.js boilerplate
+			"**/layout.tsx",
+			"**/page.tsx",
+			"**/route.ts",
+			"**/middleware.ts",
+			"**/robots.ts",
+			"**/sitemap.ts",
+			// Emails and providers
+			"**/emails/**",
+			"**/provider/**",
 		],
+		thresholds: {
+			lines: 70,
+			functions: 70,
+			branches: 70,
+			statements: 70,
+		},
 	},
 	resolve: {
 		alias: {

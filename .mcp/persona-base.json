@@ -1,8 +1,8 @@
 {
-  "persona_id": "base_architect",
-  "name": "Base Architect Persona",
-  "role": "Foundation — derived from Ian Botts",
-  "version": "1.0.0",
-  "inherits": ["ian_botts_cto"],
-  "notes": "Shared defaults for other personas."
+	"persona_id": "base_architect",
+	"name": "Base Architect Persona",
+	"role": "Foundation — derived from Ian Botts",
+	"version": "1.0.0",
+	"inherits": ["ian_botts_cto"],
+	"notes": "Shared defaults for other personas."
 }
