@@ -1,0 +1,7 @@
+# Persona Auto‑Attach Rules
+
+- If worktree path ends with `supastarter-frontend-dev`, attach `@persona-rino-frontend.json`.
+- If worktree path ends with `supastarter-backend-dev`, attach `@persona-jacob-systems.json`.
+- Otherwise (base), attach `@persona-ian-botts-cto.json`.
+
+All sessions must read `docs/status/STATUS_REPORT.md` before starting any task.
