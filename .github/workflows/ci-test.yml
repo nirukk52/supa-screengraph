@@ -2,9 +2,9 @@ name: tests
 
 on:
   pull_request:
-    branches: [ main, 'feat/*', 'fix/*', 'chore/*' ]
+    branches: [ main ]
   push:
-    branches: [ main, 'feat/*', 'fix/*', 'chore/*' ]
+    branches: [ main ]
 
 jobs:
   vitest:
