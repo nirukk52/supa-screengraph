@@ -5,13 +5,20 @@
 	"sg:layer": "contracts",
 	"sg:scope": "agents",
 	"main": "dist/index.js",
-	"types": "src/index.ts",
+	"types": "dist/index.d.ts",
 	"exports": {
 		".": {
-			"types": "./src/index.ts",
-			"default": "./src/index.ts"
-		}
+			"import": "./dist/index.js",
+			"require": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		},
+		"./package.json": "./package.json"
 	},
+	"files": [
+		"dist",
+		"package.json",
+		"README.md"
+	],
 	"scripts": {
 		"build": "tsc -b",
 		"test": "vitest"

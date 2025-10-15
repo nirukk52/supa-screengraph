@@ -5,13 +5,25 @@
 	"sg:layer": "application",
 	"sg:scope": "eventbus",
 	"main": "dist/index.js",
-	"types": "src/port.ts",
+	"types": "dist/index.d.ts",
 	"exports": {
-		"./src/port": {
-			"import": "./src/port.ts",
-			"require": "./src/port.ts"
-		}
+		".": {
+			"import": "./dist/index.js",
+			"require": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		},
+		"./port": {
+			"import": "./dist/port.js",
+			"require": "./dist/port.js",
+			"types": "./dist/port.d.ts"
+		},
+		"./package.json": "./package.json"
 	},
+	"files": [
+		"dist",
+		"package.json",
+		"README.md"
+	],
 	"scripts": {
 		"build": "tsc -b"
 	}

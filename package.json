@@ -1,6 +1,7 @@
 {
 	"name": "supastarter-nextjs",
 	"private": true,
+	"version": "0.0.0",
 	"scripts": {
 		"build": "npx dotenv-cli -c -- turbo build",
 		"dev": "npx dotenv-cli -c -- turbo dev --concurrency 15",
@@ -15,7 +16,13 @@
 		"prepare": "husky",
 		"lint:arch": "node tooling/arch/check-arch.js && node tooling/arch/check-sizes.js && node tooling/arch/check-literals.js",
 		"scaffold": "ts-node tooling/scripts/scaffold/index.ts",
-		"pr:check": "pnpm -w install && pnpm biome ci . && pnpm -w vitest run --coverage --reporter=dot && pnpm --filter database generate && pnpm --filter web e2e:ci"
+		"pr:check": "pnpm -w install && pnpm biome ci . && pnpm -w vitest run --coverage --reporter=dot && pnpm --filter database generate && pnpm --filter web e2e:ci",
+		"build:backend": "tsc -b tooling/typescript/tsconfig.backend.json",
+		"backend:lint": "pnpm run lint:arch && pnpm run lint:publint && pnpm run lint:deps",
+		"lint:publint": "npx publint",
+		"lint:deps": "dependency-cruiser --config tooling/arch/dependency-cruiser.cjs .",
+		"backend:e2e": "pnpm --filter @sg/feature-agents-run build && pnpm -w vitest run packages/api/tests/agents-run.e2e.spec.ts",
+		"backend:test": "pnpm run build:backend && pnpm run backend:lint && pnpm run backend:e2e"
 	},
 	"engines": {
 		"node": ">=20"
@@ -34,7 +41,8 @@
 		"vitest": "^2.0.5",
 		"@vitest/coverage-v8": "^2.0.5",
 		"turbo": "^2.5.8",
-		"typescript": "5.9.3"
+		"typescript": "5.9.3",
+		"dependency-cruiser": "^16.9.0"
 	},
 	"pnpm": {
 		"overrides": {

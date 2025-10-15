@@ -8,9 +8,9 @@
 		"incremental": true,
 		"inlineSources": false,
 		"isolatedModules": true,
-		"module": "Preserve",
-		"target": "ES6",
-		"moduleResolution": "bundler",
+		"module": "node16",
+		"target": "ES2022",
+		"moduleResolution": "node16",
 		"noUnusedLocals": false,
 		"noUnusedParameters": false,
 		"preserveWatchOutput": true,
@@ -18,28 +18,7 @@
 		"skipLibCheck": true,
 		"strict": true,
 		"strictNullChecks": true,
-		"paths": {
-			"@sg/agents-contracts": ["../../packages/agents-contracts/src"],
-			"@sg/agents-contracts/*": ["../../packages/agents-contracts/src/*"],
-			"@sg/eventbus": ["../../packages/eventbus/src"],
-			"@sg/eventbus/*": ["../../packages/eventbus/src/*"],
-			"@sg/eventbus-inmemory": ["../../packages/eventbus-inmemory/src"],
-			"@sg/eventbus-inmemory/*": [
-				"../../packages/eventbus-inmemory/src/*"
-			],
-			"@sg/queue": ["../../packages/queue/src"],
-			"@sg/queue/*": ["../../packages/queue/src/*"],
-			"@sg/queue-inmemory": ["../../packages/queue-inmemory/src"],
-			"@sg/queue-inmemory/*": ["../../packages/queue-inmemory/src/*"],
-			"@sg/feature-agents-run": [
-				"../../packages/features/agents-run/src"
-			],
-			"@sg/feature-agents-run/*": [
-				"../../packages/features/agents-run/src/*"
-			],
-			"@repo/api": ["../../packages/api"],
-			"@repo/api/*": ["../../packages/api/*"]
-		}
+		"paths": {}
 	},
 	"display": "Default",
 	"exclude": ["node_modules", "dist", ".next", "build"]

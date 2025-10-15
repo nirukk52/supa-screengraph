@@ -37,10 +37,41 @@
 		"encoding": "^0.1.13",
 		"typescript": "5.9.3"
 	},
-	"main": "./index.ts",
+	"type": "module",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
 	"name": "@repo/api",
 	"scripts": {
+		"build": "tsc -b",
 		"type-check": "tsc --noEmit"
 	},
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"require": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		},
+		"./modules/*": {
+			"import": "./dist/modules/*.js",
+			"require": "./dist/modules/*.js",
+			"types": "./dist/modules/*.d.ts"
+		},
+		"./orpc/*": {
+			"import": "./dist/orpc/*.js",
+			"require": "./dist/orpc/*.js",
+			"types": "./dist/orpc/*.d.ts"
+		},
+		"./lib/*": {
+			"import": "./dist/lib/*.js",
+			"require": "./dist/lib/*.js",
+			"types": "./dist/lib/*.d.ts"
+		},
+		"./package.json": "./package.json"
+	},
+	"files": [
+		"dist",
+		"package.json",
+		"README.md"
+	],
 	"version": "0.0.0"
 }

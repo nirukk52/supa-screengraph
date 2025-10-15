@@ -1,4 +1,6 @@
 {
+	"name": "@repo/logs",
+	"version": "0.0.0",
 	"dependencies": {
 		"@repo/config": "workspace:*",
 		"consola": "^3.4.2"
@@ -8,11 +10,28 @@
 		"@repo/tsconfig": "workspace:*",
 		"@types/node": "^24.7.2"
 	},
-	"main": "./index.ts",
-	"name": "@repo/logs",
-	"scripts": {
-		"type-check": "tsc --noEmit"
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"require": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		},
+		"./lib/*": {
+			"import": "./dist/lib/*.js",
+			"require": "./dist/lib/*.js",
+			"types": "./dist/lib/*.d.ts"
+		},
+		"./package.json": "./package.json"
 	},
-	"types": "./**/.tsx",
-	"version": "0.0.0"
+	"files": [
+		"dist",
+		"package.json",
+		"README.md"
+	],
+	"scripts": {
+		"build": "tsc -b",
+		"type-check": "tsc --noEmit"
+	}
 }

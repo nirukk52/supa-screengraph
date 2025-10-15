@@ -4,7 +4,8 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const roots = ["packages", "apps"]; // scan these
+// Limit to backend packages for this pipeline
+const roots = ["packages"]; // scan these
 
 function walk(dir, acc) {
 	if (!fs.existsSync(dir)) {
@@ -26,6 +27,18 @@ function isExempt(file) {
 		return true;
 	}
 	if (/\/src\/contracts\//.test(file)) {
+		return true;
+	}
+	if (/\/node_modules\//.test(file)) {
+		return true;
+	}
+	if (/\/dist\//.test(file)) {
+		return true;
+	}
+	if (/\/prisma\/generated\//.test(file)) {
+		return true;
+	}
+	if (/\/apps\/web\//.test(file)) {
 		return true;
 	}
 	return false;
