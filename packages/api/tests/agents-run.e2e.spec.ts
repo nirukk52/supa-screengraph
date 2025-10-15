@@ -1,5 +1,5 @@
 // TODO(mail): Pending mail package dist build; remove once mail exports compile.
-import { startWorker } from "@sg/feature-agents-run";
+// Dynamically import from built dist to avoid workspace resolver issues in Vitest
 import { describe, expect, it } from "vitest";
 import { app } from "../index.test-export.ts";
 
@@ -58,6 +58,9 @@ async function collectSseEvents(
 
 describe("agents-run e2e via API", () => {
 	it("streams canonical events for a runId and terminates", async () => {
+		const { startWorker } = await import(
+			"../../features/agents-run/dist/index.js"
+		);
 		startWorker();
 		const runId = `r-${Math.random().toString(36).slice(2)}`;
 

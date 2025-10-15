@@ -7,14 +7,8 @@
 		"outDir": "dist",
 		"declaration": true,
 		"emitDeclarationOnly": false,
-		"composite": true,
-		"paths": {
-			"@sg/feature-agents-run": ["../features/agents-run/src/index.ts"]
-		}
+		"composite": true
 	},
 	"include": ["index.ts", "lib/**/*.ts", "modules/**/*.ts", "orpc/**/*.ts"],
-	"exclude": ["dist", "build", "node_modules", "tests"],
-	"references": [
-		{ "path": "../features/agents-run" }
-	]
+	"exclude": ["dist", "build", "node_modules", "tests"]
 }

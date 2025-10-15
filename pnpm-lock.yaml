@@ -503,6 +503,9 @@ importers:
       '@repo/tsconfig':
         specifier: workspace:*
         version: link:../../tooling/typescript
+      '@sg/feature-agents-run':
+        specifier: workspace:*
+        version: link:../features/agents-run
       '@types/react':
         specifier: 19.0.0
         version: 19.0.0

@@ -1,8 +1,3 @@
-import {
-	getStreamRun,
-	postCancelRun,
-	postStartRun,
-} from "@sg/feature-agents-run";
 import type { Hono } from "hono";
 
 export function registerFallbackAgentsRunRoutes(app: Hono) {
@@ -15,6 +10,8 @@ export function registerFallbackAgentsRunRoutes(app: Hono) {
 			};
 			if (body?.runId) {
 				try {
+					const pkg = "@sg/feature-agents-run";
+					const { postStartRun } = await import(pkg);
 					await postStartRun({ runId: body.runId });
 				} catch {}
 			}
@@ -25,6 +22,8 @@ export function registerFallbackAgentsRunRoutes(app: Hono) {
 			const runId = c.req.param("runId");
 			if (runId) {
 				try {
+					const pkg = "@sg/feature-agents-run";
+					const { postCancelRun } = await import(pkg);
 					await postCancelRun({ runId });
 				} catch {}
 			}
@@ -36,6 +35,8 @@ export function registerFallbackAgentsRunRoutes(app: Hono) {
 			if (!runId) {
 				return c.text("runId required", 400);
 			}
+			const pkg = "@sg/feature-agents-run";
+			const { getStreamRun } = await import(pkg);
 			const iterator = getStreamRun({ runId });
 			const stream = new ReadableStream<Uint8Array>({
 				async start(controller) {

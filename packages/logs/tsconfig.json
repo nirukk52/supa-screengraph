@@ -7,6 +7,6 @@
 		"emitDeclarationOnly": false,
 		"composite": true
 	},
-	"include": ["**/*.ts"],
+	"include": ["index.ts", "lib/**/*.ts"],
 	"exclude": ["dist", "build", "node_modules"]
 }

@@ -1,7 +1,7 @@
 import type { AgentEvent } from "@sg/agents-contracts";
 import { TOPIC_AGENTS_RUN } from "@sg/agents-contracts";
-import { bus } from "../singletons";
 import { getBufferedEvents } from "../event-buffer";
+import { bus } from "../singletons";
 
 export async function* streamRun(runId: string): AsyncIterable<AgentEvent> {
 	// First, replay any buffered events for this run (emitted before subscription)
