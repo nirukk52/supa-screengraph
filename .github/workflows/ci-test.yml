@@ -2,8 +2,9 @@ name: tests
 
 on:
   pull_request:
+    branches: [ main, feat/*, fix/*, chore/* ]
   push:
-    branches: [ main ]
+    branches: [ main, feat/*, fix/*, chore/* ]
 
 jobs:
   vitest:
@@ -23,6 +24,12 @@ jobs:
           cache: 'pnpm'
       - name: Install
         run: pnpm -w install
+      - name: Generate DB types
+        run: pnpm --filter database generate
+      - name: Build backend packages
+        run: pnpm -w run build:backend
+      - name: Run backend linting
+        run: pnpm -w run backend:lint
       - name: Test with coverage
         run: pnpm -w vitest run --coverage
       - name: Upload coverage to Codecov (patch only)
