@@ -2,9 +2,9 @@ name: Validate PRs
 
 on:
   pull_request:
-    branches: [ main, feat/*, fix/*, chore/* ]
+    branches: [ main, 'feat/*', 'fix/*', 'chore/*' ]
   push:
-    branches: [main, feat/*, fix/*, chore/*]
+    branches: [ main, 'feat/*', 'fix/*', 'chore/*' ]
 
 permissions:
   contents: write
