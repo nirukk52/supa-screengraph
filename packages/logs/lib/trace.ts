@@ -16,8 +16,8 @@ export const TRACE_PHASE = {
 	END: "END",
 } as const;
 
-export type LogLevel = typeof LOG_LEVELS[keyof typeof LOG_LEVELS];
-export type TracePhase = typeof TRACE_PHASE[keyof typeof TRACE_PHASE];
+export type LogLevel = (typeof LOG_LEVELS)[keyof typeof LOG_LEVELS];
+export type TracePhase = (typeof TRACE_PHASE)[keyof typeof TRACE_PHASE];
 
 export interface TraceEvent {
 	phase: TracePhase;
@@ -28,10 +28,10 @@ export interface TraceEvent {
 }
 
 export function write(event: TraceEvent): void {
-	const { phase, level, message, timestamp, metadata } = event;
-	
+	const { phase, level, message, metadata } = event;
+
 	const logMessage = `${phase} [${level}] ${message}`;
-	
+
 	switch (level) {
 		case LOG_LEVELS.INFO:
 			logger.info(logMessage, metadata);
@@ -50,7 +50,10 @@ export function write(event: TraceEvent): void {
 	}
 }
 
-export function traceStart(message: string, metadata?: Record<string, any>): void {
+export function traceStart(
+	message: string,
+	metadata?: Record<string, any>,
+): void {
 	write({
 		phase: TRACE_PHASE.START,
 		level: LOG_LEVELS.INFO,
@@ -60,7 +63,10 @@ export function traceStart(message: string, metadata?: Record<string, any>): voi
 	});
 }
 
-export function traceEnd(message: string, metadata?: Record<string, any>): void {
+export function traceEnd(
+	message: string,
+	metadata?: Record<string, any>,
+): void {
 	write({
 		phase: TRACE_PHASE.END,
 		level: LOG_LEVELS.INFO,

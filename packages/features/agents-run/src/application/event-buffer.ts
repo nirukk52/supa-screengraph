@@ -1,6 +1,6 @@
 /**
  * Event Buffer for Agents Run Feature
- * 
+ *
  * Provides a simple in-memory event buffer for testing and development.
  * In production, this could be replaced with a persistent store.
  */
@@ -23,7 +23,7 @@ export class EventBuffer {
 	}
 
 	getEventsForRun(runId: string): AgentEvent[] {
-		return this.events.filter(event => event.runId === runId);
+		return this.events.filter((event) => event.runId === runId);
 	}
 }
 

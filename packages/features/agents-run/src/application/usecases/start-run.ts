@@ -1,9 +1,9 @@
 import type { RunStarted } from "@sg/agents-contracts";
 import { SCHEMA_VERSION, TOPIC_AGENTS_RUN } from "@sg/agents-contracts";
+import { recordEvent } from "../event-buffer";
 import { bus, queue } from "../singletons";
 import { logFn } from "./log";
 import { nextSeq } from "./sequencer";
-import { recordEvent } from "../event-buffer";
 
 // Exported constant names must not be string literals per repo rule.
 const DEFAULT_QUEUE_NAME = "agents.run" as const;

@@ -5,10 +5,10 @@ import type {
 	RunFinished,
 } from "@sg/agents-contracts";
 import { SCHEMA_VERSION, TOPIC_AGENTS_RUN } from "@sg/agents-contracts";
+import { recordEvent } from "../../application/event-buffer";
 import { bus, queue } from "../../application/singletons";
 import { logFn } from "../../application/usecases/log";
 import { nextSeq } from "../../application/usecases/sequencer";
-import { recordEvent } from "../../application/event-buffer";
 
 export function startWorker() {
 	queue.worker<{ runId: string }>("agents.run", async ({ runId }) => {

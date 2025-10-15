@@ -1,14 +1,13 @@
 {
-  "files": [],
-  "references": [
-    { "path": "../../packages/agents-contracts" },
-    { "path": "../../packages/logs" },
-    { "path": "../../packages/eventbus" },
-    { "path": "../../packages/eventbus-inmemory" },
-    { "path": "../../packages/queue" },
-    { "path": "../../packages/queue-inmemory" },
-    { "path": "../../packages/api" },
-    { "path": "../../packages/features/agents-run" }
-  ]
+	"files": [],
+	"references": [
+		{ "path": "../../packages/agents-contracts" },
+		{ "path": "../../packages/logs" },
+		{ "path": "../../packages/eventbus" },
+		{ "path": "../../packages/eventbus-inmemory" },
+		{ "path": "../../packages/queue" },
+		{ "path": "../../packages/queue-inmemory" },
+		{ "path": "../../packages/api" },
+		{ "path": "../../packages/features/agents-run" }
+	]
 }
-
