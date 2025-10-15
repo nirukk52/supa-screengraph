@@ -12,9 +12,9 @@ export type ApiApp = Hono;
 import { cors } from "hono/cors";
 import { logger as honoLogger } from "hono/logger";
 import { mergeOpenApiSchemas } from "./lib/openapi-schema";
+import { registerFallbackAgentsRunRoutes } from "./modules/agents/fallback";
 import { openApiHandler, rpcHandler } from "./orpc/handler";
 import { router } from "./orpc/router";
-import { registerFallbackAgentsRunRoutes } from "./modules/agents/fallback";
 
 export const app: ApiApp = new Hono().basePath("/api");
 

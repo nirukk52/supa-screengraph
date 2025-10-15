@@ -23,7 +23,7 @@
 		"build": "tsc -b"
 	},
 	"dependencies": {
-		"@sg/eventbus": "workspace:*",
-		"@sg/agents-contracts": "workspace:*"
+		"@sg/agents-contracts": "workspace:*",
+		"@sg/eventbus": "workspace:*"
 	}
 }

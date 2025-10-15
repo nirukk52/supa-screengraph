@@ -6,7 +6,7 @@
  * direct imports, maintaining clean architecture boundaries.
  */
 
-import { registerFeature } from "@repo/api/src/feature-registry";
+// Feature registry - no longer depends on API layer
 
 export interface AgentsRunFeatureConfig {
 	maxConcurrentRuns?: number;
@@ -16,18 +16,24 @@ export interface AgentsRunFeatureConfig {
 
 let agentsRunConfig: AgentsRunFeatureConfig | undefined;
 
-export function registerAgentsRunFeature(config: AgentsRunFeatureConfig = {}) {
-	registerFeature({
-		id: "agents-run",
-		name: "Agents Run Manager",
-		version: "1.0.0",
-		description:
-			"Manages agent execution runs with streaming, cancellation, and heartbeat monitoring",
-		dependencies: ["@sg/agents-contracts", "@sg/eventbus", "@sg/queue"],
-		// Note: router and procedures will be loaded dynamically when needed
-		// to avoid circular dependencies
-	});
+export interface AgentsRunFeatureDefinition {
+	id: string;
+	name: string;
+	version: string;
+	description: string;
+	dependencies: string[];
+}
 
+export const agentsRunDefinition: AgentsRunFeatureDefinition = {
+	id: "agents-run",
+	name: "Agents Run Manager",
+	version: "1.0.0",
+	description:
+		"Manages agent execution runs with streaming, cancellation, and heartbeat monitoring",
+	dependencies: ["@sg/agents-contracts", "@sg/eventbus", "@sg/queue"],
+};
+
+export function configureAgentsRunFeature(config: AgentsRunFeatureConfig = {}) {
 	// Store feature configuration in module scope
 	agentsRunConfig = config;
 }
@@ -36,8 +42,5 @@ export function getAgentsRunConfig(): AgentsRunFeatureConfig {
 	return agentsRunConfig || {};
 }
 
-// Auto-register if this module is imported
-if (typeof window === "undefined") {
-	// Only auto-register in Node.js environment
-	registerAgentsRunFeature();
-}
+// Feature is now decoupled from API registration
+// The API layer will import and use this feature definition directly

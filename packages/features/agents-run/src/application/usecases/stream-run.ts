@@ -5,7 +5,7 @@ import { getBufferedEvents } from "../event-buffer";
 
 export async function* streamRun(runId: string): AsyncIterable<AgentEvent> {
 	// First, replay any buffered events for this run (emitted before subscription)
-	const buffered = getBufferedEvents(runId, 1);
+	const buffered = getBufferedEvents(runId);
 	for (const e of buffered) {
 		yield e;
 		if (e.type === "RunFinished") {

@@ -26,5 +26,8 @@
 	],
 	"scripts": {
 		"build": "tsc -b"
+	},
+	"dependencies": {
+		"@sg/agents-contracts": "workspace:*"
 	}
 }

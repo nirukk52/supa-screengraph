@@ -592,7 +592,11 @@ importers:
 
   packages/database/prisma/generated/client: {}
 
-  packages/eventbus: {}
+  packages/eventbus:
+    dependencies:
+      '@sg/agents-contracts':
+        specifier: workspace:*
+        version: link:../agents-contracts
 
   packages/eventbus-inmemory:
     dependencies:
@@ -602,27 +606,6 @@ importers:
       '@sg/eventbus':
         specifier: workspace:*
         version: link:../eventbus
-
-  packages/feature-agents-run:
-    dependencies:
-      '@orpc/server':
-        specifier: ^1.9.0
-        version: 1.9.0(@opentelemetry/api@1.9.0)
-      '@sg/agents-contracts':
-        specifier: workspace:*
-        version: link:../agents-contracts
-      '@sg/eventbus':
-        specifier: workspace:*
-        version: link:../eventbus
-      '@sg/eventbus-inmemory':
-        specifier: workspace:*
-        version: link:../eventbus-inmemory
-      '@sg/queue':
-        specifier: workspace:*
-        version: link:../queue
-      '@sg/queue-inmemory':
-        specifier: workspace:*
-        version: link:../queue-inmemory
 
   packages/features/agents-run:
     dependencies:
