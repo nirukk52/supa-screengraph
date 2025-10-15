@@ -17,6 +17,8 @@ export default defineConfig({
 			"**/dist/**",
 			"**/build/**",
 			"**/node_modules/**",
+			"**/.prisma/**",
+			"**/@prisma/**",
 			"packages/**/tests/**",
 			"packages/database/prisma/generated/**",
 			"packages/database/prisma/**",

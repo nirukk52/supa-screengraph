@@ -12,7 +12,6 @@ export type ApiApp = Hono;
 import { cors } from "hono/cors";
 import { logger as honoLogger } from "hono/logger";
 import { mergeOpenApiSchemas } from "./lib/openapi-schema";
-import { registerFallbackAgentsRunRoutes } from "./modules/agents/fallback";
 import { openApiHandler, rpcHandler } from "./orpc/handler";
 import { router } from "./orpc/router";
 
@@ -81,9 +80,6 @@ app.get(
 );
 // Payments webhook handler
 app.post("/webhooks/payments", (c) => paymentsWebhookHandler(c.req.raw));
-
-// Register fallback routes for agents-run before oRPC handlers
-registerFallbackAgentsRunRoutes(app);
 
 // Health check
 app.get("/health", (c) => c.text("OK"));

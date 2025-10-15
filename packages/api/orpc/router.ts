@@ -10,8 +10,7 @@ import { usersRouter } from "../modules/users/router";
 import { publicProcedure } from "./procedures";
 
 export const router = publicProcedure
-	// Prefix for openapi
-	.prefix("/api")
+	// Handled by handler prefix option in index.ts
 	.router({
 		admin: adminRouter,
 		newsletter: newsletterRouter,

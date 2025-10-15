@@ -87,3 +87,18 @@ pnpm pr:check
 ---
 Prepared for Junie (M3 Day 2 backend handoff). Update or close this document once all DoDs are met.
 
+
+
+## Validation (2025-10-15)
+
+- Backend e2e: pnpm -w run backend:e2e → PASS (SSE stream assertions succeeded)
+- Full tests with coverage: pnpm -w vitest run --coverage → PASS
+- CI local run: pnpm pr:check → PASS (lint, tests+coverage, database generate, web e2e)
+
+Notes:
+- Agents-run fallback routes were removed; oRPC OpenAPI handler now serves:
+  - POST /api/agents/runs
+  - POST /api/agents/runs/{runId}/cancel
+  - GET  /api/agents/runs/{runId}/stream (SSE)
+- Coverage excludes updated to ignore Prisma generated artifacts (.prisma/@prisma) to stabilize coverage conversion.
+- Added API feature registry module and test now passes.

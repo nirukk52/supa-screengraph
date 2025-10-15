@@ -20,6 +20,8 @@ This repository maintains a six-page Claude documentation set. Each category mus
 ## Retros
 - [Milestone 1 - Scaffolding and Boundaries](docs/retro/milestone-1.md) (2024-12-19)
 - [Milestone 3 Setup](docs/retro/milestone-3-setup.md) (2024-12-19)
+- [Milestone 3 Sprint 2 - Backend Pipeline](docs/retro/milestone3-sprint2.md) (2025-10-15)
+- [M3 Backend Handoff](docs/retro/m3-backend-handoff.md) (2025-10-15)
 
 ---
 

@@ -1,6 +1,6 @@
 import { publicProcedure, type } from "../../orpc/procedures";
 
-export const agentsRouter = publicProcedure.prefix("/api").router({
+export const agentsRouter = publicProcedure.router({
 	postStartRun: publicProcedure
 		.route({ method: "POST", path: "/agents/runs" })
 		.input(type<{ runId: string }>())
