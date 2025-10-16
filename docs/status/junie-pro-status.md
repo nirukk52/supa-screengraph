@@ -35,6 +35,7 @@
 - All phases now complete: install → generate → build:backend → backend:lint → biome ci → vitest coverage → e2e:ci.
 - Coverage warnings persist (Prisma source maps) but are non-fatal. E2E test passes.
 - 2025-10-16T03:58Z: Re-ran `pnpm pr:check` after user reported CI failures — local pipeline still green end-to-end. Waiting for new GitHub Action run on commit `87a261b0`; will pull logs once available.
+- 2025-10-16T07:52Z: Ran `pnpm pr:check` (pass) and attempted `pnpm run dev`. Dev server fails because `@repo/agent` process cannot bind port 8001 (`[Errno 48] Address already in use`). Killing orphaned Python PIDs frees the port temporarily but Turbo immediately respawns them; agent dev still exits. Dev environment currently blocked until port contention is resolved or agent port is reconfigured.
 - 2025-10-16T04:05Z: Fixed workflow name mismatch (validate-pr vs validate-prs.yml filename) and pushed commit 6fae8c50. Still no workflow runs after 60+ seconds. Found two workflows both trigger on pull_request to main: ci-test.yml and validate-prs.yml. Suspect ci-test.yml might be running instead, or repository-level configuration issue.
 
 ## Escalation Protocol

@@ -154,7 +154,12 @@ yamllint .github/workflows/validate-prs.yml
 - ✅ Uses `--frozen-lockfile` for deterministic installs
 - 🎯 **Deterministic CI/local parity framework implemented!**
 
-**Next**: Test with correct Node.js version or update CI to match local environment.
+**2025-10-16T07:54Z**: Verification pass
+- ✅ `pnpm pr:check`
+- ⚠️ `pnpm run dev` fails locally because `@repo/agent` binds to port `8001` already in use
+- 🔧 Mitigation: free port (kill lingering uvicorn processes) or export `AGENT_PORT=8011` before running Turbo dev
+
+**Next**: Align on agent dev port strategy (free 8001 or update scripts) and retest end-to-end including CI trigger investigation.
 
 ---
 *This handoff documentation should be updated as investigation progresses. All findings and solutions should be recorded in the status files for future reference.*
