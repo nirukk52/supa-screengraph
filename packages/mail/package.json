@@ -14,7 +14,7 @@
 		"use-intl": "^4.3.9"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.2.5",
+		"@biomejs/biome": "2.2.6",
 		"@repo/tsconfig": "workspace:*",
 		"@tailwindcss/line-clamp": "^0.4.4",
 		"@types/node": "24.7.2",
