@@ -9,7 +9,7 @@ permissions:
   pull-requests: write
 
 env:
-  DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://test:test@localhost:5432/test' }}
+  DATABASE_URL: "postgresql://test:test@localhost:5432/test"
   BETTER_AUTH_SECRET: "test-secret-for-ci-only"
   NEXT_PUBLIC_SITE_URL: "http://localhost:3000"
   GITHUB_CLIENT_ID: "test-github-client-id"
@@ -53,12 +53,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.14.0
       - uses: actions/setup-node@v4
         with:
-          node-version: lts/*
-      - uses: pnpm/action-setup@v4
+          node-version: 20
+          cache: 'pnpm'
       - name: Install deps
-        run: pnpm install
+        run: pnpm -w install
       - name: Generate DB types
         run: pnpm --filter @repo/database generate
       - name: Build backend packages
@@ -73,12 +76,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.14.0
       - uses: actions/setup-node@v4
         with:
-          node-version: lts/*
-      - uses: pnpm/action-setup@v4
+          node-version: 20
+          cache: 'pnpm'
       - name: Install dependencies
-        run: pnpm install && pnpm --filter database generate
+        run: pnpm -w install && pnpm --filter @repo/database generate
       - name: Run Playwright tests
         run: pnpm --filter @repo/web e2e:ci
       - uses: actions/upload-artifact@v4
