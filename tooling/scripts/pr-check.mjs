@@ -12,7 +12,7 @@ import { execSync } from "node:child_process";
 import process from "node:process";
 
 const EXPECTED = {
-	node: process.env.EXPECT_NODE_VERSION || "v20", // prefix match allowed (v20.x)
+	minNodeMajor: Number(process.env.EXPECT_NODE_MIN_MAJOR || 20), // allow Node >= 20
 	pnpm: process.env.EXPECT_PNPM_VERSION || "10.14.0",
 };
 
@@ -30,9 +30,10 @@ function assertVersions() {
 	const pnpmV = get("pnpm -v");
 	console.log(`Toolchain: node ${nodeV} | pnpm ${pnpmV}`);
 
-	if (!nodeV.startsWith(EXPECTED.node)) {
+	const nodeMajor = Number(nodeV.replace(/^v/, "").split(".")[0]);
+	if (!Number.isFinite(nodeMajor) || nodeMajor < EXPECTED.minNodeMajor) {
 		console.error(
-			`ERROR: Node version mismatch. Expected prefix ${EXPECTED.node} but got ${nodeV}`,
+			`ERROR: Node version mismatch. Expected >= v${EXPECTED.minNodeMajor}.x but got ${nodeV}`,
 		);
 		process.exit(1);
 	}
