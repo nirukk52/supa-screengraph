@@ -45,7 +45,14 @@
 	},
 	"assist": { "actions": { "source": { "organizeImports": "on" } } },
 	"files": {
-		"includes": ["**", "!zod/index.ts", "!tailwind-animate.css"]
+		"includes": [
+			"**",
+			"!packages/database/prisma/zod/**",
+			"!**/dist/**",
+			"!.next/**",
+			"!zod/index.ts",
+			"!tailwind-animate.css"
+		]
 	},
 	"javascript": {
 		"jsxRuntime": "reactClassic"

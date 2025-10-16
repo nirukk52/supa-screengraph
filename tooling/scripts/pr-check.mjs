@@ -64,7 +64,9 @@ async function main() {
 		run("pnpm -w run build:backend");
 		run("pnpm -w run backend:lint");
 
-		// Lint + tests with coverage (match CI)
+		// Lint auto-fix + CI check + tests with coverage (match CI)
+		run("pnpm run format");
+		run("pnpm biome lint . --write");
 		run("pnpm biome ci .");
 		run("pnpm -w vitest run --coverage --reporter=dot");
 
