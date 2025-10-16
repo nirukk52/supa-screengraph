@@ -1,4 +1,4 @@
-import { ORPCError } from "orpc";
+import { ORPCError } from "@orpc/server";
 import { publicProcedure, type } from "../../orpc/procedures";
 import { getFeature } from "../../src/feature-registry";
 
