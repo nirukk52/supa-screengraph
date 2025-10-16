@@ -1,8 +1,8 @@
-name: Validate PRs
+name: validate-pr
 
 on:
-  push:
-    branches: [ 'feat/*', 'fix/*', 'chore/*' ]
+  pull_request:
+    branches: [ main ]
 
 permissions:
   contents: write
@@ -60,7 +60,7 @@ jobs:
       - name: Install deps
         run: pnpm install
       - name: Generate DB types
-        run: pnpm --filter database generate
+        run: pnpm --filter @repo/database generate
       - name: Build backend packages
         run: pnpm -w run build:backend
       - name: Run backend linting
@@ -80,7 +80,7 @@ jobs:
       - name: Install dependencies
         run: pnpm install && pnpm --filter database generate
       - name: Run Playwright tests
-        run: pnpm --filter web e2e:ci
+        run: pnpm --filter @repo/web e2e:ci
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:

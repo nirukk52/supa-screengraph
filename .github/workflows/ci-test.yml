@@ -25,7 +25,7 @@ jobs:
       - name: Install
         run: pnpm -w install
       - name: Generate DB types
-        run: pnpm --filter database generate
+        run: pnpm --filter @repo/database generate
       - name: Build backend packages
         run: pnpm -w run build:backend
       - name: Run backend linting
