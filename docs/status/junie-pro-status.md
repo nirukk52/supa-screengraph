@@ -9,6 +9,7 @@
 ## Active TODOs (keep in sync)
 1. Collect recent GitHub Actions run IDs for PR #39 — ✅ completed
 2. Download failing job logs and commit comments via GitHub MCP — **in progress**
+2b. Check workflow trigger issue - why GitHub Actions not running — **in progress**
 3. Summarize recurring CI failure signatures in `docs/status/PR39-ci-failures.md` — pending
 4. Test/Verify: Cross-check summary against raw logs to ensure accuracy — pending
 5. Manual demo: Walk through GitHub Actions UI to confirm log locations — pending
@@ -17,10 +18,8 @@
 8. Test: Execute `pnpm turbo run pr:check` to reproduce Next.js failure — ✅ completed
 9. Locate files importing metadata helpers causing Next build errors — ✅ completed
 10. Manual demo: Confirm Vitest coverage exclusions remain active — pending
-11. Refactor metadata imports/types for Next 15 compatibility — **in progress**
-10. Manual demo: Confirm Vitest coverage exclusions remain active — pending
-11. Refactor metadata imports/types for Next 15 compatibility — pending
-12. Test: Rerun Next.js build after metadata fix — pending
+11. Refactor metadata imports/types for Next 15 compatibility — ✅ completed
+12. Test: Rerun Next.js build after metadata fix — ✅ completed
 13. Diff package.json/Turbo tasks against `validate-prs` workflow steps — pending
 14. Launch devcontainer/Docker to validate toolchain parity — pending
 15. Test: Run `pnpm install --frozen-lockfile` inside devcontainer — pending
@@ -36,6 +35,7 @@
 - All phases now complete: install → generate → build:backend → backend:lint → biome ci → vitest coverage → e2e:ci.
 - Coverage warnings persist (Prisma source maps) but are non-fatal. E2E test passes.
 - 2025-10-16T03:58Z: Re-ran `pnpm pr:check` after user reported CI failures — local pipeline still green end-to-end. Waiting for new GitHub Action run on commit `87a261b0`; will pull logs once available.
+- 2025-10-16T04:05Z: Fixed workflow name mismatch (validate-pr vs validate-prs.yml filename) and pushed commit 6fae8c50. Still no workflow runs after 60+ seconds. Found two workflows both trigger on pull_request to main: ci-test.yml and validate-prs.yml. Suspect ci-test.yml might be running instead, or repository-level configuration issue.
 
 ## Escalation Protocol
 - If CI logs unavailable via MCP, ping Junie for direct access.
