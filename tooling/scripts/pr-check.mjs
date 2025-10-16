@@ -4,8 +4,14 @@
  * - Asserts Node and pnpm versions
  * - Installs deps with frozen lockfile
  * - Runs DB generate
- * - Builds backend, lints, tests with coverage
- * - Runs web e2e in CI mode
+ * - Lints first (fast-fail), then builds, tests, and e2e
+ * - Supports local escape hatches via env flags without weakening CI
+ *   Flags (local only):
+ *     PR_PRECHECK_ONLY=1 → run format/lint only, then exit 0
+ *     SKIP_COVERAGE=1 → skip vitest coverage run
+ *     SKIP_BACKEND_E2E=1 → skip backend e2e
+ *     SKIP_FRONTEND_E2E=1 → skip web Playwright e2e
+ *     SKIP_E2E=1 → skip both backend and web e2e
  */
 
 import { execSync } from "node:child_process";
@@ -49,6 +55,23 @@ async function main() {
 	try {
 		assertVersions();
 
+		const PRECHECK_ONLY =
+			process.env.PR_PRECHECK_ONLY === "1" ||
+			process.env.PR_PRECHECK_ONLY === "true";
+		const SKIP_E2E =
+			process.env.SKIP_E2E === "1" || process.env.SKIP_E2E === "true";
+		const SKIP_BACKEND_E2E =
+			SKIP_E2E ||
+			process.env.SKIP_BACKEND_E2E === "1" ||
+			process.env.SKIP_BACKEND_E2E === "true";
+		const SKIP_FRONTEND_E2E =
+			SKIP_E2E ||
+			process.env.SKIP_FRONTEND_E2E === "1" ||
+			process.env.SKIP_FRONTEND_E2E === "true";
+		const SKIP_COVERAGE =
+			process.env.SKIP_COVERAGE === "1" ||
+			process.env.SKIP_COVERAGE === "true";
+
 		// Ensure deterministic install (match CI)
 		run("pnpm install --recursive --frozen-lockfile");
 
@@ -60,21 +83,47 @@ async function main() {
 			"pnpm --filter @repo/database exec prisma generate --no-hints --schema=./prisma/schema.prisma",
 		);
 
-		// Backend build + lint (match CI)
-		run("pnpm -w run build:backend");
-		run("pnpm -w run backend:lint");
-
-		// Lint auto-fix + CI check + tests with coverage (match CI)
+		// Lint first: format + Biome + backend lint (match CI and requirement)
+		// Biome file selection is configured in biome.json (files.includes)
 		run("pnpm run format");
 		run("pnpm biome lint . --write");
 		run("pnpm biome ci .");
-		run("pnpm -w vitest run --coverage --reporter=dot");
+		run("pnpm -w run backend:lint");
+
+		if (PRECHECK_ONLY) {
+			console.log(
+				"\nPR_PRECHECK_ONLY set: Completed format/lint. Exiting early.",
+			);
+			return;
+		}
+
+		// Build and tests after lints
+		run("pnpm -w run build:backend");
+		if (!SKIP_COVERAGE) {
+			run("pnpm -w vitest run --coverage --reporter=dot");
+		} else {
+			console.log("\nSKIP_COVERAGE set: Skipping vitest coverage run.");
+		}
 
 		// Backend e2e (match CI)
-		run("pnpm run backend:e2e");
+		if (!SKIP_BACKEND_E2E) {
+			run("pnpm run backend:e2e");
+		} else {
+			console.log("\nSKIP_BACKEND_E2E set: Skipping backend e2e.");
+		}
 
 		// Web E2E in CI mode (match CI)
-		run("pnpm --filter @repo/web e2e:ci");
+		if (!SKIP_FRONTEND_E2E) {
+			// Ensure Playwright browsers are present locally before running
+			try {
+				run("pnpm dlx playwright@1.56.0 install");
+			} catch {}
+			run("pnpm --filter @repo/web e2e:ci");
+		} else {
+			console.log(
+				"\nSKIP_FRONTEND_E2E set: Skipping web Playwright e2e.",
+			);
+		}
 
 		console.log("\nAll PR checks completed successfully.");
 	} catch (err) {

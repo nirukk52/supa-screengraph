@@ -1,14 +1,12 @@
-# Build outputs
+# Ignore generated Prisma outputs and build artifacts
+packages/database/prisma/zod/**
+packages/database/prisma/queries/**
 **/dist/**
-**/build/**
-**/.next/**
-**/coverage/**
+.next/**
 
-# Temporary: TS emit that leaked into src
-packages/mail/src/util/*.js
-packages/storage/provider/*.js
-packages/auth/**/*.js
-packages/i18n/**/*.js
-packages/utils/**/*.js
-packages/database/**/*.js
+# Ignore Tailwind helper CSS (unsupported by Biome parser)
+tooling/tailwind/**/*.css
+tooling/tailwind/**/*.pcss
 
+# Specific files
+zod/index.ts
