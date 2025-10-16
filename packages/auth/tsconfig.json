@@ -5,6 +5,7 @@
 		"outDir": "dist",
 		"composite": true
 	},
+	"references": [{ "path": "../../config" }],
 	"include": ["**/*.ts"],
 	"exclude": ["dist", "build", "node_modules"]
 }

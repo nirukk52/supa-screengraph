@@ -18,7 +18,13 @@
 		"skipLibCheck": true,
 		"strict": true,
 		"strictNullChecks": true,
-		"paths": {}
+		"paths": {
+			"@repo/config": ["../../config"],
+			"@sg/feature-agents-run": [
+				"../../packages/features/agents-run/src",
+				"../../packages/features/agents-run"
+			]
+		}
 	},
 	"display": "Default",
 	"exclude": ["node_modules", "dist", ".next", "build"]
