@@ -1,7 +1,10 @@
 import { ORPCError } from "@orpc/client";
 import { config } from "@repo/config";
 import { logger } from "@repo/logs";
-import { sendEmail } from "@repo/mail";
+
+// Mail temporarily disabled
+const sendEmail = async (..._args: any[]) => {};
+
 import { localeMiddleware } from "../../../orpc/middleware/locale-middleware";
 import { publicProcedure } from "../../../orpc/procedures";
 import { contactFormSchema } from "../types";

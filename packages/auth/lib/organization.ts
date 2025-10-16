@@ -1,6 +1,8 @@
 import { getOrganizationWithPurchasesAndMembersCount } from "@repo/database";
 import { logger } from "@repo/logs";
-import { setSubscriptionSeats } from "@repo/payments";
+
+// Payments temporarily disabled
+const setSubscriptionSeats = async (_args: { id: string; seats: number }) => {};
 
 export async function updateSeatsInOrganizationSubscription(
 	organizationId: string,

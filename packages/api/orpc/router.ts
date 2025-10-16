@@ -5,7 +5,8 @@ import { aiRouter } from "../modules/ai/router";
 import { contactRouter } from "../modules/contact/router";
 import { newsletterRouter } from "../modules/newsletter/router";
 import { organizationsRouter } from "../modules/organizations/router";
-import { paymentsRouter } from "../modules/payments/router";
+// Payments temporarily disabled
+// import { paymentsRouter } from "../modules/payments/router";
 import { usersRouter } from "../modules/users/router";
 import { publicProcedure } from "./procedures";
 
@@ -17,7 +18,7 @@ export const router = publicProcedure
 		contact: contactRouter,
 		organizations: organizationsRouter,
 		users: usersRouter,
-		payments: paymentsRouter,
+		// payments: paymentsRouter,
 		ai: aiRouter,
 		agents: agentsRouter,
 	});

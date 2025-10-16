@@ -8,8 +8,11 @@ import {
 } from "@repo/database";
 import type { Locale } from "@repo/i18n";
 import { logger } from "@repo/logs";
-import { sendEmail } from "@repo/mail";
-import { cancelSubscription } from "@repo/payments";
+
+// Mail/Payments temporarily disabled
+const sendEmail = async (..._args: any[]) => {};
+const cancelSubscription = async (..._args: any[]) => {};
+
 import { getBaseUrl } from "@repo/utils";
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
@@ -37,7 +40,7 @@ const getLocaleFromRequest = (request?: Request) => {
 
 const appUrl = getBaseUrl();
 
-export const auth = betterAuth({
+export const auth: ReturnType<typeof betterAuth> = betterAuth({
 	baseURL: appUrl,
 	trustedOrigins: [appUrl],
 	appName: config.appName,
@@ -260,16 +263,3 @@ export const auth = betterAuth({
 export * from "./lib/organization";
 
 export type Session = typeof auth.$Infer.Session;
-
-export type ActiveOrganization = NonNullable<
-	Awaited<ReturnType<typeof auth.api.getFullOrganization>>
->;
-
-export type Organization = typeof auth.$Infer.Organization;
-
-export type OrganizationMemberRole =
-	ActiveOrganization["members"][number]["role"];
-
-export type OrganizationInvitationStatus = typeof auth.$Infer.Invitation.status;
-
-export type OrganizationMetadata = Record<string, unknown> | undefined;

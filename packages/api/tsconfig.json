@@ -16,5 +16,5 @@
 		"orpc/**/*.ts",
 		"src/**/*.ts"
 	],
-	"exclude": ["dist", "build", "node_modules", "tests"]
+	"exclude": ["dist", "build", "node_modules", "tests", "modules/payments/**"]
 }

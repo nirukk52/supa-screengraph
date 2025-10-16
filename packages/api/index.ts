@@ -3,7 +3,7 @@ import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import { auth } from "@repo/auth";
 import { config } from "@repo/config";
 import { logger } from "@repo/logs";
-import { webhookHandler as paymentsWebhookHandler } from "@repo/payments";
+// Payments temporarily disabled
 import { getBaseUrl } from "@repo/utils";
 import { Scalar } from "@scalar/hono-api-reference";
 import { Hono } from "hono";
@@ -11,7 +11,6 @@ export type ApiApp = Hono;
 
 import { cors } from "hono/cors";
 import { logger as honoLogger } from "hono/logger";
-import { mergeOpenApiSchemas } from "./lib/openapi-schema";
 import { openApiHandler, rpcHandler } from "./orpc/handler";
 import { router } from "./orpc/router";
 
@@ -32,10 +31,8 @@ app.use(
 );
 // Auth handler
 app.on(["POST", "GET"], "/auth/**", (c) => auth.handler(c.req.raw));
-// OpenAPI schema endpoint
+// OpenAPI schema endpoint (auth schema disabled temporarily)
 app.get("/openapi", async (c) => {
-	const authSchema = await auth.api.generateOpenAPISchema();
-
 	const appSchema = await new OpenAPIGenerator({
 		schemaConverters: [new ZodToJsonSchemaConverter()],
 	}).generate(router, {
@@ -51,12 +48,7 @@ app.get("/openapi", async (c) => {
 		],
 	});
 
-	const mergedSchema = mergeOpenApiSchemas({
-		authSchema: authSchema as any,
-		appSchema: appSchema as any,
-	});
-
-	return c.json(mergedSchema);
+	return c.json(appSchema);
 });
 app.get("/orpc-openapi", async (c) => {
 	const appSchema = await new OpenAPIGenerator({
@@ -78,8 +70,8 @@ app.get(
 		url: "/api/openapi",
 	}),
 );
-// Payments webhook handler
-app.post("/webhooks/payments", (c) => paymentsWebhookHandler(c.req.raw));
+// Payments webhook handler disabled for now
+// app.post("/webhooks/payments", (c) => paymentsWebhookHandler(c.req.raw));
 
 // Health check
 app.get("/health", (c) => c.text("OK"));
