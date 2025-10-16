@@ -17,7 +17,7 @@
 		"lint:arch": "node tooling/arch/check-arch.js && node tooling/arch/check-sizes.js && node tooling/arch/check-literals.js",
 		"scaffold": "ts-node tooling/scripts/scaffold/index.ts",
 		"pr:checks": "pnpm run pr:check",
-		"pr:check": "pnpm -w install && pnpm biome ci . && pnpm -w vitest run --coverage --reporter=dot && pnpm --filter @repo/database generate && pnpm --filter @repo/web e2e:ci",
+		"pr:check": "pnpm -w install && pnpm --filter @repo/database generate && pnpm -w run build:backend && pnpm -w run backend:lint && pnpm biome ci . && pnpm -w vitest run --coverage --reporter=dot && pnpm --filter @repo/web e2e:ci",
 		"build:backend": "tsc -b tooling/typescript/tsconfig.backend.json",
 		"backend:lint": "pnpm run lint:arch && pnpm run lint:publint && pnpm run lint:deps",
 		"lint:publint": "npx publint",
