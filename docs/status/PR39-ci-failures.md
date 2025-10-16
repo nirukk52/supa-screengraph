@@ -1,25 +1,23 @@
-# PR #39 CI Failures Log
+# PR #39 CI Failures Log (Resolved)
 
-Purpose: Track why the three PR checks (lint, unit, e2e) fail on GitHub and how to reproduce locally. Keep this updated as we learn more.
+Purpose: Document the historical troubleshooting for PR #39 and summarize the final fix. CI now mirrors local `pnpm pr:check`.
 
 ## Context
-- PR: feat/feature-registration (PR #39)
-- Workflows impacted: `.github/workflows/validate-prs.yml` (jobs: lint, unit, e2e)
-- Local status: Build/lint/tests pass locally with coverage; PR checks still report failures.
+- PR: feat/feature-registration (merged 2025-10-16)
+- Workflow: `.github/workflows/validate-prs.yml` (single PR validation job after cleanup)
+- Final status: Local and CI pipelines pass end-to-end; coverage warnings noted as informational.
 
-## Current Hypotheses (to be confirmed)
-- Toolchain mismatch: CI must use Node 20 and pnpm 10.14.0; local was Node 24 initially.
-- Env mismatch: CI requires `DATABASE_URL`, `BETTER_AUTH_SECRET`, `NEXT_PUBLIC_SITE_URL` etc.
-- Cold vs warm builds: CI runs on a clean environment.
-- Playwright/browsers: Ensure `pnpm exec playwright install` occurs in e2e.
+## Root Cause Summary
+- Dependencies were not installed before running `pnpm --filter @repo/database generate`, so Prisma CLI binaries were missing in CI.
+- Vitest coverage ran against dist bundles lacking source maps (Prisma runtime, adapters).
+- Toolchain drift (Node 24 locally vs Node 20 in CI) caused inconsistent behavior.
 
 ## Exact CI Job Steps (mirror locally)
 
 ### 1) Lint job (validate-prs: lint)
 ```
-biome check . --write
-git add -A && git commit -m "chore(ci): apply biome autofix" && git push   # only if repo perms allow
-biome ci .
+pnpm biome lint . --write
+pnpm biome ci .
 ```
 
 ### 2) Unit job (validate-prs: unit)
@@ -57,14 +55,15 @@ pnpm -w install && pnpm --filter @repo/database generate
 pnpm --filter @repo/web e2e:ci   # runs playwright install + tests
 ```
 
-## Local Repro Status (as of latest commit)
-- Unit: ✅ PASS (coverage warnings from Prisma runtime sourcemaps are non-fatal)
-- E2E: ✅ PASS (Playwright install handled by `e2e:ci`)
-- Lint: ✅ PASS (Biome; autofix push step may be no-op locally)
+## Final Verification Status (2025-10-16)
+- Lint: ✅ PASS (Biome)
+- Unit: ✅ PASS (coverage warnings from Prisma runtime sourcemaps logged but non-fatal)
+- Backend E2E: ✅ PASS (agents-run SSE)
+- Web E2E: ✅ PASS (Playwright)
 
 ## Actual CI Error Details
 
-### Unit Test Job - Coverage Conversion Errors
+### Legacy Unit Test Error
 **Error**: 
 ```
 Failed to convert coverage for file:///Users/priyankalalge/RealSaas/Screengraph/supastarter-nextjs/packages/eventbus-inmemory/dist/index.js.
@@ -77,7 +76,7 @@ TypeError: Cannot read properties of undefined (reading 'endCol')
 
 **Fix Applied**: Coverage exclusions in `vitest.config.ts` already handle this locally, but CI may not have same exclusions.
 
-### Lint Job - Publint Warnings
+### Legacy Lint Warning
 **Warning**: 
 ```
 /tooling/scripts/dev-restart.js is written in ESM, but is interpreted as CJS. Consider using the .mjs extension
@@ -86,17 +85,17 @@ The package does not specify the "type" field. Node.js may attempt to detect the
 
 **Analysis**: Non-fatal warnings that may cause CI to fail if configured strictly.
 
-## Differences Between Local and CI
-- Toolchain pinning: CI uses Node 20, pnpm 10.14.0. Pin locally to match.
-- Permissions: Lint job may try to commit/push on CI; forks or token scopes can cause failures.
-- Env defaults: CI now uses a static `DATABASE_URL`; ensure present locally.
+## Final Mitigations
+- Toolchain harmonized: `.nvmrc` + `pr-check.mjs` assert pnpm 10.14.0 and Node ≥20.
+- Coverage exclusions expanded in `vitest.config.ts` for dist runtime files.
+- Workflow now installs dependencies before Prisma generate; CLI availability validated.
+- Playwright install executed explicitly in e2e job.
 
-## Action Items
-- [x] Capture exact CI error snippets for each failing job and paste below.
-- [x] Identify coverage conversion errors as primary unit test failure cause.
-- [x] Fix coverage exclusions in CI to match local `vitest.config.ts` settings. (Validated in local pr:check)
-- [x] Address publint warnings that may cause lint job failures. (Non-fatal; tracked)
-- [x] Validate that CI uses same Node 20 + pnpm 10.14.0 toolchain as configured. (Added .nvmrc and pr-check version asserts)
+## Action Items (Completed)
+- Captured CI error snippets for posterity.
+- Aligned coverage exclusions with Vitest configuration.
+- Added Prisma CLI availability check and adjusted workflow order.
+- Standardized Node/pnpm versions across environments.
 
 ### Parity Guardrails Added (Local & CI)
 - Introduced tooling/scripts/pr-check.mjs as single orchestration entry point.
@@ -124,38 +123,12 @@ TypeError: Cannot read properties of undefined (reading 'endCol')
 1 passed (1.8s)
 ```
 
-## Last Updated
-- Commit: e90f7167202f8bffc92db0c3fec054268f5e8025
-- Date: 2025-10-16T04:54:00Z
-- Status: **LOCAL pr:check PASSES COMPLETELY** - All tests successful, including backend e2e and web e2e
+## Final Status
+- Authoritative command: `pnpm pr:check`
+- GitHub Actions workflow: `validate-prs.yml`
+- Merge commit: `4d7f7b87`
+- Date: 2025-10-16T13:20Z
 
-## Current Status (2025-10-16T04:54Z)
-✅ **Local Environment**: `pnpm pr:check` passes end-to-end
-- Install: ✅ (frozen lockfile)
-- DB Generate: ✅ (Prisma generates successfully) 
-- Backend Build: ✅ (TypeScript compilation)
-- Backend Lint: ✅ (Architecture, publint, dependency-cruiser)
-- Biome CI: ✅ (No formatting issues)
-- Unit Tests + Coverage: ✅ (68 tests passed, coverage warnings non-fatal)
-- Backend E2E: ✅ (SSE stream assertions successful)
-- Web E2E: ✅ (Playwright test passed)
-
-❌ **CI Environment**: User reports "all three failing" with `prisma: not found` error
-
-## Key Finding
-The `prisma: not found` error mentioned by user is **NOT reproducible locally**. This indicates a CI-specific environment issue, likely:
-1. Missing Prisma CLI installation in CI
-2. Different Node.js/npm/pnpm setup in CI
-3. PATH issues in GitHub Actions runner
-
-## Root Cause Identified (2025-10-16T05:00Z)
-**CI was running `pnpm --filter @repo/database generate` BEFORE installing dependencies**, so the Prisma CLI binary wasn't available in `node_modules`.
-
-**Fix Applied:**
-- Changed `pnpm -w install --frozen-lockfile` → `pnpm install --recursive --frozen-lockfile` 
-- Added Prisma CLI availability check: `pnpm --filter @repo/database exec prisma --version`
-- Changed generate command to use explicit binary: `pnpm --filter @repo/database exec prisma generate --no-hints --schema=./prisma/schema.prisma`
-
-**Next:** Test fix by pushing and monitoring CI run.
+CI parity is restored. Keep this log as historical reference for future incident response.
 
 

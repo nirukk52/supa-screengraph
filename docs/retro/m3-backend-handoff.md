@@ -2,103 +2,63 @@
 
 ### Context Snapshot
 - **Primary goal for 2025-10-15:** ensure backend build is green, all backend tests (incl. agents-run e2e) pass locally, and CI `pnpm pr:check` passes without manual intervention.
-- **Current branch:** `feat/feature-registration` (pushed).
+- **Current branch at merge:** `feat/feature-registration` → `main`.
 - **Reference plan:** see `/backend.plan.md` (summary incorporated below).
 - **Environment reminder:** run commands from repo root (`/Users/priyankalalge/RealSaas/Screengraph/supastarter-nextjs`). Use pnpm v10.14.0 (already configured).
 
-### Status Overview (as of handoff)
+### Status Overview (post-merge)
 | Area | State | Notes |
 | --- | --- | --- |
-| Backend build (`pnpm -w run build:backend`) | ✅ | Builds after targeted package fixes (agents-contracts, eventbus, queue). |
-| Backend lint (`pnpm run backend:lint`) | ✅ | dependency-cruiser + custom scripts pass. |
-| Backend e2e (`pnpm -w run backend:e2e`) | ❌ | Vitest cannot resolve `@repo/logs/lib/logger` → dist lacks `logger.js`. |
-| CI (`pnpm pr:check`) | ❌ (blocked) | Stops on failed backend:e2e. |
-| Feature-runtime smoke (`pnpm dev`) | ✅ | Agents-run fallback routes respond (manual smoke). |
+| Backend build (`pnpm -w run build:backend`) | ✅ | Builds cleanly via `tooling/typescript/tsconfig.backend.json` composite graph. |
+| Backend lint (`pnpm run backend:lint`) | ✅ | dependency-cruiser, size, literal, publint checks aligned with new guardrails. |
+| Backend e2e (`pnpm -w run backend:e2e`) | ✅ | Agents-run SSE test passes; queue + event bus emit canonical sequence. |
+| CI (`pnpm pr:check`) | ✅ | Wrapper installs deps, runs generate/build/lint/unit/e2e successfully; coverage warnings documented as non-blocking. |
+| Feature-runtime smoke (`pnpm dev`) | ⚠️ | Requires `AGENT_PORT` override (`AGENT_PORT=8011 pnpm dev`) until agent service default port is reconfigured. |
 
-### Current Blockers
-1. **`@repo/logs` dist output incomplete** – `lib/logger.ts` is not emitted to `dist/lib/logger.js`, so runtime import fails when the e2e test dynamically loads the feature. Building the package (`pnpm --filter @repo/logs build`) succeeds but omits the file.
-2. **Agents-run e2e import strategy** – test currently uses a dynamic import from `../../features/agents-run/dist/index.js` to bypass Vitest resolver issues. Works once logs issue is fixed.
-3. **Vitest resolver fragility** – workspace symlinks require `pnpm install` post dependency changes. Keep an eye on that after each package.json change.
+### Resolved Blockers
+1. **`@repo/logs` dist output** – Added explicit exports and tsconfig tweaks so `dist/lib/logger.js` and `trace.js` emit correctly; backend e2e now loads logging adapter.
+2. **Agents-run routing** – API now imports transport-agnostic handlers via `@sg/feature-agents-run` entry point; fallback helper retired.
+3. **Vitest resolver stability** – `tooling/scripts/pr-check.mjs` re-installs and re-builds packages deterministically, preventing stale symlinks.
 
-### Immediate To-Do List (Junie)
-Each task lists inputs, steps, and definition of done (DoD). Execute in order unless otherwise noted.
+### Knowledge Captured
+- Dependency guardrails (`no-cross-package-src-imports`, `no-feature-to-api`) prevent regressions seen early in PR 39.
+- Queue name constant lives in `start-run.ts`; all workers import `QUEUE_NAME` to avoid divergence.
+- Vitest coverage must exclude Prisma runtime and adapter dist bundles until upstream ships source maps.
 
-1. **Fix `@repo/logs` build output**
-   - *Inputs:* `packages/logs/index.ts`, `packages/logs/lib/*.ts`, `packages/logs/tsconfig.json`.
-   - *Steps (suggested):*
-     1. Ensure `tsconfig.json` includes `lib/logger.ts` (current include glob should already do this; double-check).
-     2. Inspect TypeScript project references: confirm no higher-level reference excludes `logger.ts` (root `tooling/typescript/tsconfig.backend.json`).
-     3. If `logger.ts` is excluded due to `allowJs` or module config, add explicit export in `index.ts` and ensure `compilerOptions.moduleResolution` remains Node16.
-     4. Run clean build: `rm -rf packages/logs/dist packages/logs/tsconfig.tsbuildinfo && pnpm --filter @repo/logs build`.
-   - *DoD:* `packages/logs/dist/lib/logger.js` exists and exports the consola instance; `pnpm --filter @repo/logs build` succeeds twice consecutively without deleting the file.
+### Follow-up Backlog (Junie Pro)
+1. **Agent dev experience** – Decide on permanent port strategy (reclaim 8001 or update scripts/env defaults); document in dev setup.
+2. **Remote cache & devcontainer parity** – Implement tasks outlined in `docs/retro/todays/plan.md` (Turborepo cache, devcontainer smoke test).
+3. **Backend test harness** – Extract shared SSE helpers (`packages/api/tests/utils/harness.ts`) to avoid duplication in future feature tests.
+4. **Mail package dist** – Track `mail-dist-blocker` issue; bring package back into composite graph once feasible.
 
-2. **Verify backend e2e passes**
-   - *Prereq:* Task 1 complete.
-   - *Steps:*
-     1. `pnpm -w run backend:e2e`.
-     2. If Vitest still complains about module resolution, reinstall (`pnpm install`) and rerun. Avoid reintroducing compiled `.js` inside `src/` folders; guardrail will fail.
-   - *DoD:* Command exits 0, logs show SSE assertions succeeding (events length ≥ 4, `RunFinished` etc.).
-
-3. **Run full backend:test pipeline**
-   - *Steps:* `pnpm run backend:test` (build → lint → e2e).
-   - *DoD:* Single command finishes without errors; capture timing for handoff notes if notable.
-
-4. **Run CI check locally**
-   - *Steps:* `pnpm pr:check` (this runs lint, vitest coverage, database generate, web e2e).
-   - *DoD:* Command finishes 0. If frontend e2e needs env, document missing config rather than skipping silently.
-
-5. **Document final validation**
-   - *Steps:* Update this file (append “Validation” section) or add new entry in `docs/retro/milestone3-sprint2.md` summarizing results, including timestamps and commit hash.
-   - *DoD:* Written record exists referencing commands and outcomes; no ambiguity on what was run.
-
-### Secondary (Post-success) Tasks from Plan
-- **Replace fallback with oRPC adapters:** After the immediate blockers, transition from `packages/api/modules/agents/fallback.ts` to proper oRPC router wiring (see `/backend.plan.md` §2).
-- **Extract backend test harness:** Introduce `packages/api/tests/utils/harness.ts` to consolidate SSE collection and worker startup (Plan §3).
-- **Publint/exports hygiene:** Run `pnpm run lint:publint`; ensure all backend packages have `version`, `exports`, `files`. Create GH issue for deferred fixes (Plan §4).
-- **Mail package tracking:** Keep `mail-dist-blocker` issue updated (Plan §5).
-- **CI integration:** Add `backend:test` to `pr:check` once stable (Plan §6).
-- **Docs/ADR updates:** Update architecture docs and status report per Plan §7 once fallback removed.
+### Validation Log (2025-10-16)
+- `pnpm -w run backend:e2e` → PASS (SSE stream emits `RunStarted` … `RunFinished`).
+- `pnpm run backend:test` → PASS.
+- `pnpm pr:check` → PASS (install → prisma generate → build:backend → backend:lint → biome ci → vitest coverage → backend e2e → web e2e).
+- GitHub Actions `validate-prs` workflow → PASS on merge commit `4d7f7b87`.
 
 ### Notes & Tips
-- **Guardrails:** dependency-cruiser (`lint:deps`) now forbids feature → API imports and cross-package `src` imports. Fix violations by exporting from package `dist` entry points.
-- **TypeScript references:** All backend packages participate in `tooling/typescript/tsconfig.backend.json`. If you add new packages, update references there.
-- **Vitest resolver:** If you touch package exports, run `pnpm install` before tests to refresh workspace symlinks.
-- **Dynamic import in e2e:** Once logs build issue is solved, consider reverting to static workspace import and introducing `vite-tsconfig-paths` to restore readability.
+- **Guardrails:** dependency-cruiser now enforces feature boundaries; add exports to package entry points rather than importing `src` files.
+- **TypeScript references:** Add new backend packages to `tooling/typescript/tsconfig.backend.json` to participate in incremental builds.
+- **Vitest resolver:** After changing package exports, run `pnpm install` (handled automatically in `pr:check`).
+- **Dynamic imports:** With logging dist fixed, future e2e tests can rely on workspace imports once `vite-tsconfig-paths` is evaluated.
 
 ### Quick Command Reference
 ```bash
-# Clean + rebuild logs and rerun backend e2e
-rm -rf packages/logs/dist packages/logs/tsconfig.tsbuildinfo
-pnpm --filter @repo/logs build
-pnpm -w run backend:e2e
-
 # Full backend pipeline
 pnpm run backend:test
 
-# CI check
+# CI mirror
 pnpm pr:check
+
+# Dev server with agent override
+AGENT_PORT=8011 pnpm dev
 ```
 
-### Pending Questions for Follow-up
-1. Should we adopt `vite-tsconfig-paths` or a Vitest config alias to avoid direct dist imports?
-2. After fallback removal, confirm SSE route generation in OpenAPI – does the schema expose `/agents/runs/{runId}/stream` correctly?
-3. Mail package: document exact blockers (`TS1479`, `TS2835`) in dedicated issue for later sprint.
+### Pending Questions
+1. Adopt `vite-tsconfig-paths` or custom Vitest alias to eliminate dist imports?
+2. After agent port decision, update docs + scripts to remove manual override.
+3. When mail package is re-enabled, revisit coverage/publint exclusions.
 
 ---
-Prepared for Junie (M3 Day 2 backend handoff). Update or close this document once all DoDs are met.
-
-
-
-## Validation (2025-10-15)
-
-- Backend e2e: pnpm -w run backend:e2e → PASS (SSE stream assertions succeeded)
-- Full tests with coverage: pnpm -w vitest run --coverage → PASS
-- CI local run: pnpm pr:check → PASS (lint, tests+coverage, database generate, web e2e)
-
-Notes:
-- Agents-run fallback routes were removed; oRPC OpenAPI handler now serves:
-  - POST /api/agents/runs
-  - POST /api/agents/runs/{runId}/cancel
-  - GET  /api/agents/runs/{runId}/stream (SSE)
-- Coverage excludes updated to ignore Prisma generated artifacts (.prisma/@prisma) to stabilize coverage conversion.
-- Added API feature registry module and test now passes.
+Prepared for Junie (M3 Day 2 backend handoff). Retain for historical context; future changes should reference this baseline.
