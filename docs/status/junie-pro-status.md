@@ -17,7 +17,7 @@
 7. Manual demo: Inspect Turborepo task graph for `pr:check` — pending
 8. Test: Execute `pnpm turbo run pr:check` to reproduce Next.js failure — ✅ completed
 9. Locate files importing metadata helpers causing Next build errors — ✅ completed
-10. Manual demo: Confirm Vitest coverage exclusions remain active — pending
+10. Manual demo: Confirm Vitest coverage exclusions remain active — ✅ completed (2025-10-16)
 11. Refactor metadata imports/types for Next 15 compatibility — ✅ completed
 12. Test: Rerun Next.js build after metadata fix — ✅ completed
 13. Diff package.json/Turbo tasks against `validate-prs` workflow steps — pending
@@ -36,6 +36,7 @@
 - Coverage warnings persist (Prisma source maps) but are non-fatal. E2E test passes.
 - 2025-10-16T03:58Z: Re-ran `pnpm pr:check` after user reported CI failures — local pipeline still green end-to-end. Waiting for new GitHub Action run on commit `87a261b0`; will pull logs once available.
 - 2025-10-16T07:52Z: Ran `pnpm pr:check` (pass) and attempted `pnpm run dev`. Dev server fails because `@repo/agent` process cannot bind port 8001 (`[Errno 48] Address already in use`). Killing orphaned Python PIDs frees the port temporarily but Turbo immediately respawns them; agent dev still exits. Dev environment currently blocked until port contention is resolved or agent port is reconfigured.
+- 2025-10-16T09:46Z: Addressed Copilot PR review feedback — tightened dependency-cruiser rules, removed final `src` path aliases, aligned queue worker registration with shared constant, simplified agents router, and pruned unsupported Vitest coverage flags. Re-ran `pnpm lint` and `pnpm -w vitest run packages/api/tests/agents-run.e2e.spec.ts`; both pass locally.
 - 2025-10-16T04:05Z: Fixed workflow name mismatch (validate-pr vs validate-prs.yml filename) and pushed commit 6fae8c50. Still no workflow runs after 60+ seconds. Found two workflows both trigger on pull_request to main: ci-test.yml and validate-prs.yml. Suspect ci-test.yml might be running instead, or repository-level configuration issue.
 
 ## Escalation Protocol

@@ -8,10 +8,11 @@ import { SCHEMA_VERSION, TOPIC_AGENTS_RUN } from "@sg/agents-contracts";
 import { recordEvent } from "../../application/event-buffer";
 import { bus, queue } from "../../application/singletons";
 import { logFn } from "../../application/usecases/log";
+import { QUEUE_NAME } from "../../application/usecases/start-run";
 import { nextSeq } from "../../application/usecases/sequencer";
 
 export function startWorker() {
-	queue.worker<{ runId: string }>("agents.run", async ({ runId }) => {
+	queue.worker<{ runId: string }>(QUEUE_NAME, async ({ runId }) => {
 		logFn("worker:job:start");
 		const n1: NodeStarted = {
 			runId,

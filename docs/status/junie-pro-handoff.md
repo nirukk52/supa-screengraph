@@ -159,6 +159,14 @@ yamllint .github/workflows/validate-prs.yml
 - ⚠️ `pnpm run dev` fails locally because `@repo/agent` binds to port `8001` already in use
 - 🔧 Mitigation: free port (kill lingering uvicorn processes) or export `AGENT_PORT=8011` before running Turbo dev
 
+**2025-10-16T09:46Z**: Latest updates from PR review cycle
+- ✅ Removed remaining cross-package `src` path aliases in `tooling/typescript/base.json`
+- ✅ Tightened dependency-cruiser guardrails (no catch-all `pathNot`, regex exclude)
+- ✅ Synced queue worker registration with exported `QUEUE_NAME`
+- ✅ Trimmed unused dynamic router helper and dependent import
+- ✅ Simplified Vitest coverage config to supported keys
+- ✅ Re-ran `pnpm lint` and `pnpm -w vitest run packages/api/tests/agents-run.e2e.spec.ts`
+
 **Next**: Align on agent dev port strategy (free 8001 or update scripts) and retest end-to-end including CI trigger investigation.
 
 ---

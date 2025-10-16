@@ -10,7 +10,6 @@ module.exports = {
 			},
 			to: {
 				path: "@.+/src/",
-				pathNot: "^(.)",
 			},
 		},
 		{
@@ -29,9 +28,7 @@ module.exports = {
 		doNotFollow: {
 			path: "node_modules",
 		},
-		exclude: {
-			path: ".*dist.*",
-		},
+		exclude: "(^|/)(dist|build|node_modules)/",
 		reporterOptions: {
 			dot: {
 				collapsePattern: "^node_modules",

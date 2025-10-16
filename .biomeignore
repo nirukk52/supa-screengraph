@@ -1,8 +1,8 @@
 # Ignore generated Prisma outputs and build artifacts
-packages/database/prisma/zod/**
-packages/database/prisma/queries/**
-**/dist/**
-.next/**
+packages/database/prisma/zod/
+packages/database/prisma/queries/
+**/dist/
+.next/
 
 # Ignore Tailwind helper CSS (unsupported by Biome parser)
 tooling/tailwind/**/*.css

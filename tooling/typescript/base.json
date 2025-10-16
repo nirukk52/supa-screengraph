@@ -21,7 +21,6 @@
 		"paths": {
 			"@repo/config": ["../../config"],
 			"@sg/feature-agents-run": [
-				"../../packages/features/agents-run/src",
 				"../../packages/features/agents-run"
 			]
 		}
