@@ -152,7 +152,6 @@ if [[ -n "$LOCK_BRANCH" ]]; then
 #!/usr/bin/env bash
 set -euo pipefail
 current=
-current=
 current=$(git rev-parse --abbrev-ref HEAD)
 if [[ "\$current" != "$LOCK_BRANCH" ]]; then
   echo "🔒 This worktree is locked to '$LOCK_BRANCH' (was: \$current). Reverting checkout." >&2
