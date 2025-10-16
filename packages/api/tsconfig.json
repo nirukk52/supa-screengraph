@@ -1,6 +1,21 @@
 {
 	"extends": "../../tooling/typescript/react-library.json",
-	"compilerOptions": {},
-	"include": ["**/*.ts"],
-	"exclude": ["dist", "build", "node_modules"]
+	"compilerOptions": {
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"rootDir": ".",
+		"outDir": "dist",
+		"declaration": true,
+		"emitDeclarationOnly": false,
+		"composite": true
+	},
+	"references": [{ "path": "../features/agents-run" }],
+	"include": [
+		"index.ts",
+		"lib/**/*.ts",
+		"modules/**/*.ts",
+		"orpc/**/*.ts",
+		"src/**/*.ts"
+	],
+	"exclude": ["dist", "build", "node_modules", "tests", "modules/payments/**"]
 }

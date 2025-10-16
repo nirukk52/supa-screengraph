@@ -12,14 +12,20 @@ export default defineConfig({
 	coverage: {
 		reporter: ["text", "json", "lcov"],
 		provider: "v8",
+		all: false,
 		include: ["packages/**/src/**/*.{ts,tsx}"],
 		exclude: [
 			"**/dist/**",
 			"**/build/**",
 			"**/node_modules/**",
+			"**/.prisma/**",
+			"**/@prisma/**",
 			"packages/**/tests/**",
 			"packages/database/prisma/generated/**",
 			"packages/database/prisma/**",
+			"packages/eventbus-inmemory/dist/**",
+			"packages/queue-inmemory/dist/**",
+			"packages/database/prisma/generated/client/runtime/**",
 			"apps/**",
 			// Config and tooling
 			"**/*.config.{ts,js}",

@@ -1,0 +1,18 @@
+{
+	"files": [],
+	"references": [
+		{ "path": "../../packages/agents-contracts" },
+		{ "path": "../../packages/logs" },
+		{ "path": "../../packages/eventbus" },
+		{ "path": "../../packages/eventbus-inmemory" },
+		{ "path": "../../packages/queue" },
+		{ "path": "../../packages/queue-inmemory" },
+		{ "path": "../../packages/utils" },
+		{ "path": "../../packages/i18n" },
+		{ "path": "../../packages/database" },
+		{ "path": "../../packages/auth" },
+		{ "path": "../../config" },
+		{ "path": "../../packages/api" },
+		{ "path": "../../packages/features/agents-run" }
+	]
+}

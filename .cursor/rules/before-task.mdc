@@ -10,3 +10,5 @@ This rule enforces BEFORE_TASK gates for every actionable request.
 - Also run search_facts for context and relationships.
 - If Graphiti is unavailable, STOP all work and alert the user.
 - Do not plan or write code until these checks pass.
+- Always use github mcp when to get errors on a PR.
+- **NEVER MERGE WITHOUT PASSING PR:CHECK FIRST** - This is CRITICAL for towards goal of code quality, rapid dev and fast breakthroughs.

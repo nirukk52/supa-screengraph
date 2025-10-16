@@ -4,7 +4,23 @@
 	},
 	"name": "@repo/config",
 	"private": true,
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"require": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		},
+		"./package.json": "./package.json"
+	},
+	"files": [
+		"dist",
+		"package.json",
+		"README.md"
+	],
 	"scripts": {
+		"build": "tsc -b",
 		"type-check": "tsc --noEmit"
 	},
 	"version": "0.0.0"

@@ -5,18 +5,25 @@
 	"sg:layer": "infra",
 	"sg:scope": "eventbus",
 	"main": "dist/index.js",
-	"types": "src/index.ts",
+	"types": "dist/index.d.ts",
 	"exports": {
 		".": {
-			"import": "./src/index.ts",
-			"require": "./src/index.ts"
-		}
+			"import": "./dist/index.js",
+			"require": "./dist/index.js",
+			"types": "./dist/index.d.ts"
+		},
+		"./package.json": "./package.json"
 	},
+	"files": [
+		"dist",
+		"package.json",
+		"README.md"
+	],
 	"scripts": {
 		"build": "tsc -b"
 	},
 	"dependencies": {
-		"@sg/eventbus": "workspace:*",
-		"@sg/agents-contracts": "workspace:*"
+		"@sg/agents-contracts": "workspace:*",
+		"@sg/eventbus": "workspace:*"
 	}
 }

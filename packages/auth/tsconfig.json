@@ -1,5 +1,11 @@
 {
 	"extends": "../../tooling/typescript/base.json",
+	"compilerOptions": {
+		"rootDir": ".",
+		"outDir": "dist",
+		"composite": true
+	},
+	"references": [{ "path": "../../config" }],
 	"include": ["**/*.ts"],
 	"exclude": ["dist", "build", "node_modules"]
 }

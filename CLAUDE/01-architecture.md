@@ -51,6 +51,14 @@ Purpose: Single-page overview of the system's runtime, module boundaries, and da
 - Packages: unit + adapter integration; contract tests for schemas.
 - Features: route/worker integration + minimal e2e stream ordering.
 
+## CI/CD Pipeline
+- **Unified Workflow**: Single `validate-prs.yml` for all PR checks
+- **Sequential Execution**: Install → Generate → Build → Lint → Test → E2E
+- **Local/CI Parity**: `pr:check.mjs` mirrors CI workflow exactly
+- **Backend E2E**: Included in CI pipeline for comprehensive testing
+- **Quality Gates**: Biome linting, dependency checks, architecture validation
+- **Deterministic**: Frozen lockfile, pinned toolchain versions
+
 ## Source of Truth
 - Diagrams: `docs/architecture/flow.md`
 - Contracts: `packages/agents-contracts`

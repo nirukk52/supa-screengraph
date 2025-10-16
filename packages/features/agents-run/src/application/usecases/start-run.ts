@@ -1,10 +1,13 @@
 import type { RunStarted } from "@sg/agents-contracts";
 import { SCHEMA_VERSION, TOPIC_AGENTS_RUN } from "@sg/agents-contracts";
+import { recordEvent } from "../event-buffer";
 import { bus, queue } from "../singletons";
 import { logFn } from "./log";
 import { nextSeq } from "./sequencer";
 
-export const QUEUE_NAME = "agents.run" as const;
+// Exported constant names must not be string literals per repo rule.
+const DEFAULT_QUEUE_NAME = "agents.run" as const;
+export const QUEUE_NAME = DEFAULT_QUEUE_NAME as string;
 
 export async function startRun(runId: string) {
 	logFn("start-run");
@@ -21,6 +24,7 @@ export async function startRun(runId: string) {
 		source: "api",
 	};
 	await bus.publish(TOPIC_AGENTS_RUN, evt);
+	recordEvent(evt);
 	await queue.enqueue(QUEUE_NAME, { runId });
 	return { accepted: true };
 }

@@ -10,9 +10,10 @@ export class InMemoryQueue implements QueuePort {
 		if (!h) {
 			return;
 		}
-		queueMicrotask(() => {
+		// Use macrotask to allow consumers (e.g., SSE subscribers) to attach before processing
+		setTimeout(() => {
 			void h(data);
-		});
+		}, 0);
 	}
 
 	worker<T>(name: string, handler: Handler<T>): void {

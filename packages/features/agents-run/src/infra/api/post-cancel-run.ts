@@ -1,10 +1,10 @@
-import { publicProcedure, type } from "@repo/api/orpc/procedures";
 import { cancelRun } from "../../application/usecases/cancel-run";
 
-export const postCancelRun = publicProcedure
-	.route({ method: "POST", path: "/agents/runs/{runId}/cancel" })
-	.input(type<{ runId: string }>())
-	.handler(async ({ input }) => {
-		await cancelRun(input.runId);
-		return { status: "accepted" } as const;
-	});
+export interface CancelRunCommand {
+	runId: string;
+}
+
+export async function executeCancelRun({ runId }: CancelRunCommand) {
+	await cancelRun(runId);
+	return { status: "accepted" } as const;
+}

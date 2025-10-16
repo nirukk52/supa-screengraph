@@ -1,19 +1,18 @@
-import {
-	SCHEMA_VERSION,
-	TOPIC_AGENTS_RUN,
-} from "@sg/agents-contracts/src/contracts/constants";
 import type {
 	DebugTrace,
 	NodeFinished,
 	NodeStarted,
 	RunFinished,
-} from "@sg/agents-contracts/src/contracts/event-types";
+} from "@sg/agents-contracts";
+import { SCHEMA_VERSION, TOPIC_AGENTS_RUN } from "@sg/agents-contracts";
+import { recordEvent } from "../../application/event-buffer";
 import { bus, queue } from "../../application/singletons";
 import { logFn } from "../../application/usecases/log";
 import { nextSeq } from "../../application/usecases/sequencer";
+import { QUEUE_NAME } from "../../application/usecases/start-run";
 
 export function startWorker() {
-	queue.worker<{ runId: string }>("agents.run", async ({ runId }) => {
+	queue.worker<{ runId: string }>(QUEUE_NAME, async ({ runId }) => {
 		logFn("worker:job:start");
 		const n1: NodeStarted = {
 			runId,
@@ -25,6 +24,7 @@ export function startWorker() {
 			name: "EnsureDevice",
 		};
 		await bus.publish(TOPIC_AGENTS_RUN, n1);
+		recordEvent(n1);
 
 		const dbg: DebugTrace = {
 			runId,
@@ -36,6 +36,7 @@ export function startWorker() {
 			fn: "doWork",
 		};
 		await bus.publish(TOPIC_AGENTS_RUN, dbg);
+		recordEvent(dbg);
 
 		const n2: NodeFinished = {
 			runId,
@@ -47,6 +48,7 @@ export function startWorker() {
 			name: "EnsureDevice",
 		};
 		await bus.publish(TOPIC_AGENTS_RUN, n2);
+		recordEvent(n2);
 
 		const fin: RunFinished = {
 			runId,
@@ -57,5 +59,6 @@ export function startWorker() {
 			source: "worker",
 		};
 		await bus.publish(TOPIC_AGENTS_RUN, fin);
+		recordEvent(fin);
 	});
 }

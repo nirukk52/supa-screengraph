@@ -1,7 +1,14 @@
-import type { ActiveOrganization } from "../auth";
+interface OrganizationMember {
+	userId: string;
+	role: string;
+}
+
+interface BasicOrganization {
+	members: OrganizationMember[];
+}
 
 export function isOrganizationAdmin(
-	organization?: ActiveOrganization | null,
+	organization?: BasicOrganization | null,
 	user?: {
 		id: string;
 		role?: string | null;

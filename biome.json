@@ -45,7 +45,7 @@
 	},
 	"assist": { "actions": { "source": { "organizeImports": "on" } } },
 	"files": {
-		"includes": ["**", "!zod/index.ts", "!tailwind-animate.css"]
+		"includes": ["**/*.{ts,tsx,js,jsx,json,md,mdx,cjs,mjs}"]
 	},
 	"javascript": {
 		"jsxRuntime": "reactClassic"
