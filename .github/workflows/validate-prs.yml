@@ -2,8 +2,7 @@ name: validate-prs
 
 on:
   pull_request:
-  push:
-    branches: [main, feat/*, feature/*, fix/*, chore/*]
+    branches: [main]
 
 permissions:
   contents: read
@@ -14,12 +13,24 @@ jobs:
     name: Unified PR Checks
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U test -d test" \
+          --health-interval 5s \
+          --health-timeout 5s \
+          --health-retries 20
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
 
       - name: Setup pnpm
@@ -32,6 +43,9 @@ jobs:
         with:
           node-version: 20
           cache: 'pnpm'
+
+      - name: Install Playwright browsers and system deps
+        run: pnpm --filter @repo/web exec playwright install --with-deps
 
       - name: Run PR Checks (local/CI parity)
         run: node tooling/scripts/pr-check.mjs
