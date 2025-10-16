@@ -22,6 +22,10 @@ This repository maintains a six-page Claude documentation set. Each category mus
 - [Milestone 3 Setup](docs/retro/milestone-3-setup.md) (2024-12-19)
 - [Milestone 3 Sprint 2 - Backend Pipeline](docs/retro/milestone3-sprint2.md) (2025-10-15)
 - [M3 Backend Handoff](docs/retro/m3-backend-handoff.md) (2025-10-15)
+- [PR #39 Retro – Deterministic Backend & CI Playbook](docs/guides/pr39-retro.md) (2025-10-16)
+
+## Architecture Notes
+- [PR #39 Backend Patterns](docs/architecture/pr39-backend-patterns.md)
 
 ---
 
