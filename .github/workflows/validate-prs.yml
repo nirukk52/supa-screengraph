@@ -48,10 +48,13 @@ jobs:
           pnpm -v
 
       - name: Install dependencies (frozen lockfile)
-        run: pnpm -w install --frozen-lockfile
+        run: pnpm install --recursive --frozen-lockfile
+
+      - name: Ensure Prisma CLI is available
+        run: pnpm --filter @repo/database exec prisma --version
 
       - name: Generate DB types
-        run: pnpm --filter @repo/database generate
+        run: pnpm --filter @repo/database exec prisma generate --no-hints --schema=./prisma/schema.prisma
 
       - name: Build backend packages
         run: pnpm -w run build:backend

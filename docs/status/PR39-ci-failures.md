@@ -125,8 +125,37 @@ TypeError: Cannot read properties of undefined (reading 'endCol')
 ```
 
 ## Last Updated
-- Commit: 0d153add2b6821d40ef565a82a0b0a6f648ac208
-- Date: 2025-10-16T00:38:00Z
-- Status: All steps pass locally; CI failures likely due to coverage conversion errors and toolchain differences
+- Commit: e90f7167202f8bffc92db0c3fec054268f5e8025
+- Date: 2025-10-16T04:54:00Z
+- Status: **LOCAL pr:check PASSES COMPLETELY** - All tests successful, including backend e2e and web e2e
+
+## Current Status (2025-10-16T04:54Z)
+✅ **Local Environment**: `pnpm pr:check` passes end-to-end
+- Install: ✅ (frozen lockfile)
+- DB Generate: ✅ (Prisma generates successfully) 
+- Backend Build: ✅ (TypeScript compilation)
+- Backend Lint: ✅ (Architecture, publint, dependency-cruiser)
+- Biome CI: ✅ (No formatting issues)
+- Unit Tests + Coverage: ✅ (68 tests passed, coverage warnings non-fatal)
+- Backend E2E: ✅ (SSE stream assertions successful)
+- Web E2E: ✅ (Playwright test passed)
+
+❌ **CI Environment**: User reports "all three failing" with `prisma: not found` error
+
+## Key Finding
+The `prisma: not found` error mentioned by user is **NOT reproducible locally**. This indicates a CI-specific environment issue, likely:
+1. Missing Prisma CLI installation in CI
+2. Different Node.js/npm/pnpm setup in CI
+3. PATH issues in GitHub Actions runner
+
+## Root Cause Identified (2025-10-16T05:00Z)
+**CI was running `pnpm --filter @repo/database generate` BEFORE installing dependencies**, so the Prisma CLI binary wasn't available in `node_modules`.
+
+**Fix Applied:**
+- Changed `pnpm -w install --frozen-lockfile` → `pnpm install --recursive --frozen-lockfile` 
+- Added Prisma CLI availability check: `pnpm --filter @repo/database exec prisma --version`
+- Changed generate command to use explicit binary: `pnpm --filter @repo/database exec prisma generate --no-hints --schema=./prisma/schema.prisma`
+
+**Next:** Test fix by pushing and monitoring CI run.
 
 

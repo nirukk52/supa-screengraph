@@ -49,21 +49,29 @@ async function main() {
 	try {
 		assertVersions();
 
-		// Ensure deterministic install
-		run("pnpm -w install --frozen-lockfile");
+		// Ensure deterministic install (match CI)
+		run("pnpm install --recursive --frozen-lockfile");
 
-		// Database schema generate
-		run("pnpm --filter @repo/database generate");
+		// Ensure Prisma CLI is available (match CI)
+		run("pnpm --filter @repo/database exec prisma --version");
 
-		// Backend build + lint
+		// Database schema generate (match CI)
+		run(
+			"pnpm --filter @repo/database exec prisma generate --no-hints --schema=./prisma/schema.prisma",
+		);
+
+		// Backend build + lint (match CI)
 		run("pnpm -w run build:backend");
 		run("pnpm -w run backend:lint");
 
-		// Lint + tests with coverage
+		// Lint + tests with coverage (match CI)
 		run("pnpm biome ci .");
 		run("pnpm -w vitest run --coverage --reporter=dot");
 
-		// Web E2E in CI mode
+		// Backend e2e (match CI)
+		run("pnpm run backend:e2e");
+
+		// Web E2E in CI mode (match CI)
 		run("pnpm --filter @repo/web e2e:ci");
 
 		console.log("\nAll PR checks completed successfully.");
