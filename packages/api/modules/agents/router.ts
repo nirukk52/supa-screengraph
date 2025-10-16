@@ -34,9 +34,15 @@ function getDynamicAgentRoutes() {
 	try {
 		// Dynamically load the feature's API handlers if present
 		const mod = require("@sg/feature-agents-run");
-		if (mod.getStreamRun) routes.getStreamRun = mod.getStreamRun;
-		if (mod.postCancelRun) routes.postCancelRun = mod.postCancelRun;
-		if (mod.postStartRun) routes.postStartRun = mod.postStartRun;
+		if (mod.getStreamRun) {
+			routes.getStreamRun = mod.getStreamRun;
+		}
+		if (mod.postCancelRun) {
+			routes.postCancelRun = mod.postCancelRun;
+		}
+		if (mod.postStartRun) {
+			routes.postStartRun = mod.postStartRun;
+		}
 	} catch (error) {
 		const err = error as { message?: string };
 		console.warn(

@@ -49,8 +49,12 @@ class FeatureRegistryImpl implements FeatureRegistry {
 
 	getByType(type: "router" | "procedures"): FeatureDefinition[] {
 		return this.getAll().filter((feature) => {
-			if (type === "router") return feature.router;
-			if (type === "procedures") return feature.procedures;
+			if (type === "router") {
+				return feature.router;
+			}
+			if (type === "procedures") {
+				return feature.procedures;
+			}
 			return false;
 		});
 	}
