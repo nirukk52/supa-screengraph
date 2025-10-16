@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "generatorVersion": "0.0.0",
-  "generatedAt": "2025-10-16T09:16:15.789Z",
+  "generatedAt": "2025-10-16T09:51:15.107Z",
   "outputPath": "/Users/priyankalalge/RealSaas/Screengraph/supastarter-nextjs/packages/database/prisma/zod",
   "files": [
     "index.ts"

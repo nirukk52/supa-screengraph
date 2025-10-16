@@ -20,9 +20,7 @@
 		"strictNullChecks": true,
 		"paths": {
 			"@repo/config": ["../../config"],
-			"@sg/feature-agents-run": [
-				"../../packages/features/agents-run"
-			]
+			"@sg/feature-agents-run": ["../../packages/features/agents-run"]
 		}
 	},
 	"display": "Default",
