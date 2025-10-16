@@ -1,0 +1,14 @@
+# Build outputs
+**/dist/**
+**/build/**
+**/.next/**
+**/coverage/**
+
+# Temporary: TS emit that leaked into src
+packages/mail/src/util/*.js
+packages/storage/provider/*.js
+packages/auth/**/*.js
+packages/i18n/**/*.js
+packages/utils/**/*.js
+packages/database/**/*.js
+
