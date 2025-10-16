@@ -1,4 +1,4 @@
-name: pr-check
+name: unified-pr-check
 
 on:
   pull_request:
@@ -9,18 +9,9 @@ permissions:
   contents: read
   pull-requests: read
 
-env:
-  DATABASE_URL: "postgresql://test:test@localhost:5432/test"
-  BETTER_AUTH_SECRET: "test-secret-for-ci-only"
-  NEXT_PUBLIC_SITE_URL: "http://localhost:3000"
-  GITHUB_CLIENT_ID: "test-github-client-id"
-  GITHUB_CLIENT_SECRET: "test-github-client-secret"
-  GOOGLE_CLIENT_ID: "test-google-client-id"
-  GOOGLE_CLIENT_SECRET: "test-google-client-secret"
-
 jobs:
-  pr-check:
-    name: PR Checks (sequential)
+  unified-pr-check:
+    name: Unified PR Checks
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -42,37 +33,16 @@ jobs:
           node-version: 20
           cache: 'pnpm'
 
-      - name: Show tool versions
-        run: |
-          node -v
-          pnpm -v
-
-      - name: Install dependencies (frozen lockfile)
-        run: pnpm install --recursive --frozen-lockfile
-
-      - name: Ensure Prisma CLI is available
-        run: pnpm --filter @repo/database exec prisma --version
-
-      - name: Generate DB types
-        run: pnpm --filter @repo/database exec prisma generate --no-hints --schema=./prisma/schema.prisma
-
-      - name: Build backend packages
-        run: pnpm -w run build:backend
-
-      - name: Run backend linting
-        run: pnpm -w run backend:lint
-
-      - name: Verify Biome (no changes pending)
-        run: pnpm biome ci .
-
-      - name: Run unit tests with coverage
-        run: pnpm -w vitest run --coverage --reporter=dot
-
-      - name: Run backend e2e (API)
-        run: pnpm run backend:e2e
-
-      - name: Run web e2e (Playwright)
-        run: pnpm --filter @repo/web e2e:ci
+      - name: Execute Unified Workflow
+        run: node tooling/scripts/execute-unified-workflow.mjs
+        env:
+          DATABASE_URL: "postgresql://test:test@localhost:5432/test"
+          BETTER_AUTH_SECRET: "test-secret-for-ci-only"
+          NEXT_PUBLIC_SITE_URL: "http://localhost:3000"
+          GITHUB_CLIENT_ID: "test-github-client-id"
+          GITHUB_CLIENT_SECRET: "test-github-client-secret"
+          GOOGLE_CLIENT_ID: "test-google-client-id"
+          GOOGLE_CLIENT_SECRET: "test-google-client-secret"
 
       - name: Upload Playwright report
         if: ${{ !cancelled() }}
