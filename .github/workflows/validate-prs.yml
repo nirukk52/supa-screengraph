@@ -2,8 +2,8 @@ name: validate-prs
 
 on:
   pull_request:
-    branches: [ main ]
-  workflow_dispatch:
+  push:
+    branches: [main, feat/*, feature/*, fix/*, chore/*]
 
 permissions:
   contents: read

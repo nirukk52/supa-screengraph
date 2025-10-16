@@ -62,3 +62,29 @@ Purpose: Single-page overview of the system's runtime, module boundaries, and da
 ## Source of Truth
 - Diagrams: `docs/architecture/flow.md`
 - Contracts: `packages/agents-contracts`
+
+---
+
+## Frontend UI Architecture (apps/web)
+
+Purpose: Scalable, accessible, and fast UI using Next.js App Router, Shadcn, Radix, Tailwind, and React Server Components.
+
+Structure:
+- `apps/web/app/**`: routes/layouts (RSC-first); minimal client components.
+- `apps/web/modules/ui/**`: primitives and patterns; re-export via `modules/ui/lib`.
+- `apps/web/modules/i18n/**`: routing helpers and localization utilities.
+- `.storybook/**` + `mocks/**` + `msw.init.ts`: rapid prototyping with MSW.
+
+Styling & Tokens:
+- Tailwind with tokens in `tooling/tailwind/theme.css` (colors, spacing, radii, typography).
+- No magic values; consume tokens via utilities.
+
+Guidelines:
+- Prefer RSC; wrap client components in Suspense when needed.
+- Typed props; no `any`; exhaustive unions.
+- Accessibility: roles, aria, focus-visible, keyboard interactions per Radix.
+- Co-located stories documenting states (default, hover, loading, error, disabled).
+
+Performance:
+- Minimize `useEffect`/state; memoize only when measured.
+- Code-split non-critical UI; lazy-load images with sizes; prefer CSS transforms.
