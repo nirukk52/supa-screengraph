@@ -19,7 +19,7 @@ const meta = {
 		},
 	},
 	args: {
-    onClick: () => {},
+		onClick: () => {},
 	},
 } satisfies Meta<typeof ExampleButton>;
 
