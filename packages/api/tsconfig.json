@@ -9,6 +9,6 @@
 		"emitDeclarationOnly": false,
 		"composite": true
 	},
-	"include": ["index.ts", "lib/**/*.ts", "modules/**/*.ts", "orpc/**/*.ts"],
+	"include": ["index.ts", "lib/**/*.ts", "modules/**/*.ts", "orpc/**/*.ts", "src/**/*.ts"],
 	"exclude": ["dist", "build", "node_modules", "tests"]
 }
