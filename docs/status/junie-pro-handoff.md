@@ -143,7 +143,18 @@ yamllint .github/workflows/validate-prs.yml
 - **Handoff To**: Junie Pro
 - **Repository**: nirukk52/supa-screengraph
 - **PR**: #39 (feat/feature-registration → main)
-- **Last Updated**: 2025-10-16T04:07Z
+- **Last Updated**: 2025-10-16T04:17Z
+
+## Latest Update (Junie Pro Implementation)
+**2025-10-16T04:17Z**: Junie Pro successfully implemented the unified `pr:check` script:
+- ✅ Created `tooling/scripts/pr-check.mjs` with version validation
+- ✅ Added `.nvmrc` with Node.js 20.15.1 for consistent toolchain  
+- ✅ Updated `package.json` to use new unified script
+- ✅ Script correctly detects version mismatches (tested: local v24.8.0 vs expected v20)
+- ✅ Uses `--frozen-lockfile` for deterministic installs
+- 🎯 **Deterministic CI/local parity framework implemented!**
+
+**Next**: Test with correct Node.js version or update CI to match local environment.
 
 ---
 *This handoff documentation should be updated as investigation progresses. All findings and solutions should be recorded in the status files for future reference.*
