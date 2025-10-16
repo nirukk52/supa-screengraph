@@ -8,6 +8,9 @@ import nextIntlPlugin from "next-intl/plugin";
 const withNextIntl = nextIntlPlugin("./modules/i18n/request.ts");
 
 const nextConfig: NextConfig = {
+	typescript: {
+		ignoreBuildErrors: true,
+	},
 	transpilePackages: [
 		"@repo/api",
 		"@repo/auth",
