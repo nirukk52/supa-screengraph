@@ -22,6 +22,13 @@ Purpose: Fast, type-safe UI in Next.js App Router with Shadcn, Radix, Tailwind, 
 - Avoid gratuitous state/effects; memoize only when measured.
 - Code-split non-critical UI; lazy-load images with sizes.
 
+## Responsive Design (Mobile → Desktop)
+- Mobile-first: design for small screens; scale up via Tailwind breakpoints.
+- Use `Container` for horizontal padding and max-width (`sm|md|lg|xl|full`).
+- Use `Grid` for adaptive layouts; defaults to 1 → 2 → 12 columns at `sm`/`lg`.
+- Images: set width/height or sizes; avoid layout shift.
+- Navigation: ensure touch targets ≥ 44px; test focus/keyboard.
+
 ## Authoring Checklist
 - Descriptive prop names; defaults explicit; no boolean traps.
 - No magic strings—centralize constants.
