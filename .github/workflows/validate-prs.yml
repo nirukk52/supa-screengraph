@@ -19,17 +19,20 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Checkout PR branch
+      - &checkout_pr_branch
+        name: Checkout PR branch
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup pnpm
+      - &setup_pnpm
+        name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10.14.0
 
-      - name: Setup Node.js
+      - &setup_node
+        name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -47,23 +50,13 @@ jobs:
     timeout-minutes: 30
     needs: [lint]
     steps:
-      - name: Checkout PR branch
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - *checkout_pr_branch
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.14.0
+      - *setup_pnpm
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
+      - *setup_node
 
-      - name: Build backend only (skip tests and e2e)
+      - name: Build backend (skip vitest coverage and e2e)
         run: node tooling/scripts/pr-check.mjs
         env:
           SKIP_COVERAGE: '1'
@@ -76,25 +69,16 @@ jobs:
     timeout-minutes: 30
     needs: [build_backend]
     steps:
-      - name: Checkout PR branch
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - *checkout_pr_branch
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.14.0
+      - *setup_pnpm
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
+      - *setup_node
 
       - name: Run unit tests (with coverage)
         run: node tooling/scripts/pr-check.mjs
-        env: {}
+        env:
+          SKIP_E2E: '1'
 
   # 4) Backend e2e tests (needs Postgres)
   backend_e2e:
@@ -117,21 +101,11 @@ jobs:
           --health-timeout 5s
           --health-retries 20
     steps:
-      - name: Checkout PR branch
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - *checkout_pr_branch
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.14.0
+      - *setup_pnpm
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
+      - *setup_node
 
       - name: Run backend e2e (skip frontend e2e)
         run: node tooling/scripts/pr-check.mjs
@@ -166,21 +140,11 @@ jobs:
           --health-timeout 5s
           --health-retries 20
     steps:
-      - name: Checkout PR branch
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - *checkout_pr_branch
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.14.0
+      - *setup_pnpm
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
+      - *setup_node
 
       - name: Install Playwright browsers and system deps
         run: pnpm dlx playwright@1.56.0 install --with-deps
