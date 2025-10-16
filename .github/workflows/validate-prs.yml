@@ -1,12 +1,13 @@
-name: validate-prs
+name: pr-check
 
 on:
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
+  pull-requests: read
 
 env:
   DATABASE_URL: "postgresql://test:test@localhost:5432/test"
@@ -18,77 +19,61 @@ env:
   GOOGLE_CLIENT_SECRET: "test-google-client-secret"
 
 jobs:
-  lint:
-    name: Lint code
+  pr-check:
+    name: PR Checks (sequential)
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v4
         with:
-          # Ensure we check out the source branch, not the merge commit
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0
-          persist-credentials: true
-      - name: Setup Biome
-        uses: biomejs/setup-biome@v2
-        with:
-          version: latest
-      - name: Apply Biome fixes
-        run: biome check . --write
-      - name: Commit and push fixes (same-repo PRs only)
-        if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          if [ -n "$(git status --porcelain)" ]; then
-            git add -A
-            git commit -m "chore(ci): apply biome autofix"
-            git push
-          fi
-      - name: Verify Biome (no changes pending)
-        run: biome ci .
-  unit:
-    name: Unit tests (Vitest + coverage)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: 10.14.0
-      - uses: actions/setup-node@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'pnpm'
-      - name: Install deps
-        run: pnpm -w install
+
+      - name: Show tool versions
+        run: |
+          node -v
+          pnpm -v
+
+      - name: Install dependencies (frozen lockfile)
+        run: pnpm -w install --frozen-lockfile
+
       - name: Generate DB types
         run: pnpm --filter @repo/database generate
+
       - name: Build backend packages
         run: pnpm -w run build:backend
+
       - name: Run backend linting
         run: pnpm -w run backend:lint
-      - name: Run unit tests with coverage (70% gates)
+
+      - name: Verify Biome (no changes pending)
+        run: pnpm biome ci .
+
+      - name: Run unit tests with coverage
         run: pnpm -w vitest run --coverage --reporter=dot
-  e2e:
-    name: Run e2e tests
-    timeout-minutes: 60
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10.14.0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'pnpm'
-      - name: Install dependencies
-        run: pnpm -w install && pnpm --filter @repo/database generate
-      - name: Run Playwright tests
+
+      - name: Run backend e2e (API)
+        run: pnpm run backend:e2e
+
+      - name: Run web e2e (Playwright)
         run: pnpm --filter @repo/web e2e:ci
-      - uses: actions/upload-artifact@v4
+
+      - name: Upload Playwright report
         if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
         with:
           name: playwright-report
           path: apps/web/playwright-report/
