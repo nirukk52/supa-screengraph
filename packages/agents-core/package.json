@@ -1,0 +1,33 @@
+{
+	"name": "@repo/agents-core",
+	"version": "0.0.0",
+	"private": true,
+	"sg:layer": "domain",
+	"sg:scope": "agents",
+	"main": "dist/index.js",
+	"types": "src/index.ts",
+	"exports": {
+		".": {
+			"import": "./dist/index.js",
+			"require": "./dist/index.js",
+			"types": "./src/index.ts"
+		},
+		"./package.json": "./package.json"
+	},
+	"files": [
+		"dist",
+		"package.json",
+		"README.md"
+	],
+	"scripts": {
+		"build": "tsc -b",
+		"type-check": "tsc --noEmit",
+		"prepare": "pnpm run build"
+	},
+	"dependencies": {},
+	"devDependencies": {
+		"@biomejs/biome": "2.2.5",
+		"@repo/tsconfig": "workspace:*",
+		"typescript": "5.9.3"
+	}
+}
