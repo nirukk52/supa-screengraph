@@ -9,6 +9,13 @@ import {
 } from "./adapters";
 import { startOutboxWorker } from "./outbox-publisher";
 
+/**
+ * Start the run orchestrator worker.
+ *
+ * Subscribes to the in-memory queue for `QUEUE_NAME` and processes run jobs by
+ * invoking the domain orchestrator. Also starts the outbox publisher worker to
+ * flush persisted events to the event bus.
+ */
 export function startWorker() {
 	queue.worker<{ runId: string }>(QUEUE_NAME, async ({ runId }) => {
 		logFn("worker:job:start");

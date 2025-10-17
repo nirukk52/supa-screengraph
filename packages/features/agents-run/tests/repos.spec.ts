@@ -1,5 +1,6 @@
 import "./mocks/db-mock";
 import { db } from "@repo/database/prisma/client";
+import { EVENT_SOURCES, EVENT_TYPES } from "@sg/agents-contracts";
 import { beforeEach, describe, expect, it } from "vitest";
 import { RunEventRepo } from "../src/infra/repos/run-event-repo";
 
@@ -14,17 +15,17 @@ describe("RunEventRepo", () => {
 			runId,
 			seq: 1,
 			ts: Date.now(),
-			type: "RunStarted",
+			type: EVENT_TYPES.RunStarted,
 			v: 1,
-			source: "api",
+			source: EVENT_SOURCES.api,
 		} as any);
 		await RunEventRepo.appendEvent({
 			runId,
 			seq: 2,
 			ts: Date.now(),
-			type: "NodeStarted",
+			type: EVENT_TYPES.NodeStarted,
 			v: 1,
-			source: "worker",
+			source: EVENT_SOURCES.worker,
 			name: "EnsureDevice",
 		} as any);
 		const run = await db.run.findUniqueOrThrow({ where: { id: runId } });
@@ -37,18 +38,18 @@ describe("RunEventRepo", () => {
 			runId,
 			seq: 1,
 			ts: Date.now(),
-			type: "RunStarted",
+			type: EVENT_TYPES.RunStarted,
 			v: 1,
-			source: "api",
+			source: EVENT_SOURCES.api,
 		} as any);
 		await expect(
 			RunEventRepo.appendEvent({
 				runId,
 				seq: 3,
 				ts: Date.now(),
-				type: "NodeStarted",
+				type: EVENT_TYPES.NodeStarted,
 				v: 1,
-				source: "worker",
+				source: EVENT_SOURCES.worker,
 				name: "Warmup",
 			} as any),
 		).rejects.toThrow();

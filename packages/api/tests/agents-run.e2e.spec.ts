@@ -4,6 +4,7 @@
 // (4) verify stream endpoint responds with SSE headers
 
 import { db } from "@repo/database/prisma/client";
+import { EVENT_TYPES } from "@sg/agents-contracts";
 import { describe, expect, it } from "vitest";
 import { app } from "../index.test-export.ts";
 import { createTestApp } from "./helpers/supertest-app";
@@ -69,7 +70,7 @@ describe("agents-run e2e via API", () => {
 		const events = await waitForEvents(runId, 1, 10000);
 
 		expect(events.length).toBeGreaterThanOrEqual(1);
-		expect(events[0].type).toBe("RunStarted");
+		expect(events[0].type).toBe(EVENT_TYPES.RunStarted);
 
 		// Monotonic sequence and runId consistency (for whatever events exist)
 		for (let i = 1; i < events.length; i++) {

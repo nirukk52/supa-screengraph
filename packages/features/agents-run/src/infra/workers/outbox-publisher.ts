@@ -1,10 +1,22 @@
 import { db } from "@repo/database/prisma/client";
 import { logger } from "@repo/logs";
 import type { AgentEvent } from "@sg/agents-contracts";
-import { TOPIC_AGENTS_RUN } from "@sg/agents-contracts";
+import {
+	EVENT_SOURCES,
+	EVENT_TYPES,
+	TOPIC_AGENTS_RUN,
+} from "@sg/agents-contracts";
 import { bus } from "../../application/singletons";
 
-async function tickOutboxOnce() {
+/**
+ * Publish pending outbox events for candidate runs.
+ *
+ * Drains events in order per run by reading the current outbox.nextSeq,
+ * publishing the corresponding event to the bus, marking it published,
+ * and advancing nextSeq. This provides at-least-once delivery to the bus;
+ * clients achieve exactly-once via de-duplication on seq.
+ */
+async function publishPendingOutboxEventsOnce() {
 	// Find candidate runs where nextSeq <= lastSeq
 	const candidates = await db.runOutbox.findMany({
 		take: 50,
@@ -40,7 +52,7 @@ async function tickOutboxOnce() {
 						ts: Number(evtRow.ts),
 						type: evtRow.type as AgentEvent["type"],
 						v: 1,
-						source: "outbox",
+						source: EVENT_SOURCES.outbox,
 						...(evtRow.name ? { name: evtRow.name } : {}),
 						...(evtRow.fn ? { fn: evtRow.fn } : {}),
 					} as AgentEvent;
@@ -70,7 +82,7 @@ async function tickOutboxOnce() {
 						lag_ms: lagMs,
 					});
 
-					if (evt.type === "RunFinished") {
+					if (evt.type === EVENT_TYPES.RunFinished) {
 						await tx.run.update({
 							where: { id: c.runId },
 							data: {
@@ -91,12 +103,20 @@ async function tickOutboxOnce() {
 	}
 }
 
+/**
+ * Start the outbox publisher worker.
+ *
+ * Periodically polls the outbox table and publishes pending events to the
+ * in-memory event bus topic `TOPIC_AGENTS_RUN`. Returns a disposer to stop
+ * polling. Uses at-least-once delivery to the bus; consumers should de-dupe
+ * on `(runId, seq)`.
+ */
 export function startOutboxWorker(pollMs = 200) {
 	const id = setInterval(() => {
-		void tickOutboxOnce();
+		void publishPendingOutboxEventsOnce();
 	}, pollMs);
 
-	void tickOutboxOnce();
+	void publishPendingOutboxEventsOnce();
 
 	return () => {
 		clearInterval(id);

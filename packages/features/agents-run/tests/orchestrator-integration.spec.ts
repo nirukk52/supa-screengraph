@@ -1,4 +1,5 @@
 import "./mocks/db-mock";
+import { EVENT_TYPES } from "@sg/agents-contracts";
 import { describe, expect, it } from "vitest";
 import { resetInfra } from "../src/application/singletons";
 import { startRun } from "../src/application/usecases/start-run";
@@ -30,10 +31,10 @@ describe("Orchestrator Integration (M3)", () => {
 		expect(events.length).toBeGreaterThanOrEqual(12);
 
 		// First event is RunStarted
-		expect(events[0].type).toBe("RunStarted");
+		expect(events[0].type).toBe(EVENT_TYPES.RunStarted);
 
 		// Last event is RunFinished
-		expect(events.at(-1)?.type).toBe("RunFinished");
+		expect(events.at(-1)?.type).toBe(EVENT_TYPES.RunFinished);
 
 		// Validate monotonic sequencing
 		const seqs = events.map((e) => e.seq);

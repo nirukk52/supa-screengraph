@@ -1,5 +1,6 @@
 import "./mocks/db-mock";
 import { db } from "@repo/database/prisma/client";
+import { EVENT_SOURCES, EVENT_TYPES } from "@sg/agents-contracts";
 import { beforeEach, describe, expect, it } from "vitest";
 import { resetInfra } from "../src/application/singletons";
 import { streamRun } from "../src/application/usecases/stream-run";
@@ -44,18 +45,18 @@ describe("SSE stream backfill", () => {
 					runId,
 					seq: 1,
 					ts: BigInt(Date.now()),
-					type: "RunStarted",
+					type: EVENT_TYPES.RunStarted,
 					v: 1,
-					source: "api",
+					source: EVENT_SOURCES.api,
 					publishedAt: new Date(),
 				},
 				{
 					runId,
 					seq: 2,
 					ts: BigInt(Date.now()),
-					type: "NodeStarted",
+					type: EVENT_TYPES.NodeStarted,
 					v: 1,
-					source: "worker",
+					source: EVENT_SOURCES.worker,
 					name: "EnsureDevice",
 					publishedAt: new Date(),
 				},
@@ -63,9 +64,9 @@ describe("SSE stream backfill", () => {
 					runId,
 					seq: 3,
 					ts: BigInt(Date.now()),
-					type: "NodeFinished",
+					type: EVENT_TYPES.NodeFinished,
 					v: 1,
-					source: "worker",
+					source: EVENT_SOURCES.worker,
 					name: "EnsureDevice",
 					publishedAt: new Date(),
 				},
@@ -73,9 +74,9 @@ describe("SSE stream backfill", () => {
 					runId,
 					seq: 4,
 					ts: BigInt(Date.now()),
-					type: "RunFinished",
+					type: EVENT_TYPES.RunFinished,
 					v: 1,
-					source: "worker",
+					source: EVENT_SOURCES.worker,
 				},
 			],
 		});

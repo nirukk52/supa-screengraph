@@ -1,12 +1,13 @@
 import { db } from "@repo/database/prisma/client";
 import { logger } from "@repo/logs";
 import type { AgentEvent } from "@sg/agents-contracts";
+import { EVENT_TYPES } from "@sg/agents-contracts";
 
 export const RunEventRepo = {
 	async appendEvent(event: AgentEvent): Promise<void> {
 		await db.$transaction(async (tx) => {
 			// Ensure run exists; create on seq=1 (RunStarted)
-			if (event.seq === 1 && event.type === "RunStarted") {
+			if (event.seq === 1 && event.type === EVENT_TYPES.RunStarted) {
 				await tx.run.upsert({
 					where: { id: event.runId },
 					update: {},

@@ -1,6 +1,6 @@
 import { db } from "@repo/database/prisma/client";
 import type { AgentEvent } from "@sg/agents-contracts";
-import { TOPIC_AGENTS_RUN } from "@sg/agents-contracts";
+import { EVENT_SOURCES, TOPIC_AGENTS_RUN } from "@sg/agents-contracts";
 import { bus } from "../singletons";
 
 export async function* streamRun(
@@ -21,7 +21,7 @@ export async function* streamRun(
 			ts: Number(r.ts),
 			type: r.type as AgentEvent["type"],
 			v: 1,
-			source: "outbox",
+			source: EVENT_SOURCES.outbox,
 			...(r.name ? { name: r.name } : {}),
 			...(r.fn ? { fn: r.fn } : {}),
 		} as AgentEvent;
