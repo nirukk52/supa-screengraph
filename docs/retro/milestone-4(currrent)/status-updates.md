@@ -2,7 +2,14 @@
 
 ## Reverse-Chronological Log
 
-### 2025-10-17
+### 2025-10-17 (PM) — ✅ M4 COMPLETE
+- ✅ Junie implemented `awaitOutboxFlush` and `awaitStreamCompletion` helpers
+- ✅ CI workflow updated with `TEST_DATABASE_URL` for backend_e2e and web_e2e
+- ✅ All pr:check gates green
+- ✅ PR opened: https://github.com/nirukk52/supa-screengraph/pull/51
+- ✅ M5 supertest migration plan created
+
+### 2025-10-17 (AM)
 - ✅ Testcontainers-based Prisma setup integrated; per-worker schemas drop on teardown.
 - ⚠️ Vitest integration specs timing out (outbox/stream). Need deterministic drain helper to await `RunFinished` and `publishedAt`.
 - 🔄 Carded task: implement `awaitOutboxFlush(runId)` in tests + shared helper.
@@ -19,11 +26,13 @@
 
 ## Open Tasks / Blockers
 
-1. Add test helper to wait for outbox flush & SSE completion → unblock orchestrator/debug-stream/backfill specs.
-2. Update integration tests in `packages/api/node_modules/@sg/feature-agents-run/tests` (same helpers) to keep CI parity.
-3. Patch CI workflow to export `TEST_DATABASE_URL` (or enable Docker) and reuse Vitest bootstrap.
-4. Document test env usage + fallback DB in new `m4_v2_prisma_setup.md`.
-5. Ensure pr-check script skips local `pnpm vitest run` when `TEST_DATABASE_URL` missing (friendlier DX).
+✅ **ALL RESOLVED**
+
+1. ✅ Test helpers implemented (`awaitOutboxFlush`, `awaitStreamCompletion`)
+2. ✅ Integration tests updated with helpers
+3. ✅ CI workflow patched with `TEST_DATABASE_URL`
+4. ✅ Prisma setup documented in `m4_v2_prisma_setup.md`
+5. 🔄 pr-check DX improvements deferred to M5
 
 ## Manual Smoke Checklist (to rerun post-fix)
 - [ ] Start run via API → confirm 13 canonical events persisted and published with `publishedAt`.
