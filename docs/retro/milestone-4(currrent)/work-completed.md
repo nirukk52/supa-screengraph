@@ -23,7 +23,17 @@
 - Authored M4 objective and status log mirroring Milestone 3 structure.
 - TODO: Retro summary, Junie handoff, diff doc (pending once tests stabilized).
 
-## Next Steps
-- Implement deterministic wait helper for outbox/SSE tests and update CI workflow.
-- Document Postgres test setup (`m4_v2_prisma_setup.md`).
-- Finish retro and handoff docs once tests pass.
+## What Was Deferred
+
+**Observability (to M6+):**
+- Basic metrics (counters for runs/events, gauge for outbox lag)
+- Logging hooks in repos and outbox worker
+
+**Documentation (to M6+):**
+- One-page runbook for "run stuck" troubleshooting
+- Update docs/architecture/flow.md with M4 persistence diagram
+- Create packages/features/agents-run/README.md
+
+**Rationale:** Keep M4 scope tight on core persistence; defer operational polish until closer to production.
+
+See `remaining-work.md` for details.
