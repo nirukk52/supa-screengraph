@@ -21,7 +21,7 @@
 	],
 	"scripts": {
 		"build": "tsc -b",
-		"test": "vitest"
+		"test": "node ./scripts/vitest-runner.js"
 	},
 	"dependencies": {
 		"zod": "^4.1.11"

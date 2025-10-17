@@ -7,6 +7,7 @@ import {
 	InMemoryClock,
 	StubCancellationToken,
 } from "./adapters";
+import { startOutboxWorker } from "./outbox-publisher";
 
 export function startWorker() {
 	queue.worker<{ runId: string }>(QUEUE_NAME, async ({ runId }) => {
@@ -19,4 +20,7 @@ export function startWorker() {
 			cancelToken: new StubCancellationToken(),
 		});
 	});
+
+	// Start outbox worker alongside
+	startOutboxWorker();
 }

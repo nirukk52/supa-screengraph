@@ -1,0 +1,54 @@
+import { db } from "@repo/database/prisma/client";
+import type { AgentEvent } from "@sg/agents-contracts";
+
+export const RunEventRepo = {
+	async appendEvent(event: AgentEvent): Promise<void> {
+		await db.$transaction(async (tx) => {
+			// Ensure run exists; create on seq=1 (RunStarted)
+			if (event.seq === 1 && event.type === "RunStarted") {
+				await tx.run.upsert({
+					where: { id: event.runId },
+					update: {},
+					create: {
+						id: event.runId,
+						state: "started",
+						startedAt: new Date(event.ts),
+						lastSeq: 0,
+						v: 1,
+					},
+				});
+				await tx.runOutbox.upsert({
+					where: { runId: event.runId },
+					update: {},
+					create: { runId: event.runId, nextSeq: 1 },
+				});
+			}
+
+			// Monotonicity: seq == lastSeq + 1
+			const runRow = await tx.run.findUniqueOrThrow({
+				where: { id: event.runId },
+			});
+			if (event.seq !== runRow.lastSeq + 1) {
+				throw new Error("Non-monotonic seq append");
+			}
+
+			await tx.runEvent.create({
+				data: {
+					runId: event.runId,
+					seq: event.seq,
+					ts: BigInt(event.ts),
+					type: event.type,
+					v: event.v,
+					source: event.source,
+					name: (event as any).name ?? null,
+					fn: (event as any).fn ?? null,
+				},
+			});
+
+			await tx.run.update({
+				where: { id: event.runId },
+				data: { lastSeq: event.seq },
+			});
+		});
+	},
+};

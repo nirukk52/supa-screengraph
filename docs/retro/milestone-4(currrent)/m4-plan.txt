@@ -1,0 +1,255 @@
+Milestone 4 — Persistence, Outbox, SSE Backfill
+Intent
+
+Move from in-memory delivery to a durable, resumable event log with a single, ordered publishing path and reconnect-safe SSE.
+
+Core Outcomes
+
+Every event is persisted once with strict (runId, seq) uniqueness.
+
+Only the outbox publishes to the event bus, in per-run order.
+
+SSE can backfill from storage via ?fromSeq= and then attach live, without duplicates.
+
+Data Model (conceptual, not tied to a specific ORM)
+runs
+
+Purpose: lifecycle/state for a run and quick queries.
+
+Fields:
+
+id (PK; your runId)
+
+state (started | finished | cancelled | failed) — M4 may use started/finished only
+
+started_at, finished_at
+
+last_seq (int; monotonic per run)
+
+v (small int; schema version)
+
+meta (json; internal only)
+
+Guards: last_seq >= 0, single terminal state transition.
+
+run_events
+
+Purpose: the durable, ordered log and the only source for outbox and backfill.
+
+Fields (payload-free):
+
+id (PK)
+
+run_id (FK → runs.id)
+
+seq (int; starts at 1; per-run monotonic)
+
+ts (timestamp; from injected clock)
+
+type (RunStarted | NodeStarted | DebugTrace | NodeFinished | RunFinished)
+
+v (small int; event schema version)
+
+source (api | worker | outbox | replayer)
+
+name (node name; optional)
+
+fn (function id; optional)
+
+published_at (timestamp; null until outbox publishes)
+
+created_at
+
+Uniqueness: (run_id, seq) unique.
+
+Optional DB guard: partial unique “only one RunFinished per run”.
+
+run_outbox
+
+Purpose: per-run cursor so the outbox can publish without scanning.
+
+Fields:
+
+run_id (PK)
+
+next_seq (int; starts at 1)
+
+updated_at
+
+Behavior: outbox publishes the event whose seq == next_seq, then increments.
+
+Write Path (authoritative order)
+
+Orchestrator/worker generates the event (same canonical shape from M2/M3).
+
+Persist it to run_events and atomically bump runs.last_seq.
+
+Do not publish to bus here.
+
+Outbox later reads and publishes in order.
+
+Guardrail: If persistence fails, there is no publish. The bus must only see events that already exist in storage.
+
+Outbox Publisher (single source of bus truth)
+Contract
+
+Input: run_outbox.next_seq tells which event to publish for each run.
+
+Operation (per run):
+
+Lock the run_outbox row for that run.
+
+Read event (run_id, seq = next_seq) from run_events.
+
+If present → publish to bus; then mark published_at and increment next_seq in the same transaction (or publish then mark using a transactional outbox pattern if available).
+
+If absent → release lock; the run is awaiting the next event.
+
+If published event is RunFinished → set runs.state='finished', finished_at, and optionally delete run_outbox row.
+
+Concurrency: Many outbox workers can operate, but only one worker advances a given run at a time (row-level lock).
+
+Ordering guarantee: Never publish seq+1 before seq.
+
+Idempotency:
+
+Don’t republish an event with non-null published_at.
+
+If a crash occurs after publish but before mark, tolerate a republish attempt only if your bus is idempotent; otherwise, ensure “publish+mark” is atomic with your DB/queue tooling.
+
+Tuning
+
+Poll cadence: 100–500 ms, jittered.
+
+Batching: optional small batches per run, but always in order.
+
+Max concurrent runs: cap to avoid flooding.
+
+SSE Backfill & Live Attach
+Endpoint
+
+GET /agents/runs/:id/stream?fromSeq=<n>
+
+Server algorithm
+
+Compute start: startSeq = (fromSeq ?? 0) + 1.
+
+Backfill first: stream events from run_events where seq >= startSeq and published_at IS NOT NULL, ordered by seq.
+
+Attach live: subscribe to bus for that runId.
+
+De-dupe: if a live event arrives seq <= lastSentSeq, drop it.
+
+Heartbeat: send ping (or SSE comment) every 15s; does not advance seq.
+
+Close: after emitting RunFinished, flush and close socket.
+
+Headers & limits
+
+Content-Type: text/event-stream, Cache-Control: no-cache, Connection: keep-alive, X-Accel-Buffering: no (nginx).
+
+Hard cap concurrent connections; ensure unsubscribe on socket close.
+
+Invariants (must hold)
+
+Uniqueness: (runId, seq) is unique in storage and on the wire.
+
+Monotonicity (per run): RunStarted.seq = 1; RunFinished is single and last.
+
+Single publisher: only outbox sets source='outbox' and publishes to the bus.
+
+Payload-free: events remain canonical (base fields + name?, fn?; nothing else).
+
+SSE correctness: backfill → live attach → no duplicates; heartbeat never changes seq.
+
+Failure Modes & Recovery (declared behavior)
+
+Worker crashes after insert, before publish: Outbox will publish later (event exists with published_at=NULL).
+
+Outbox crashes after publish, before mark: Next tick must detect and not republish (prefer transactional outbox). If republish is possible, bus handler must be idempotent.
+
+SSE reconnect race: Handled by server-side de-dupe and client fromSeq.
+
+Double terminal insert: Rejected by DB guard (or fails app-level invariant check).
+
+Run never finishes: Alert after a timeout window (see Ops).
+
+Repositories & Transactions (discipline)
+
+RunEventRepo.append: insert event; atomically bump runs.last_seq; optionally assert seq == last_seq + 1 to catch gaps early.
+
+RunRepo.updateState: only allow legal transitions (e.g., started → finished).
+
+OutboxRepo: atomic read-publish-mark-advance with per-run lock.
+
+Observability & Ops
+Metrics (per minute; tag by runId where useful)
+
+runs_started, runs_finished, events_inserted, events_published, outbox_lag_ms (now − last published_at), active_sse_clients.
+
+time_to_first_node_ms = ts(NodeStarted@seq=2) − ts(RunStarted@seq=1).
+
+Alerts
+
+Run stall: no RunFinished N minutes after RunStarted.
+
+Outbox lag: high lag or unpublished backlog > threshold.
+
+SSE churn: spike in reconnects.
+
+Runbook (one page)
+
+“Run stuck” checklist: check run_outbox.next_seq, run_events gap, worker/outbox logs; manual advance policy.
+
+“Rebuild stream” steps: backfill from fromSeq, verify order, watch terminal.
+
+Tests (additions for M4)
+Repos
+
+Uniqueness: duplicate (runId, seq) rejected.
+
+Monotonicity: attempts to insert seq lower than last_seq + 1 fail (if you enforce the check).
+
+Terminal uniqueness: second RunFinished fails.
+
+Outbox
+
+Ordering: publishes 1..N in order and marks each; survives restarts.
+
+Concurrency: two outboxes never advance the same run_outbox row simultaneously (lock verified).
+
+SSE
+
+Backfill+attach: send fromSeq=k; server sends k+1.., then live events; no duplicates.
+
+Race: simulate an event publishing during backfill; de-dupe works.
+
+End-to-end
+
+Full happy path: produce events → persist → outbox publish → SSE client with backfill → terminal close.
+
+Guardrails (hard rules)
+
+Single source of publish: Any component bypassing outbox is a violation.
+
+No payload fields added to events in M4. If needed later, add a separate artifact store or details not exposed via SSE.
+
+Sequencer ownership unchanged: per-run seq still minted by the feature layer (M2 policy); DB enforces uniqueness, not minting.
+
+Terminal semantics fixed: exactly one terminal event; SSE closes only after it.
+
+Source values fixed: api | worker | outbox | replayer reserved; outbox must set source='outbox'.
+
+Minimal Definition of Done
+
+Events are persisted with unique (runId, seq) and no gaps.
+
+Outbox reliably publishes persisted events in order; published_at set; survives restarts.
+
+SSE backfills from ?fromSeq and then attaches live with de-duplication; closes on terminal.
+
+Metrics and basic alerts exist; a one-page runbook exists.
+
+Tests cover repo constraints, outbox ordering/locking, backfill race, and terminal close behavior.
+
+Docs updated with a flow overlay: persist → outbox → bus → SSE, and the reconnect/backfill sequence.

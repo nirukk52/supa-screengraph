@@ -1,7 +1,7 @@
 import type { RunStarted } from "@sg/agents-contracts";
-import { SCHEMA_VERSION, TOPIC_AGENTS_RUN } from "@sg/agents-contracts";
-import { recordEvent } from "../event-buffer";
-import { bus, queue } from "../singletons";
+import { SCHEMA_VERSION } from "@sg/agents-contracts";
+import { RunRepo } from "../../infra/repos/run-repo";
+import { queue } from "../singletons";
 import { logFn } from "./log";
 import { nextSeq } from "./sequencer";
 
@@ -23,8 +23,7 @@ export async function startRun(runId: string) {
 		v: SCHEMA_VERSION,
 		source: "api",
 	};
-	await bus.publish(TOPIC_AGENTS_RUN, evt);
-	recordEvent(evt);
+	await RunRepo.createRun(runId, evt.ts);
 	await queue.enqueue(QUEUE_NAME, { runId });
 	return { accepted: true };
 }

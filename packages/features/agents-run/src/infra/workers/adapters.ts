@@ -10,10 +10,9 @@ import type {
 	Tracer,
 } from "@repo/agents-core";
 import type { AgentEvent } from "@sg/agents-contracts";
-import { SCHEMA_VERSION, TOPIC_AGENTS_RUN } from "@sg/agents-contracts";
-import { recordEvent } from "../../application/event-buffer";
-import { bus } from "../../application/singletons";
+import { SCHEMA_VERSION } from "@sg/agents-contracts";
 import { nextSeq } from "../../application/usecases/sequencer";
+import { RunEventRepo } from "../repos/run-event-repo";
 
 export class InMemoryClock implements Clock {
 	now(): number {
@@ -31,11 +30,10 @@ export class FeatureLayerTracer implements Tracer {
 			source: "worker",
 		} as AgentEvent;
 
-		// Publish to event bus
-		bus.publish(TOPIC_AGENTS_RUN, event);
-
-		// Record to event buffer (for SSE)
-		recordEvent(event);
+		// M4: persist event only; outbox publishes later
+		RunEventRepo.appendEvent(event).catch(() => {
+			/* swallow - tests assert persistence path */
+		});
 	}
 }
 

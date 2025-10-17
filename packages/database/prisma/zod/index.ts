@@ -76,6 +76,24 @@ export const AiChatScalarFieldEnumSchema = z.enum(['id', 'organizationId', 'user
 
 export type AiChatScalarFieldEnum = z.infer<typeof AiChatScalarFieldEnumSchema>;
 
+// File: RunScalarFieldEnum.schema.ts
+
+export const RunScalarFieldEnumSchema = z.enum(['id', 'state', 'startedAt', 'finishedAt', 'lastSeq', 'v', 'createdAt', 'updatedAt'])
+
+export type RunScalarFieldEnum = z.infer<typeof RunScalarFieldEnumSchema>;
+
+// File: RunEventScalarFieldEnum.schema.ts
+
+export const RunEventScalarFieldEnumSchema = z.enum(['id', 'runId', 'seq', 'ts', 'type', 'v', 'source', 'name', 'fn', 'publishedAt', 'createdAt'])
+
+export type RunEventScalarFieldEnum = z.infer<typeof RunEventScalarFieldEnumSchema>;
+
+// File: RunOutboxScalarFieldEnum.schema.ts
+
+export const RunOutboxScalarFieldEnumSchema = z.enum(['runId', 'nextSeq', 'updatedAt'])
+
+export type RunOutboxScalarFieldEnum = z.infer<typeof RunOutboxScalarFieldEnumSchema>;
+
 // File: SortOrder.schema.ts
 
 export const SortOrderSchema = z.enum(['asc', 'desc'])
@@ -294,4 +312,50 @@ export const AiChatSchema = z.object({
 });
 
 export type AiChatType = z.infer<typeof AiChatSchema>;
+
+
+// File: Run.schema.ts
+
+export const RunSchema = z.object({
+  id: z.string(),
+  state: z.string(),
+  startedAt: z.date(),
+  finishedAt: z.date().nullish(),
+  lastSeq: z.number().int(),
+  v: z.number().int().default(1),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
+
+export type RunType = z.infer<typeof RunSchema>;
+
+
+// File: RunEvent.schema.ts
+
+export const RunEventSchema = z.object({
+  id: z.string(),
+  runId: z.string(),
+  seq: z.number().int(),
+  ts: z.bigint(),
+  type: z.string(),
+  v: z.number().int().default(1),
+  source: z.string(),
+  name: z.string().nullish(),
+  fn: z.string().nullish(),
+  publishedAt: z.date().nullish(),
+  createdAt: z.date(),
+});
+
+export type RunEventType = z.infer<typeof RunEventSchema>;
+
+
+// File: RunOutbox.schema.ts
+
+export const RunOutboxSchema = z.object({
+  runId: z.string(),
+  nextSeq: z.number().int().default(1),
+  updatedAt: z.date(),
+});
+
+export type RunOutboxType = z.infer<typeof RunOutboxSchema>;
 

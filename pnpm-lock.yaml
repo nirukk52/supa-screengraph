@@ -675,6 +675,9 @@ importers:
       '@repo/agents-core':
         specifier: workspace:*
         version: link:../../agents-core
+      '@repo/database':
+        specifier: workspace:*
+        version: link:../../database
       '@sg/agents-contracts':
         specifier: workspace:*
         version: link:../../agents-contracts
