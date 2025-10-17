@@ -1,18 +1,13 @@
 import { z } from "zod";
+import { EVENT_SOURCE_VALUES, EVENT_TYPE_VALUES } from "./constants";
 
 export const EventBaseSchema = z.object({
 	runId: z.string(),
 	seq: z.number().int().positive(),
 	ts: z.number().int().nonnegative(),
-	type: z.enum([
-		"RunStarted",
-		"NodeStarted",
-		"DebugTrace",
-		"NodeFinished",
-		"RunFinished",
-	]),
+	type: z.enum(EVENT_TYPE_VALUES),
 	v: z.literal(1),
-	source: z.enum(["api", "worker", "outbox", "replayer"]),
+	source: z.enum(EVENT_SOURCE_VALUES),
 });
 
 export const RunStartedSchema = EventBaseSchema.extend({

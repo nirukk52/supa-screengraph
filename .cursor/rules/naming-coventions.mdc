@@ -9,5 +9,13 @@ This rule describes what naming conventions to use for files, folders, component
 - Use PascalCase for component names
 - Use camelCase for variables and method names
 - Favor named exports for components.
+- The name of the file and the first class or function inside it should be same.
+- Layer-Aware Naming (Example: 
+Prefix or suffix names to indicate layer/purpose.
+Domain: User, Order
+Application: CreateUserUseCase
+Infra: UserRepository, UserApiAdapter)
+
+- Use Domain Vocabulary (Ex. AgentRunTracer over FeatureLayerTracer)
 
 - Persona gate: ensure `@persona-ian-botts-cto.json` is attached before proceeding.

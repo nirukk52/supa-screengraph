@@ -77,7 +77,11 @@ vi.mock("@repo/database/prisma/client", () => {
 });
 
 import { db } from "@repo/database/prisma/client";
-import { TOPIC_AGENTS_RUN } from "@sg/agents-contracts";
+import {
+	EVENT_SOURCES,
+	EVENT_TYPES,
+	TOPIC_AGENTS_RUN,
+} from "@sg/agents-contracts";
 import { bus } from "../src/application/singletons";
 import { startOutboxWorker } from "../src/infra/workers/outbox-publisher";
 import { awaitOutboxFlush } from "./helpers/await-outbox";
@@ -109,12 +113,12 @@ describe("outbox publisher", () => {
 				ts: BigInt(Date.now()),
 				type:
 					seq === 3
-						? "RunFinished"
+						? EVENT_TYPES.RunFinished
 						: seq === 1
-							? "RunStarted"
-							: "NodeFinished",
+							? EVENT_TYPES.RunStarted
+							: EVENT_TYPES.NodeFinished,
 				v: 1,
-				source: "worker",
+				source: EVENT_SOURCES.worker,
 			})),
 		});
 
@@ -124,7 +128,7 @@ describe("outbox publisher", () => {
 			for await (const evt of bus.subscribe(TOPIC_AGENTS_RUN)) {
 				if (evt.runId === runId) {
 					received.push(evt.seq);
-					if (evt.type === "RunFinished") {
+					if (evt.type === EVENT_TYPES.RunFinished) {
 						break;
 					}
 				}
