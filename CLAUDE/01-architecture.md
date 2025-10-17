@@ -38,6 +38,11 @@ Purpose: Single-page overview of the system's runtime, module boundaries, and da
 - At-least-once delivery; UI is idempotent via `sequence`.
 - Outbox: `run_events` persisted then published; enables replay/backfill.
 - SSE stream supports `?fromSeq=N` for reconnect.
+- **Design Decision**: Using custom outbox pattern instead of Supabase Realtime for:
+  - Deterministic ordering (seq-based monotonic events)
+  - Durable persistence with backfill from published events
+  - Full control over publish semantics and at-least-once guarantees
+  - Note: Supabase Realtime is available; consider it for simpler read-only use cases or when durability/ordering is less critical.
 
 ## State Machine
 - PENDING → QUEUED → DISPATCHED → RUNNING → SUCCEEDED | FAILED | CANCELED
