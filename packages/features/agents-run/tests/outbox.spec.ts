@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@repo/database/prisma/client", () => {
-	const subs: any[] = [];
+	const _subs: any[] = [];
 	// very small in-memory db for outbox test
 	const store: any = {
 		runs: new Map(),
@@ -50,7 +50,9 @@ vi.mock("@repo/database/prisma/client", () => {
 		},
 		runEvent: {
 			createMany: async ({ data }: any) => {
-				for (const d of data) store.events.set(key(d.runId, d.seq), d);
+				for (const d of data) {
+					store.events.set(key(d.runId, d.seq), d);
+				}
 			},
 			findUnique: async ({ where }: any) =>
 				store.events.get(
@@ -78,6 +80,7 @@ import { db } from "@repo/database/prisma/client";
 import { TOPIC_AGENTS_RUN } from "@sg/agents-contracts";
 import { bus } from "../src/application/singletons";
 import { startOutboxWorker } from "../src/infra/workers/outbox-publisher";
+import { awaitOutboxFlush } from "./helpers/await-outbox";
 
 describe("outbox publisher", () => {
 	beforeEach(async () => {
@@ -121,12 +124,14 @@ describe("outbox publisher", () => {
 			for await (const evt of bus.subscribe(TOPIC_AGENTS_RUN)) {
 				if (evt.runId === runId) {
 					received.push(evt.seq);
-					if (evt.type === "RunFinished") break;
+					if (evt.type === "RunFinished") {
+						break;
+					}
 				}
 			}
 		})();
 
-		await new Promise((r) => setTimeout(r, 500));
+		await awaitOutboxFlush(runId, 3);
 		stop();
 		await sub;
 

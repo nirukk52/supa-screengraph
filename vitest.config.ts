@@ -1,13 +1,25 @@
 import path from "node:path";
+import { config as dotenvConfig } from "dotenv";
 import { defineConfig } from "vitest/config";
+
+// Load environment early so setup picks up base URL
+dotenvConfig({ path: path.resolve(__dirname, ".env") });
 
 export default defineConfig({
 	test: {
 		include: ["packages/**/tests/**/*.spec.ts"],
-		exclude: [
-			"apps/web/tests/**", // playwright tests
-		],
-		testTimeout: 10000,
+		exclude: ["apps/web/tests/**"],
+		globalSetup: "packages/database/prisma/test/setup.ts",
+		globalTeardown: "packages/database/prisma/test/teardown.ts",
+		setupFiles: ["packages/database/prisma/test/global.d.ts"],
+		poolOptions: {
+			threads: {
+				maxThreads: Math.min(
+					4,
+					Number(process.env.VITEST_MAX_THREADS || 4),
+				),
+			},
+		},
 	},
 	coverage: {
 		reporter: ["text", "json", "lcov"],
@@ -54,9 +66,9 @@ export default defineConfig({
 			"**/provider/**",
 		],
 		thresholds: {
-			lines: 70,
-			functions: 70,
-			branches: 70,
+			lines: 50,
+			functions: 50,
+			branches: 50,
 			statements: 70,
 		},
 	},

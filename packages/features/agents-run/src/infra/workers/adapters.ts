@@ -20,6 +20,8 @@ export class InMemoryClock implements Clock {
 	}
 }
 
+const appendChains = new Map<string, Promise<void>>();
+
 export class FeatureLayerTracer implements Tracer {
 	emit(_type: EventType, payload: CanonicalEvent): void {
 		// Map canonical event to M2 schema with seq/v/source
@@ -30,10 +32,23 @@ export class FeatureLayerTracer implements Tracer {
 			source: "worker",
 		} as AgentEvent;
 
-		// M4: persist event only; outbox publishes later
-		RunEventRepo.appendEvent(event).catch(() => {
-			/* swallow - tests assert persistence path */
-		});
+		// Serialize appends per run to maintain monotonicity despite async writes
+		const key = payload.runId;
+		const prev = appendChains.get(key) ?? Promise.resolve();
+		const next = prev
+			.then(async () => {
+				await RunEventRepo.appendEvent(event);
+			})
+			.catch(() => {
+				// keep chain alive on error to not block subsequent events
+			})
+			.finally(() => {
+				// allow chain to be garbage collected after completion
+				if (appendChains.get(key) === next) {
+					appendChains.delete(key);
+				}
+			});
+		appendChains.set(key, next);
 	}
 }
 

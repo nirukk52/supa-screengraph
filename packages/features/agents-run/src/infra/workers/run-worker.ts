@@ -21,6 +21,8 @@ export function startWorker() {
 		});
 	});
 
-	// Start outbox worker alongside
-	startOutboxWorker();
+	const stopOutbox = startOutboxWorker(25);
+	return () => {
+		stopOutbox();
+	};
 }

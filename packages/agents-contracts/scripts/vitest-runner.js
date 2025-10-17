@@ -9,7 +9,9 @@ for (let i = 0; i < raw.length; i++) {
 		i++; // skip value (pnpm passes 'true')
 		continue;
 	}
-	if (a === "--color") continue;
+	if (a === "--color") {
+		continue;
+	}
 	filtered.push(a);
 }
 

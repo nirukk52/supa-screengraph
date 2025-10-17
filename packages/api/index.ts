@@ -11,6 +11,7 @@ export type ApiApp = Hono;
 
 import { cors } from "hono/cors";
 import { logger as honoLogger } from "hono/logger";
+import { registerFallbackAgentsRunRoutes } from "./modules/agents/fallback";
 import { openApiHandler, rpcHandler } from "./orpc/handler";
 import { router } from "./orpc/router";
 
@@ -75,6 +76,10 @@ app.get(
 
 // Health check
 app.get("/health", (c) => c.text("OK"));
+
+// Temporary direct fallback routes for agents-run SSE (bypass oRPC for streaming)
+registerFallbackAgentsRunRoutes(app);
+
 // oRPC handlers (for RPC and OpenAPI)
 app.use("*", async (c, next) => {
 	const context = {

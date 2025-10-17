@@ -27,7 +27,9 @@ export async function* streamRun(
 		} as AgentEvent;
 		yield e;
 		lastSent = e.seq;
-		if (e.type === "RunFinished") return;
+		if (e.type === "RunFinished") {
+			return;
+		}
 	}
 
 	// Then subscribe for live events; de-dupe on seq

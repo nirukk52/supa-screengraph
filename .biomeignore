@@ -1,12 +1,2 @@
-# Ignore generated Prisma outputs and build artifacts
-packages/database/prisma/zod/
-packages/database/prisma/queries/
-**/dist/
-.next/
-
-# Ignore Tailwind helper CSS (unsupported by Biome parser)
-tooling/tailwind/**/*.css
-tooling/tailwind/**/*.pcss
-
-# Specific files
-zod/index.ts
+packages/database/prisma/index.js
+packages/database/prisma/test/setup.js

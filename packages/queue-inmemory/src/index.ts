@@ -5,6 +5,10 @@ type Handler<T> = (data: T) => Promise<void>;
 export class InMemoryQueue implements QueuePort {
 	private handlers = new Map<string, Handler<any>>();
 
+	reset(): void {
+		this.handlers.clear();
+	}
+
 	async enqueue<T>(name: string, data: T): Promise<void> {
 		const h = this.handlers.get(name);
 		if (!h) {

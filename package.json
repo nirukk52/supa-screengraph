@@ -12,6 +12,7 @@
 		"clean": "turbo clean",
 		"format": "biome format . --write",
 		"test": "pnpm -r --if-present test",
+		"test:db": "pnpm vitest run",
 		"test:affected": "node tooling/scripts/test/affected.ts",
 		"prepare": "husky",
 		"lint:arch": "node tooling/arch/check-arch.js && node tooling/arch/check-sizes.js && node tooling/arch/check-literals.js",
@@ -31,19 +32,22 @@
 	"packageManager": "pnpm@10.14.0",
 	"devDependencies": {
 		"@biomejs/biome": "2.2.5",
-		"@repo/tsconfig": "workspace:*",
-		"@types/node": "^24.7.2",
-		"dotenv-cli": "^10.0.0",
-		"husky": "^9.1.7",
 		"@commitlint/cli": "^19.5.0",
 		"@commitlint/config-conventional": "^19.5.0",
-		"ts-node": "^10.9.2",
-		"zod": "^4.1.11",
-		"vitest": "^2.0.5",
+		"@repo/tsconfig": "workspace:*",
+		"@testcontainers/localstack": "^11.7.1",
+		"@testcontainers/postgresql": "^11.7.1",
+		"@types/node": "^24.7.2",
 		"@vitest/coverage-v8": "^2.0.5",
+		"dependency-cruiser": "^16.9.0",
+		"dotenv": "^17.2.3",
+		"dotenv-cli": "^10.0.0",
+		"husky": "^9.1.7",
+		"ts-node": "^10.9.2",
 		"turbo": "^2.5.8",
 		"typescript": "5.9.3",
-		"dependency-cruiser": "^16.9.0"
+		"vitest": "^2.0.5",
+		"zod": "^4.1.11"
 	},
 	"pnpm": {
 		"overrides": {

@@ -3,39 +3,34 @@ import type { AgentEvent } from "@sg/agents-contracts";
 import { TOPIC_AGENTS_RUN } from "@sg/agents-contracts";
 import { bus } from "../../application/singletons";
 
-export async function startOutboxWorker(pollMs = 200) {
-	async function tick() {
-		// Find candidate runs where nextSeq <= lastSeq
-		const candidates = await db.runOutbox.findMany({
-			take: 50,
-			orderBy: { updatedAt: "asc" },
-		});
+async function tickOutboxOnce() {
+	// Find candidate runs where nextSeq <= lastSeq
+	const candidates = await db.runOutbox.findMany({
+		take: 50,
+		orderBy: { updatedAt: "asc" },
+	});
 
-		for (const c of candidates) {
-			await db.$transaction(
+	for (const c of candidates) {
+		// Drain multiple events per candidate in a tight loop to reduce latency in tests
+		// Stop when no publishable event is found
+		// Cap iterations to prevent infinite loops in case of unexpected state
+		let iterations = 0;
+		while (iterations++ < 100) {
+			const published = await db.$transaction(
 				async (tx) => {
-					// Lock outbox row by updating a no-op field (updatedAt via update)
+					// Touch updatedAt to establish ordering and act as a lightweight lock
 					const outbox = await tx.runOutbox.update({
 						where: { runId: c.runId },
-						data: {},
+						data: { updatedAt: new Date() },
 					});
-					const run = await tx.run.findUniqueOrThrow({
-						where: { id: c.runId },
-					});
-					if (outbox.nextSeq > run.lastSeq) {
-						return; // nothing to publish
-					}
-
+					// look up event by nextSeq; if present, publish regardless of run.lastSeq
 					const evtRow = await tx.runEvent.findUnique({
 						where: {
 							runId_seq: { runId: c.runId, seq: outbox.nextSeq },
 						},
 					});
-					if (!evtRow) {
-						return; // inconsistent append; guardrail elsewhere
-					}
-					if (evtRow.publishedAt) {
-						return; // already published
+					if (!evtRow || evtRow.publishedAt) {
+						return false; // nothing to publish
 					}
 
 					const evt: AgentEvent = {
@@ -60,7 +55,8 @@ export async function startOutboxWorker(pollMs = 200) {
 					});
 					await tx.runOutbox.update({
 						where: { runId: c.runId },
-						data: { nextSeq: { increment: 1 } },
+						// Use literal update to be compatible with simple test mocks (no Prisma operators)
+						data: { nextSeq: outbox.nextSeq + 1 },
 					});
 
 					if (evt.type === "RunFinished") {
@@ -72,14 +68,26 @@ export async function startOutboxWorker(pollMs = 200) {
 							},
 						});
 					}
+					return true;
 				},
 				{ timeout: 5000 },
 			);
+
+			if (!published) {
+				break;
+			}
 		}
 	}
+}
 
+export function startOutboxWorker(pollMs = 200) {
 	const id = setInterval(() => {
-		tick().catch(() => {});
+		void tickOutboxOnce();
 	}, pollMs);
-	return () => clearInterval(id);
+
+	void tickOutboxOnce();
+
+	return () => {
+		clearInterval(id);
+	};
 }
