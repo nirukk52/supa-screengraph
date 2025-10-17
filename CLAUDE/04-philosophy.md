@@ -22,4 +22,4 @@
 
 ## Founders Mantras:
 Speed and isolation first, determinism second, scale later.
-Developer experience and rapid dev efforts should keeep on going up.
+Developer experience and rapid dev efforts should keep on going up.

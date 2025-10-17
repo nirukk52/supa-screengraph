@@ -40,3 +40,16 @@
 - [ ] Cancel run mid-plan → verify outbox halts and `RunFinished` emitted with proper state transition.
 - [ ] Validate CI `validate-prs` green on clean branch.
 - [ ] Update integration helper to await outbox flush and rerun vitest.
+
+## Remaining Work (M4)
+
+- PR #51: review and merge to `main`.
+- Post-merge smoke on `main`:
+  - Run `pnpm pr:check` on a clean workspace.
+  - Hit stream endpoint with `fromSeq` and verify ordered backfill + live events.
+- Documentation wrap-up:
+  - Update `work-completed.md` with merged PR SHA/link.
+  - Mark status and handoff as ✅ in all M4 docs.
+- Ops notes:
+  - Confirm production migration policy (migrate vs push) remains external to this PR.
+  - Record runbook pointers for diagnosing outbox lag (follow-up metrics in M5).
