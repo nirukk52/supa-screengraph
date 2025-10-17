@@ -1,4 +1,6 @@
-import { AiChatSchema } from "@repo/database";
+// Note: Do not import AiChatSchema as a runtime value from @repo/database.
+// That package re-exports zod artifacts as type-only to avoid bundling runtime zod.
+// Define the input schema we need locally instead.
 import { z } from "zod";
 
 export const MessageSchema = z.object({
@@ -6,6 +8,7 @@ export const MessageSchema = z.object({
 	content: z.string(),
 });
 
-export const ChatSchema = AiChatSchema.extend({
+// Minimal chat input schema for API usage. If you need DB parity, update here.
+export const ChatSchema = z.object({
 	messages: z.array(MessageSchema),
 });

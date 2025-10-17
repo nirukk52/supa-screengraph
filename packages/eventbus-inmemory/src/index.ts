@@ -4,6 +4,10 @@ import type { EventBusPort } from "@sg/eventbus";
 export class InMemoryEventBus implements EventBusPort {
 	private topics = new Map<string, Set<(e: AgentEvent) => void>>();
 
+	reset(): void {
+		this.topics.clear();
+	}
+
 	async publish(topic: string, event: AgentEvent): Promise<void> {
 		const subs = this.topics.get(topic);
 		if (!subs || subs.size === 0) {

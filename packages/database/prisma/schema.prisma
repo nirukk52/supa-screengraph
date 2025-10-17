@@ -207,3 +207,51 @@ model AiChat {
 
     @@map("ai_chat")
 }
+
+// ==================== AGENTS RUN ====================
+
+model Run {
+    id         String    @id
+    state      String    // started | finished | cancelled
+    startedAt  DateTime
+    finishedAt DateTime?
+    lastSeq    Int       @default(0)
+    v          Int       @default(1)
+    createdAt  DateTime  @default(now())
+    updatedAt  DateTime  @updatedAt
+
+    events   RunEvent[]
+    outbox   RunOutbox?
+
+    @@map("runs")
+}
+
+model RunEvent {
+    id          String    @id @default(cuid())
+    runId       String
+    seq         Int
+    ts          BigInt
+    type        String    // RunStarted | NodeStarted | DebugTrace | NodeFinished | RunFinished
+    v           Int       @default(1)
+    source      String    // api | worker | outbox
+    name        String?
+    fn          String?
+    publishedAt DateTime?
+    createdAt   DateTime  @default(now())
+
+    run Run @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+    @@unique([runId, seq])
+    @@index([runId, publishedAt])
+    @@map("run_events")
+}
+
+model RunOutbox {
+    runId     String   @id
+    nextSeq   Int      @default(1)
+    updatedAt DateTime @updatedAt
+
+    run Run @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+    @@map("run_outbox")
+}

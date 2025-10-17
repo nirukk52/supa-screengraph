@@ -11,7 +11,7 @@ export interface EventBase {
 	ts: number; // ms since epoch
 	type: EventType;
 	v: 1;
-	source: "api" | "worker";
+	source: "api" | "worker" | "outbox" | "replayer";
 }
 
 export interface RunStarted extends EventBase {

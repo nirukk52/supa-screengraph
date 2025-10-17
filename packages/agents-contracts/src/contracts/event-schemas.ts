@@ -12,7 +12,7 @@ export const EventBaseSchema = z.object({
 		"RunFinished",
 	]),
 	v: z.literal(1),
-	source: z.enum(["api", "worker"]),
+	source: z.enum(["api", "worker", "outbox", "replayer"]),
 });
 
 export const RunStartedSchema = EventBaseSchema.extend({

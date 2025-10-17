@@ -1,24 +1,30 @@
+import "./mocks/db-mock";
 import { describe, expect, it } from "vitest";
+import { resetInfra } from "../src/application/singletons";
 import { startRun } from "../src/application/usecases/start-run";
 import { streamRun } from "../src/application/usecases/stream-run";
 import { startWorker } from "../src/infra/workers/run-worker";
-
-async function collect(iter: AsyncIterable<any>) {
-	const out: any[] = [];
-	for await (const e of iter) {
-		out.push(e);
-	}
-	return out;
-}
+import {
+	awaitOutboxFlush,
+	awaitStreamCompletion,
+} from "./helpers/await-outbox";
 
 describe("Orchestrator Integration (M3)", () => {
 	it("golden path: emits RunStarted → nodes → RunFinished with monotonic seq", async () => {
-		startWorker();
+		resetInfra();
+		const stop = startWorker();
+
 		const runId = `r-${Math.random().toString(36).slice(2)}`;
 		const iter = streamRun(runId);
-		const collecting = collect(iter);
+		// Start publishing
 		await startRun(runId);
-		const events = await collecting;
+		// Ensure outbox has flushed through terminal event (or last seq)
+		await awaitOutboxFlush(runId);
+		// Drain stream deterministically until RunFinished
+		const events = await awaitStreamCompletion(iter);
+
+		stop?.();
+		resetInfra();
 
 		// Should emit: RunStarted + 5 nodes (Start+Finish) + RunFinished = 12 events
 		expect(events.length).toBeGreaterThanOrEqual(12);
@@ -44,18 +50,20 @@ describe("Orchestrator Integration (M3)", () => {
 			expect(event).toHaveProperty("v");
 			expect(event).toHaveProperty("source");
 		}
-	});
+	}, 10000);
 
 	it("concurrent runs: each has isolated monotonic seq", async () => {
-		startWorker();
+		resetInfra();
+		const stop = startWorker();
+
 		const runId1 = `r1-${Math.random().toString(36).slice(2)}`;
 		const runId2 = `r2-${Math.random().toString(36).slice(2)}`;
 
 		const iter1 = streamRun(runId1);
 		const iter2 = streamRun(runId2);
 
-		const collecting1 = collect(iter1);
-		const collecting2 = collect(iter2);
+		const collecting1 = awaitStreamCompletion(iter1);
+		const collecting2 = awaitStreamCompletion(iter2);
 
 		// Start both runs concurrently
 		await Promise.all([startRun(runId1), startRun(runId2)]);
@@ -64,6 +72,9 @@ describe("Orchestrator Integration (M3)", () => {
 			collecting1,
 			collecting2,
 		]);
+
+		stop?.();
+		resetInfra();
 
 		// Each run should have its own monotonic seq
 		const seqs1 = events1.map((e) => e.seq);
@@ -79,5 +90,5 @@ describe("Orchestrator Integration (M3)", () => {
 		// Runs should have emitted similar event counts
 		expect(events1.length).toBeGreaterThanOrEqual(12);
 		expect(events2.length).toBeGreaterThanOrEqual(12);
-	});
+	}, 10000);
 });

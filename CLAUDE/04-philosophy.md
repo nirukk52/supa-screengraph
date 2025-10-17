@@ -19,3 +19,7 @@
 ## Defaults
 - TypeScript everywhere; no implicit any; enums/constants only.
 - RSC-first UI; minimal client JS; streaming UX.
+
+## Founders Mantras:
+Speed and isolation first, determinism second, scale later.
+Developer experience and rapid dev efforts should keep on going up.

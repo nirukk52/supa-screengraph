@@ -74,5 +74,8 @@ env/
 
 worktrees/
 
+# Ignore generated JS files that fail Biome linting
+packages/database/prisma/index.js
+packages/database/prisma/test/setup.js
 
 .idea/
