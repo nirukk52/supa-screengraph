@@ -62,6 +62,10 @@ export default defineConfig({
 	},
 	resolve: {
 		alias: {
+			"@repo/agents-core": path.resolve(
+				__dirname,
+				"packages/agents-core",
+			),
 			"@sg/agents-contracts": path.resolve(
 				__dirname,
 				"packages/agents-contracts",

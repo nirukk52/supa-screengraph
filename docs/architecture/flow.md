@@ -178,3 +178,10 @@ graph LR
   end
 --- ## Notes - Events are published on topic run:{runId} and streamed to clients via SSE/WS. - Nodes are pure and stateless; they emit domain events and return new state. - Keep enums/constants and zod schemas in packages/agents-contracts.
 
+### M3 Update (Orchestrator TS Port)
+- Events now produced by `orchestrateRun` (packages/agents-core) via injected `Tracer`.
+- Sequencing still owned by feature layer (`packages/features/agents-run`).
+- Worker calls `orchestrateRun` with in-memory adapters (clock, tracer, cancelToken).
+- Nodes remain pure; no I/O in M3 (stubs only).
+- Stream schema unchanged; UI behavior identical to M2.
+

@@ -24,6 +24,7 @@
 		"dev:feature": "node ./src/infra/workers/run-worker.js"
 	},
 	"dependencies": {
+		"@repo/agents-core": "workspace:*",
 		"@sg/agents-contracts": "workspace:*",
 		"@sg/eventbus": "workspace:*",
 		"@sg/eventbus-inmemory": "workspace:*",
