@@ -1,4 +1,5 @@
 import { db } from "@repo/database/prisma/client";
+import { logger } from "@repo/logs";
 import type { AgentEvent } from "@sg/agents-contracts";
 
 export const RunEventRepo = {
@@ -48,6 +49,13 @@ export const RunEventRepo = {
 			await tx.run.update({
 				where: { id: event.runId },
 				data: { lastSeq: event.seq },
+			});
+
+			// Metrics: event persisted
+			logger.info("metric.events_inserted", {
+				runId: event.runId,
+				seq: event.seq,
+				type: event.type,
 			});
 		});
 	},

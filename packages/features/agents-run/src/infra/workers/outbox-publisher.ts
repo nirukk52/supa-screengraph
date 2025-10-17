@@ -1,4 +1,5 @@
 import { db } from "@repo/database/prisma/client";
+import { logger } from "@repo/logs";
 import type { AgentEvent } from "@sg/agents-contracts";
 import { TOPIC_AGENTS_RUN } from "@sg/agents-contracts";
 import { bus } from "../../application/singletons";
@@ -47,16 +48,26 @@ async function tickOutboxOnce() {
 					// Publish then mark (at-least-once publish)
 					await bus.publish(TOPIC_AGENTS_RUN, evt);
 
+					const publishedAt = new Date();
 					await tx.runEvent.update({
 						where: {
 							runId_seq: { runId: c.runId, seq: outbox.nextSeq },
 						},
-						data: { publishedAt: new Date() },
+						data: { publishedAt },
 					});
 					await tx.runOutbox.update({
 						where: { runId: c.runId },
 						// Use literal update to be compatible with simple test mocks (no Prisma operators)
 						data: { nextSeq: outbox.nextSeq + 1 },
+					});
+
+					// Metrics: event published + lag
+					const lagMs = publishedAt.getTime() - evt.ts;
+					logger.info("metric.events_published", {
+						runId: evt.runId,
+						seq: evt.seq,
+						type: evt.type,
+						lag_ms: lagMs,
 					});
 
 					if (evt.type === "RunFinished") {
