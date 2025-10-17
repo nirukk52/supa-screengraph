@@ -1,14 +1,12 @@
-// Simplified e2e test for agents-run
-// Rationale: SSE parsing at the API layer was flaky and added complexity.
-// For now, we just: (1) start a run via the API, (2) poll the DB until
-// RunFinished is present, and (3) assert basic invariants (RunStarted first,
-// RunFinished last, monotonic seq). We still sanity-check the stream endpoint
-// responds with text/event-stream, but we don't parse the stream here.
-// In the future, we can restore a richer SSE e2e once infra stabilizes.
+// E2E test for agents-run using supertest-like wrapper
+// Tests: (1) start a run via API, (2) poll DB for events,
+// (3) assert invariants (RunStarted first, monotonic seq)
+// (4) verify stream endpoint responds with SSE headers
 
 import { db } from "@repo/database/prisma/client";
 import { describe, expect, it } from "vitest";
 import { app } from "../index.test-export.ts";
+import { createTestApp } from "./helpers/supertest-app";
 
 async function waitForEvents(runId: string, minCount = 1, timeoutMs = 10000) {
 	const start = Date.now();
@@ -39,6 +37,8 @@ async function waitForEvents(runId: string, minCount = 1, timeoutMs = 10000) {
 }
 
 describe("agents-run e2e via API", () => {
+	const testApp = createTestApp(app);
+
 	it("starts a run via API and persists at least the initial event", async () => {
 		// Ensure worker is running (feature module provides in-memory implementations)
 		const { startWorker } = await import("@sg/feature-agents-run");
@@ -46,21 +46,20 @@ describe("agents-run e2e via API", () => {
 
 		const runId = `r-${Math.random().toString(36).slice(2)}`;
 
-		// Start run over HTTP
-		const startReq = new Request("http://localhost/api/agents/runs", {
-			method: "POST",
-			headers: { "content-type": "application/json" },
-			body: JSON.stringify({ runId }),
-		});
-		const startRes = await app.fetch(startReq as any);
+		// Start run over HTTP using supertest-like API
+		const startRes = await testApp
+			.post("/agents/runs")
+			.send({ runId })
+			.expect(200);
+
 		expect(startRes.ok).toBe(true);
+		expect(startRes.body).toBeDefined();
 
 		// Optional sanity check: stream endpoint exists and returns SSE headers
-		const streamReq = new Request(
-			`http://localhost/api/agents/runs/${encodeURIComponent(runId)}/stream`,
-		);
-		const streamRes = await app.fetch(streamReq as any);
-		expect(streamRes.ok).toBe(true);
+		const streamRes = await testApp
+			.get(`/agents/runs/${encodeURIComponent(runId)}/stream`)
+			.expect(200);
+
 		expect(streamRes.headers.get("content-type") || "").toContain(
 			"text/event-stream",
 		);
