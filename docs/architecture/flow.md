@@ -137,6 +137,49 @@ graph LR
 
   classDef core fill:#10b981,stroke:#10b981,color:#fff
   class AGENTS,API core
+--- ## M4 Persistence Layer (Durable Events + Outbox)
+mermaid
+sequenceDiagram
+  autonumber
+  participant O as Orchestrator
+  participant R as RunEventRepo
+  participant DB as Postgres
+  participant OW as OutboxWorker
+  participant B as EventBus
+  participant SSE as SSE Endpoint
+  participant C as Client
+
+  Note over O,R: Worker executes orchestrator
+  O->>R: appendEvent(RunStarted, seq=1)
+  R->>DB: INSERT run_events, UPSERT run+outbox
+  R->>DB: UPDATE runs.lastSeq = 1
+  Note over R: Event persisted, NOT published yet
+
+  loop Outbox Poll (200ms)
+    OW->>DB: Lock run_outbox WHERE nextSeq <= lastSeq
+    OW->>DB: SELECT run_events WHERE seq = nextSeq
+    OW->>B: publish(event)
+    OW->>DB: UPDATE publishedAt, nextSeq++
+    Note over OW: Exactly-once per seq, ordered
+  end
+
+  Note over C,SSE: Client connects/reconnects
+  C->>SSE: GET /stream?fromSeq=5
+  SSE->>DB: SELECT run_events WHERE seq>=6 AND publishedAt IS NOT NULL
+  SSE-->>C: Backfill seq 6,7,8...
+  SSE->>B: Subscribe run:{id}
+  B-->>SSE: Live event seq=9
+  Note over SSE: De-dupe: if seq <= lastSentSeq, drop
+  SSE-->>C: seq=9 (live)
+  SSE-->>C: Terminal event → close
+
+### M4 Invariants
+- **Single publisher:** Only outbox sets `source='outbox'` and publishes to bus
+- **Monotonic seq:** `runs.lastSeq` enforced atomically; outbox never skips a seq
+- **Exactly-once to client:** Server de-dupes on reconnect using `lastSentSeq`
+- **Backfill safety:** Only events with `publishedAt IS NOT NULL` are sent
+- **Payload-free:** Events contain no artifacts; same canonical shape as M2/M3
+
 --- ## High-Level Run States
 mermaid
 stateDiagram-v2

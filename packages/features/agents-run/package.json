@@ -25,6 +25,7 @@
 	},
 	"dependencies": {
 		"@repo/database": "workspace:*",
+		"@repo/logs": "workspace:*",
 		"@repo/agents-core": "workspace:*",
 		"@sg/agents-contracts": "workspace:*",
 		"@sg/eventbus": "workspace:*",
