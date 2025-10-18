@@ -1,8 +1,8 @@
 import { TOPIC_AGENTS_RUN } from "@sg/agents-contracts/src/contracts/constants";
 import type { DebugTrace } from "@sg/agents-contracts/src/contracts/event-types";
 import { describe, expect, it } from "vitest";
-import { bus } from "../src/application/singletons";
-import { cancelRun } from "../src/application/usecases/cancel-run";
+import { bus } from "../../src/application/singletons";
+import { cancelRun } from "../../src/application/usecases/cancel-run";
 
 async function takeOne<T>(iter: AsyncIterable<T>): Promise<T> {
 	for await (const v of iter) {

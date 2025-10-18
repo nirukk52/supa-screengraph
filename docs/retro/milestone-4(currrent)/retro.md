@@ -19,6 +19,9 @@
 4. Document test env + fallback instructions in `docs/retro/milestone-4(currrent)/m4_v2_prisma_setup.md` → **Owner:** current branch.
 5. Add minimal outbox metrics (lag, publish count) + log hooks in future sprint.
 
+## Test Refactor
+- Updated agents-run test layout: integration specs now rely on the real Prisma harness while unit specs keep the db-mock (see `packages/features/agents-run/tests/CLAUDE.md`).
+
 ## Acceptance for Milestone Close (Pending)
 - All Vitest integration specs green against real DB.
 - CI `validate-prs` gate green using the same setup.

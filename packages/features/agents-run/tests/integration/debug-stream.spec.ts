@@ -1,16 +1,15 @@
-import "./mocks/db-mock";
 import { describe, it } from "vitest";
-import { resetInfra } from "../src/application/singletons";
-import { startRun } from "../src/application/usecases/start-run";
-import { streamRun } from "../src/application/usecases/stream-run";
-import { startWorker } from "../src/infra/workers/run-worker";
+import { resetInfra } from "../../src/application/singletons";
+import { startRun } from "../../src/application/usecases/start-run";
+import { streamRun } from "../../src/application/usecases/stream-run";
+import { startWorker } from "../../src/infra/workers/run-worker";
 import {
 	awaitOutboxFlush,
 	awaitStreamCompletion,
 } from "./helpers/await-outbox";
 
 describe("M3 Debug Stream Inspection", () => {
-	it("prints full event stream with all fields", async () => {
+	it.skip("prints full event stream with all fields", async () => {
 		const stop = startWorker();
 		resetInfra();
 

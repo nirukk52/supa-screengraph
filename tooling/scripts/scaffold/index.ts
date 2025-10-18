@@ -67,15 +67,18 @@ function main() {
 		for (const dir of ["unit", "integration"]) {
 			write(path.join(base, "tests", dir, ".keep"), "");
 		}
-		// basic spec template
+		write(
+			path.join(base, "tests", "unit", "mocks", "db-mock.ts"),
+			"import { vi } from 'vitest';\n\n" +
+				"export const db = {};\n\n" +
+				"vi.mock('@repo/database/prisma/client', () => ({ db }));\n",
+		);
 		write(
 			path.join(base, "tests", "unit", "sample.spec.ts"),
-			'import { describe, it, expect } from "vitest";\n\n' +
-				"describe('sample', () => {\n" +
-				"  it('works', () => {\n" +
-				"    // Arrange\n\n" +
-				"    // Act\n\n" +
-				"    // Assert\n" +
+			"import './mocks/db-mock';\n" +
+				"import { describe, expect, it } from 'vitest';\n\n" +
+				"describe('sample unit test', () => {\n" +
+				"  it('runs against the in-memory mock', () => {\n" +
 				"    expect(true).toBe(true);\n" +
 				"  });\n" +
 				"});\n",
@@ -132,12 +135,12 @@ function main() {
 		for (const dir of ["unit", "integration"]) {
 			write(path.join(base, "tests", dir, ".keep"), "");
 		}
-		// feature spec templates
 		write(
 			path.join(base, "tests", "unit", "feature.spec.ts"),
-			'import { describe, it, expect } from "vitest";\n\n' +
-				"describe('feature', () => {\n" +
-				"  it('bootstrap', () => {\n" +
+			"import './mocks/db-mock';\n" +
+				"import { describe, expect, it } from 'vitest';\n\n" +
+				"describe('feature unit test', () => {\n" +
+				"  it('runs against the in-memory mock', () => {\n" +
 				"    expect(true).toBe(true);\n" +
 				"  });\n" +
 				"});\n",

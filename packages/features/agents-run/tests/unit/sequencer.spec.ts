@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { nextSeq } from "../src/application/usecases/sequencer";
+import { nextSeq } from "../../src/application/usecases/sequencer";
 
 describe("sequencer", () => {
 	it("monotonic per run", () => {
