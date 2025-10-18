@@ -24,6 +24,6 @@
 		"test": "node ./scripts/vitest-runner.js"
 	},
 	"dependencies": {
-		"zod": "^4.1.11"
+		"zod": "^4.1.12"
 	}
 }
