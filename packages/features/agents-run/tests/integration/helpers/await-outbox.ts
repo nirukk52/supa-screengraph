@@ -112,20 +112,13 @@ export async function waitForRunCompletion(
 	runId: string,
 	opts: AwaitOutboxOptions = {},
 ): Promise<{ state: string; lastSeq: number; nextSeq: number }> {
-	const pollMs = opts.pollMs ?? 50;
-	const timeoutMs = opts.timeoutMs ?? 15_000;
+	const pollMs = opts.pollMs ?? 100;
+	const timeoutMs = opts.timeoutMs ?? 20_000;
 	const start = Date.now();
 
 	while (true) {
 		if (opts.signal?.aborted) {
 			throw new Error("waitForRunCompletion aborted");
-		}
-
-		// Trigger outbox flush to help the run progress (safe if run doesn't exist yet)
-		try {
-			await drainOutboxForRun(runId);
-		} catch {
-			// Ignore errors - run might not exist yet
 		}
 
 		const run = await prisma.run.findUnique({

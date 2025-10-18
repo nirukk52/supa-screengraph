@@ -40,9 +40,9 @@ export const mockDb = {
 			runs.set(create.id, create);
 			return create;
 		},
-			findUnique: async ({ where }: any) => {
-				return runs.get(where.id) ?? null;
-			},
+		findUnique: async ({ where }: any) => {
+			return runs.get(where.id) ?? null;
+		},
 		findUniqueOrThrow: async ({ where }: any) => {
 			const r = runs.get(where.id);
 			if (!r) {
@@ -83,9 +83,9 @@ export const mockDb = {
 			}
 			return r;
 		},
-				findUnique: async ({ where }: any) => {
-					return outboxes.get(where.runId) ?? null;
-				},
+		findUnique: async ({ where }: any) => {
+			return outboxes.get(where.runId) ?? null;
+		},
 		update: async ({ where, data }: any) => {
 			const r = outboxes.get(where.runId);
 			if (!r) {
