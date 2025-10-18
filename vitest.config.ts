@@ -16,13 +16,9 @@ export default defineConfig({
 		],
 		globalSetup: "packages/database/prisma/test/setup.ts",
 		globalTeardown: "packages/database/prisma/test/teardown.ts",
-		// setupFiles: ["packages/database/prisma/test/global.d.ts"], // Removed: .d.ts files should not be used here
 		poolOptions: {
 			threads: {
-				maxThreads: Math.min(
-					4,
-					Number(process.env.VITEST_MAX_THREADS || 4),
-				),
+				singleThread: true,
 			},
 		},
 	},
