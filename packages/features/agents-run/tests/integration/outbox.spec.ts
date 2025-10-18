@@ -48,7 +48,8 @@ describe("outbox publisher", () => {
 				});
 				expect(published.map((e) => e.seq)).toEqual([1, 2, 3]);
 				expect(
-					published.filter((event) => event.publishedAt != null).length,
+					published.filter((event) => event.publishedAt != null)
+						.length,
 				).toBe(3);
 				expect(published[0].publishedAt).not.toBeNull();
 				expect(published[1].publishedAt).not.toBeNull();

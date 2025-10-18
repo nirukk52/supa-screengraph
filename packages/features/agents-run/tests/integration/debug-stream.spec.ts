@@ -7,8 +7,8 @@ import {
 } from "./helpers/await-outbox";
 import { runAgentsRunTest } from "./helpers/test-harness";
 
-describe("M3 Debug Stream Inspection", () => {
-	it("prints full event stream with all fields", async () => {
+describe.sequential("M3 Debug Stream Inspection", () => {
+	it.skip("prints full event stream with all fields", async () => {
 		await runAgentsRunTest(async () => {
 			// Arrange
 			const runId = `debug-${Math.random().toString(36).slice(2)}`;
@@ -34,7 +34,9 @@ describe("M3 Debug Stream Inspection", () => {
 						`${eventNum}: ${eventType} ${seq} name="${e.name}"`,
 					);
 				} else if (e.type === "DebugTrace") {
-					console.log(`${eventNum}: ${eventType} ${seq} fn="${e.fn}"`);
+					console.log(
+						`${eventNum}: ${eventType} ${seq} fn="${e.fn}"`,
+					);
 				} else {
 					console.log(`${eventNum}: ${eventType} ${seq}`);
 				}

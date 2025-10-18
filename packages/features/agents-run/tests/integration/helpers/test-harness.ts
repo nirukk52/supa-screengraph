@@ -23,17 +23,17 @@ export async function runAgentsRunTest(
 	options?: TestOptions,
 ): Promise<void> {
 	const normalized = normalizeOptions(options);
-	
+
 	// Setup: clear DB, reset infra, start worker
 	await clearDatabase();
 	resetInfra();
 	const stop = normalized.startWorker ? startWorker() : undefined;
-	
+
 	// Small delay to ensure worker/queue fully registered
 	if (normalized.startWorker) {
 		await new Promise((r) => setTimeout(r, 50));
 	}
-	
+
 	try {
 		await fn();
 	} finally {
