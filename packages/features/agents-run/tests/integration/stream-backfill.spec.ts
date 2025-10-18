@@ -18,11 +18,9 @@ async function collect<T>(iter: AsyncIterable<T>): Promise<T[]> {
 describe("SSE stream backfill", () => {
 	beforeEach(async () => {
 		resetInfra();
-		const stop = startWorker();
 		await db.runEvent.deleteMany({});
 		await db.runOutbox.deleteMany({});
 		await db.run.deleteMany({});
-		stop?.();
 	});
 
 	it.skip("backfills from fromSeq and de-dupes live", async () => {
@@ -50,7 +48,7 @@ describe("SSE stream backfill", () => {
 		resetInfra();
 	}, 20000);
 
-	it.skip("subscribes for live events after backfill", async () => {
+	it("subscribes for live events after backfill", async () => {
 		resetInfra();
 		const stop = startWorker();
 

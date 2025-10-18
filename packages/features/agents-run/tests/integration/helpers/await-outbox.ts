@@ -33,12 +33,25 @@ export async function awaitOutboxFlush(
 		if (opts.signal?.aborted) {
 			throw new Error("awaitOutboxFlush aborted");
 		}
-		const run = await prisma.run.findUniqueOrThrow({
+
+		const run = await prisma.run.findUnique({
 			where: { id: runId },
 		});
-		const outbox = await prisma.runOutbox.findUniqueOrThrow({
+		const outbox = await prisma.runOutbox.findUnique({
 			where: { runId },
 		});
+
+		// If run doesn't exist yet, keep waiting
+		if (!run || !outbox) {
+			if (Date.now() - start > timeoutMs) {
+				throw new Error(
+					`awaitOutboxFlush timeout after ${timeoutMs}ms (runId=${runId}, run exists: ${!!run}, outbox exists: ${!!outbox})`,
+				);
+			}
+			await new Promise((resolve) => setTimeout(resolve, pollMs));
+			continue;
+		}
+
 		const lastSeq = run.lastSeq ?? 0;
 		const nextSeq = outbox.nextSeq ?? 0;
 

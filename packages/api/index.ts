@@ -47,8 +47,12 @@ if (typeof process !== "undefined") {
 	process.on("SIGTERM", cleanup);
 }
 
-// Start workers immediately
-startWorkersOnce();
+// Start workers immediately (skip in test env to avoid collision with test workers)
+const isTestEnv =
+	process.env.NODE_ENV === "test" || process.env.VITEST === "true";
+if (!isTestEnv) {
+	startWorkersOnce();
+}
 
 export const app: ApiApp = new Hono().basePath("/api");
 

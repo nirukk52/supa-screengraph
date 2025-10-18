@@ -3,8 +3,8 @@ import { startRun } from "../../src/application/usecases/start-run";
 import { streamRun } from "../../src/application/usecases/stream-run";
 import { startWorker } from "../../src/infra/workers/run-worker";
 import {
-	awaitOutboxFlush,
 	awaitStreamCompletion,
+	waitForRunCompletion,
 } from "./helpers/await-outbox";
 
 describe("debug stream", () => {
@@ -13,7 +13,7 @@ describe("debug stream", () => {
 		const runId = `r-${Math.random().toString(36).slice(2)}`;
 		const iter = streamRun(runId);
 		await startRun(runId);
-		await awaitOutboxFlush(runId);
+		await waitForRunCompletion(runId);
 		const events = await awaitStreamCompletion(iter);
 		expect(events.length).toBeGreaterThanOrEqual(4);
 		expect(events[0].type).toBe("RunStarted");
