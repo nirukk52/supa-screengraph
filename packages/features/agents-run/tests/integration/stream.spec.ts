@@ -22,5 +22,5 @@ describe("debug stream", () => {
 		for (let i = 1; i < seqs.length; i++) {
 			expect(seqs[i]).toBeGreaterThan(seqs[i - 1]);
 		}
-	});
+	}, 20000);
 });

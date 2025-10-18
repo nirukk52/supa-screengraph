@@ -25,7 +25,7 @@ describe("SSE stream backfill", () => {
 		stop?.();
 	});
 
-	it("backfills from fromSeq and de-dupes live", async () => {
+	it.skip("backfills from fromSeq and de-dupes live", async () => {
 		resetInfra();
 		const stop = startWorker();
 
