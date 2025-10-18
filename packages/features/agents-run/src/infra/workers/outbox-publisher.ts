@@ -6,7 +6,7 @@ import {
 	EVENT_TYPES,
 	TOPIC_AGENTS_RUN,
 } from "@sg/agents-contracts";
-import { bus } from "../../application/singletons";
+import { getInfra } from "../../application/infra";
 
 /**
  * Publish pending outbox events for candidate runs.
@@ -43,6 +43,7 @@ async function publishNextOutboxEvent(runId: string) {
 				...(evtRow.fn ? { fn: evtRow.fn } : {}),
 			} as AgentEvent;
 
+			const { bus } = getInfra();
 			await bus.publish(TOPIC_AGENTS_RUN, evt);
 
 			const publishedAt = new Date();

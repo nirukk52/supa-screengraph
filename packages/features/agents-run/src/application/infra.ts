@@ -1,6 +1,6 @@
 import type { EventBusPort } from "@sg/eventbus";
-import type { QueuePort } from "@sg/queue";
 import { InMemoryEventBus } from "@sg/eventbus-inmemory";
+import type { QueuePort } from "@sg/queue";
 import { InMemoryQueue } from "@sg/queue-inmemory";
 
 export interface Infra {
@@ -30,8 +30,6 @@ export function setInfra(next: Infra): void {
 
 export function resetInfra(): void {
 	const i = getInfra();
-	(i.bus as any).reset?.();
-	(i.queue as any).reset?.();
+	(i.bus as { reset?: () => void }).reset?.();
+	(i.queue as { reset?: () => void }).reset?.();
 }
-
-
