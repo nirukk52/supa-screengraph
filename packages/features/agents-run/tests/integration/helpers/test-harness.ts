@@ -1,5 +1,7 @@
 import { db } from "@repo/database/prisma/client";
-import { resetInfra } from "../../../src/application/singletons";
+import { InMemoryEventBus } from "@sg/eventbus-inmemory";
+import { InMemoryQueue } from "@sg/queue-inmemory";
+import { getInfra, resetInfra, setInfra } from "../../../src/application/infra";
 import { startWorker } from "../../../src/infra/workers/run-worker";
 
 type TestOptions = {
@@ -26,7 +28,8 @@ export async function runAgentsRunTest(
 
 	// Setup: clear DB, reset infra, start worker
 	await clearDatabase();
-	resetInfra();
+	const previous = getInfra();
+	setInfra({ bus: new InMemoryEventBus(), queue: new InMemoryQueue() });
 	const stop = normalized.startWorker ? startWorker() : undefined;
 
 	// Small delay to ensure worker/queue fully registered
@@ -45,6 +48,7 @@ export async function runAgentsRunTest(
 		}
 		await clearDatabase();
 		resetInfra();
+		setInfra(previous);
 		// Extra delay to ensure full cleanup before next test
 		await new Promise((r) => setTimeout(r, 50));
 	}
