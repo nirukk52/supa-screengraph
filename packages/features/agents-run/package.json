@@ -32,6 +32,6 @@
 		"@sg/eventbus-inmemory": "workspace:*",
 		"@sg/queue": "workspace:*",
 		"@sg/queue-inmemory": "workspace:*",
-		"@orpc/server": "^1.9.0"
+		"@orpc/server": "^1.9.4"
 	}
 }
