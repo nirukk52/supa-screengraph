@@ -22,6 +22,13 @@
 ## Test Refactor
 - Updated agents-run test layout: integration specs now rely on the real Prisma harness while unit specs keep the db-mock (see `packages/features/agents-run/tests/CLAUDE.md`).
 
+## oRPC Native SSE Streaming
+- Migrated from fallback HTTP/SSE routes to oRPC's native Event Iterator for `getStreamRun`.
+- Workers now start at API boot with singleton guard and graceful shutdown hooks.
+- Removed `registerFallbackAgentsRunRoutes` and custom SSE framing logic.
+- `packages/api/modules/agents/router.ts` now uses async generator syntax (`async function*`) to stream `AgentEvent` directly.
+- oRPC automatically handles SSE formatting, backpressure, and client reconnects with `fromSeq` support.
+
 ## Acceptance for Milestone Close (Pending)
 - All Vitest integration specs green against real DB.
 - CI `validate-prs` gate green using the same setup.

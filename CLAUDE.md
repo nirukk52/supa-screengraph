@@ -27,6 +27,9 @@ This repository maintains a six-page Claude documentation set. Each category mus
 ## Architecture Notes
 - [PR #39 Backend Patterns](docs/architecture/pr39-backend-patterns.md)
 
+## Recent Changes (2025-10-18)
+- **oRPC Native SSE**: Migrated from fallback HTTP/SSE routes to oRPC's Event Iterator for streaming. Workers start at API boot with singleton guard. See `docs/retro/milestone-4(currrent)/retro.md` for details.
+
 ---
 
 Update policy (enforced):
