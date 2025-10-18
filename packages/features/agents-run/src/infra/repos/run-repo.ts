@@ -2,32 +2,24 @@ import { db } from "@repo/database/prisma/client";
 
 export const RunRepo = {
 	async createRun(runId: string, startedAt: number): Promise<void> {
-		function isUniqueViolation(error: unknown): boolean {
-			return Boolean((error as any)?.code === "P2002");
-		}
-
-		try {
-			await db.run.create({
-				data: {
-					id: runId,
-					state: "started",
-					startedAt: new Date(startedAt),
-					lastSeq: 0,
-					v: 1,
-				},
-			});
-		} catch (error) {
-			if (!isUniqueViolation(error)) {
-				throw error;
+		await db.$transaction(async (tx) => {
+			const run = await tx.run.findUnique({ where: { id: runId } });
+			if (!run) {
+				await tx.run.create({
+					data: {
+						id: runId,
+						state: "started",
+						startedAt: new Date(startedAt),
+						lastSeq: 0,
+						v: 1,
+					},
+				});
 			}
-		}
-		try {
-			await db.runOutbox.create({ data: { runId, nextSeq: 1 } });
-		} catch (error) {
-			if (!isUniqueViolation(error)) {
-				throw error;
+			const outbox = await tx.runOutbox.findUnique({ where: { runId } });
+			if (!outbox) {
+				await tx.runOutbox.create({ data: { runId, nextSeq: 1 } });
 			}
-		}
+		});
 	},
 
 	async updateRunState(
