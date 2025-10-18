@@ -1,4 +1,13 @@
+import type { PrismaClient } from "@prisma/client";
 import { db } from "@repo/database/prisma/client";
+import { drainOutboxForRun } from "../../../src/infra/workers/outbox-publisher";
+
+/**
+ * Integration test helper – requires real Prisma/Postgres.
+ * DO NOT use with db-mock; this helper calls Prisma-specific APIs.
+ * For unit tests, seed data directly via the mock instead.
+ */
+const prisma: PrismaClient = db as unknown as PrismaClient;
 
 export type AwaitOutboxOptions = {
 	pollMs?: number;
@@ -20,31 +29,18 @@ export async function awaitOutboxFlush(
 	const timeoutMs = opts.timeoutMs ?? 10_000;
 	const start = Date.now();
 
-	async function check() {
-		// Read run + outbox state; avoid $transaction array form for mock compatibility
-		const hasOutboxFind =
-			typeof (db as any).runOutbox?.findUniqueOrThrow === "function";
-		const run = await (db as any).run.findUniqueOrThrow({
+	while (true) {
+		if (opts.signal?.aborted) {
+			throw new Error("awaitOutboxFlush aborted");
+		}
+		const run = await prisma.run.findUniqueOrThrow({
 			where: { id: runId },
 		});
-		let outbox: any;
-		if (hasOutboxFind) {
-			outbox = await (db as any).runOutbox.findUniqueOrThrow({
-				where: { runId },
-			});
-		} else if (typeof (db as any).runOutbox?.findMany === "function") {
-			const list = await (db as any).runOutbox.findMany({
-				where: { runId },
-			});
-			outbox = Array.isArray(list)
-				? list.find((o: any) => o.runId === runId)
-				: list;
-		} else {
-			throw new Error("runOutbox getter not available on db mock");
-		}
-
-		const lastSeq = run?.lastSeq ?? 0;
-		const nextSeq = outbox?.nextSeq ?? 0;
+		const outbox = await prisma.runOutbox.findUniqueOrThrow({
+			where: { runId },
+		});
+		const lastSeq = run.lastSeq ?? 0;
+		const nextSeq = outbox.nextSeq ?? 0;
 
 		if (typeof targetSeq === "number") {
 			if (nextSeq > targetSeq) {
@@ -54,31 +50,21 @@ export async function awaitOutboxFlush(
 			if (nextSeq > lastSeq) {
 				return { nextSeq, lastSeq };
 			}
-			// Fallback: if RunFinished is published, consider flushed
-			const finished = await db.runEvent.findUnique({
+			const finished = await prisma.runEvent.findUnique({
 				where: { runId_seq: { runId, seq: lastSeq } },
 			});
 			if (finished?.type === "RunFinished" && finished?.publishedAt) {
 				return { nextSeq, lastSeq };
 			}
 		}
-		return null;
-	}
 
-	while (true) {
-		if (opts.signal?.aborted) {
-			throw new Error("awaitOutboxFlush aborted");
-		}
-		const res = await check();
-		if (res) {
-			return res;
-		}
 		if (Date.now() - start > timeoutMs) {
 			throw new Error(
 				`awaitOutboxFlush timeout after ${timeoutMs}ms (runId=${runId}, targetSeq=${targetSeq ?? "<last>"})`,
 			);
 		}
-		await new Promise((r) => setTimeout(r, pollMs));
+		await drainOutboxForRun(runId);
+		await new Promise((resolve) => setTimeout(resolve, pollMs));
 	}
 }
 
@@ -88,12 +74,12 @@ export async function awaitOutboxFlush(
  */
 export async function awaitStreamCompletion<T extends { type?: string }>(
 	iter: AsyncIterable<T>,
-	isDone: (evt: T) => boolean = (e) => e?.type === "RunFinished",
+	isDone: (evt: T) => boolean = (event) => event?.type === "RunFinished",
 ): Promise<T[]> {
 	const out: T[] = [];
-	for await (const e of iter) {
-		out.push(e);
-		if (isDone(e)) {
+	for await (const event of iter) {
+		out.push(event);
+		if (isDone(event)) {
 			break;
 		}
 	}

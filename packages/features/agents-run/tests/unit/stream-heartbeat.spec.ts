@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { sseHeartbeat } from "../src/application/usecases/stream-run";
+import { sseHeartbeat } from "../../src/application/usecases/stream-run";
 
 describe("sseHeartbeat", () => {
 	it("writes ping and clears interval", () => {

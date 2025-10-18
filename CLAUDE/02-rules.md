@@ -21,7 +21,7 @@ Hard, enforceable rules (cap ≤25):
 17. Document module top with purpose, dependencies, public API.
 18. Consistent naming: noun for types, verb for functions, adjective for flags.
 19. Document architectural decisions in `docs/adr`.
-20. Tests live with modules; e2e in apps/tests only.
+20. Tests live with modules (unit/ and integration/ subdirectories); e2e in apps/tests only.
 21. Feature isolation: no cross-feature imports.
 22. Contracts are source-of-truth: if not in agents-contracts, it doesn't exist.
 23. Tenancy must be enforced at data and event levels.

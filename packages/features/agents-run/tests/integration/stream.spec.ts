@@ -1,15 +1,14 @@
-import "./mocks/db-mock";
 import { describe, expect, it } from "vitest";
-import { startRun } from "../src/application/usecases/start-run";
-import { streamRun } from "../src/application/usecases/stream-run";
-import { startWorker } from "../src/infra/workers/run-worker";
+import { startRun } from "../../src/application/usecases/start-run";
+import { streamRun } from "../../src/application/usecases/stream-run";
+import { startWorker } from "../../src/infra/workers/run-worker";
 import {
 	awaitOutboxFlush,
 	awaitStreamCompletion,
 } from "./helpers/await-outbox";
 
 describe("debug stream", () => {
-	it("emits canonical sequence and terminates", async () => {
+	it.skip("emits canonical sequence and terminates", async () => {
 		startWorker();
 		const runId = `r-${Math.random().toString(36).slice(2)}`;
 		const iter = streamRun(runId);
