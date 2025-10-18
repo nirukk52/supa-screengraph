@@ -3,6 +3,7 @@ import { db } from "@repo/database/prisma/client";
 import { EVENT_SOURCES, EVENT_TYPES } from "@sg/agents-contracts";
 import { beforeEach, describe, expect, it } from "vitest";
 import { RunEventRepo } from "../../src/infra/repos/run-event-repo";
+import { RunRepo } from "../../src/infra/repos/run-repo";
 
 describe("RunEventRepo", () => {
 	beforeEach(async () => {
@@ -11,6 +12,7 @@ describe("RunEventRepo", () => {
 
 	it("appends seq monotonically and bumps lastSeq", async () => {
 		const runId = "r1";
+		await RunRepo.createRun(runId, Date.now());
 		await RunEventRepo.appendEvent({
 			runId,
 			seq: 1,
@@ -34,6 +36,7 @@ describe("RunEventRepo", () => {
 
 	it("rejects non-monotonic append", async () => {
 		const runId = "r2";
+		await RunRepo.createRun(runId, Date.now());
 		await RunEventRepo.appendEvent({
 			runId,
 			seq: 1,

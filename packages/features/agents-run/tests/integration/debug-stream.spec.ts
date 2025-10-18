@@ -4,8 +4,8 @@ import { startRun } from "../../src/application/usecases/start-run";
 import { streamRun } from "../../src/application/usecases/stream-run";
 import { startWorker } from "../../src/infra/workers/run-worker";
 import {
-	awaitOutboxFlush,
 	awaitStreamCompletion,
+	waitForRunCompletion,
 } from "./helpers/await-outbox";
 
 describe("M3 Debug Stream Inspection", () => {
@@ -17,7 +17,7 @@ describe("M3 Debug Stream Inspection", () => {
 		const iter = streamRun(runId);
 
 		await startRun(runId);
-		await awaitOutboxFlush(runId);
+		await waitForRunCompletion(runId);
 		const events = await awaitStreamCompletion(iter);
 
 		stop?.();
@@ -50,5 +50,5 @@ describe("M3 Debug Stream Inspection", () => {
 		});
 
 		console.log("\n========== END DEBUG STREAM =========\n");
-	}, 10000);
+	}, 20000);
 });

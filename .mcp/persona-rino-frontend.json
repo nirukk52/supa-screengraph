@@ -201,12 +201,7 @@
 			"apps/web/public",
 			"apps/web/content"
 		],
-		"restricted_directories": [
-			"packages/",
-			"tooling/",
-			"docs/",
-			"CLAUDE/"
-		],
+		"restricted_directories": ["packages/", "tooling/", "docs/", "CLAUDE/"],
 		"rule": "Only modify files within apps/web directory. For backend changes, coordinate with backend worktree."
 	},
 
@@ -274,7 +269,12 @@
 			"SUPABASE_*",
 			"OPENAI_*"
 		],
-		"forbid_in": ["Frontend ADR", "episode", "commit_message", "pr_description"]
+		"forbid_in": [
+			"Frontend ADR",
+			"episode",
+			"commit_message",
+			"pr_description"
+		]
 	},
 
 	"modes": {

@@ -13,6 +13,8 @@ describe("Orchestrator Integration (M3)", () => {
 	it.skip("golden path: emits RunStarted → nodes → RunFinished with monotonic seq", async () => {
 		resetInfra();
 		const stop = startWorker();
+		// Small delay to ensure worker is ready
+		await new Promise((r) => setTimeout(r, 50));
 
 		const runId = `r-${Math.random().toString(36).slice(2)}`;
 		const iter = streamRun(runId);
@@ -55,6 +57,8 @@ describe("Orchestrator Integration (M3)", () => {
 	it.skip("concurrent runs: each has isolated monotonic seq", async () => {
 		resetInfra();
 		const stop = startWorker();
+		// Small delay to ensure worker is ready
+		await new Promise((r) => setTimeout(r, 50));
 
 		const runId1 = `r1-${Math.random().toString(36).slice(2)}`;
 		const runId2 = `r2-${Math.random().toString(36).slice(2)}`;
