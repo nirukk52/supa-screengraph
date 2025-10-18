@@ -1,12 +1,6 @@
-import { InMemoryEventBus } from "@sg/eventbus-inmemory";
-import { InMemoryQueue } from "@sg/queue-inmemory";
+import { getInfra, resetInfra } from "./infra";
 
-export const bus = new InMemoryEventBus();
-export const queue = new InMemoryQueue();
+export const bus = getInfra().bus;
+export const queue = getInfra().queue;
 
-export function resetInfra(): void {
-	// Reset event bus topics to ensure clean subscription state between tests.
-	bus.reset?.();
-	// Reset queue handlers to avoid leaking subscribers between tests.
-	queue.reset?.();
-}
+export { resetInfra };
