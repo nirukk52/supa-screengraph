@@ -8,7 +8,12 @@ dotenvConfig({ path: path.resolve(__dirname, ".env") });
 export default defineConfig({
 	test: {
 		include: ["packages/**/tests/**/*.spec.ts"],
-		exclude: ["apps/web/tests/**"],
+		exclude: [
+			"apps/web/tests/**",
+			"**/node_modules/**",
+			"**/dist/**",
+			"**/build/**",
+		],
 		globalSetup: "packages/database/prisma/test/setup.ts",
 		globalTeardown: "packages/database/prisma/test/teardown.ts",
 		// setupFiles: ["packages/database/prisma/test/global.d.ts"], // Removed: .d.ts files should not be used here

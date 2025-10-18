@@ -6,24 +6,32 @@ import { EVENT_TYPES } from "@sg/agents-contracts";
 export const RunEventRepo = {
 	async appendEvent(event: AgentEvent): Promise<void> {
 		await db.$transaction(async (tx) => {
-			// Ensure run exists; create on seq=1 (RunStarted)
+			// Ensure run exists; create on seq=1 (RunStarted) - idempotent
 			if (event.seq === 1 && event.type === EVENT_TYPES.RunStarted) {
-				await tx.run.upsert({
-					where: { id: event.runId },
-					update: {},
-					create: {
-						id: event.runId,
-						state: "started",
-						startedAt: new Date(event.ts),
-						lastSeq: 0,
-						v: 1,
-					},
-				});
-				await tx.runOutbox.upsert({
-					where: { runId: event.runId },
-					update: {},
-					create: { runId: event.runId, nextSeq: 1 },
-				});
+				try {
+					await tx.run.create({
+						data: {
+							id: event.runId,
+							state: "started",
+							startedAt: new Date(event.ts),
+							lastSeq: 0,
+							v: 1,
+						},
+					});
+				} catch (error) {
+					if ((error as any)?.code !== "P2002") {
+						throw error;
+					}
+				}
+				try {
+					await tx.runOutbox.create({
+						data: { runId: event.runId, nextSeq: 1 },
+					});
+				} catch (error) {
+					if ((error as any)?.code !== "P2002") {
+						throw error;
+					}
+				}
 			}
 
 			// Monotonicity: seq == lastSeq + 1
