@@ -85,3 +85,74 @@ export async function awaitStreamCompletion<T extends { type?: string }>(
 	}
 	return out;
 }
+
+/**
+ * Wait for a run to complete (reach "finished" state).
+ * Polls the database until run.state === "finished" and all events are published.
+ * This is the recommended helper for deterministic test completion.
+ *
+ * @param runId - The run ID to wait for
+ * @param opts - Options for polling and timeout
+ * @returns Promise that resolves when run is complete with final state
+ */
+export async function waitForRunCompletion(
+	runId: string,
+	opts: AwaitOutboxOptions = {},
+): Promise<{ state: string; lastSeq: number; nextSeq: number }> {
+	const pollMs = opts.pollMs ?? 50;
+	const timeoutMs = opts.timeoutMs ?? 15_000;
+	const start = Date.now();
+
+	while (true) {
+		if (opts.signal?.aborted) {
+			throw new Error("waitForRunCompletion aborted");
+		}
+
+		// Trigger outbox flush to help the run progress (safe if run doesn't exist yet)
+		try {
+			await drainOutboxForRun(runId);
+		} catch {
+			// Ignore errors - run might not exist yet
+		}
+
+		const run = await prisma.run.findUnique({
+			where: { id: runId },
+		});
+		const outbox = await prisma.runOutbox.findUnique({
+			where: { runId },
+		});
+
+		// If run doesn't exist yet, keep waiting
+		if (!run || !outbox) {
+			if (Date.now() - start > timeoutMs) {
+				throw new Error(
+					`waitForRunCompletion timeout after ${timeoutMs}ms (runId=${runId}, run exists: ${!!run}, outbox exists: ${!!outbox})`,
+				);
+			}
+			await new Promise((resolve) => setTimeout(resolve, pollMs));
+			continue;
+		}
+
+		const state = run.state;
+		const lastSeq = run.lastSeq ?? 0;
+		const nextSeq = outbox.nextSeq ?? 0;
+
+		// Check if run is finished and all events are published
+		if (state === "finished" && nextSeq > lastSeq) {
+			return { state, lastSeq, nextSeq };
+		}
+
+		// Also check for cancelled state
+		if (state === "cancelled" && nextSeq > lastSeq) {
+			return { state, lastSeq, nextSeq };
+		}
+
+		if (Date.now() - start > timeoutMs) {
+			throw new Error(
+				`waitForRunCompletion timeout after ${timeoutMs}ms (runId=${runId}, state=${state}, lastSeq=${lastSeq}, nextSeq=${nextSeq})`,
+			);
+		}
+
+		await new Promise((resolve) => setTimeout(resolve, pollMs));
+	}
+}

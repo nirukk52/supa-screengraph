@@ -5,8 +5,8 @@ import { startRun } from "../../src/application/usecases/start-run";
 import { streamRun } from "../../src/application/usecases/stream-run";
 import { startWorker } from "../../src/infra/workers/run-worker";
 import {
-	awaitOutboxFlush,
 	awaitStreamCompletion,
+	waitForRunCompletion,
 } from "./helpers/await-outbox";
 
 describe("Orchestrator Integration (M3)", () => {
@@ -18,8 +18,8 @@ describe("Orchestrator Integration (M3)", () => {
 		const iter = streamRun(runId);
 		// Start publishing
 		await startRun(runId);
-		// Ensure outbox has flushed through terminal event (or last seq)
-		await awaitOutboxFlush(runId);
+		// Wait for run to complete deterministically
+		await waitForRunCompletion(runId);
 		// Drain stream deterministically until RunFinished
 		const events = await awaitStreamCompletion(iter);
 
@@ -50,7 +50,7 @@ describe("Orchestrator Integration (M3)", () => {
 			expect(event).toHaveProperty("v");
 			expect(event).toHaveProperty("source");
 		}
-	}, 10000);
+	}, 20000);
 
 	it.skip("concurrent runs: each has isolated monotonic seq", async () => {
 		resetInfra();
@@ -67,6 +67,12 @@ describe("Orchestrator Integration (M3)", () => {
 
 		// Start both runs concurrently
 		await Promise.all([startRun(runId1), startRun(runId2)]);
+
+		// Wait for both to complete
+		await Promise.all([
+			waitForRunCompletion(runId1),
+			waitForRunCompletion(runId2),
+		]);
 
 		const [events1, events2] = await Promise.all([
 			collecting1,
@@ -90,5 +96,5 @@ describe("Orchestrator Integration (M3)", () => {
 		// Runs should have emitted similar event counts
 		expect(events1.length).toBeGreaterThanOrEqual(12);
 		expect(events2.length).toBeGreaterThanOrEqual(12);
-	}, 10000);
+	}, 30000);
 });
