@@ -718,6 +718,13 @@ importers:
       '@sg/queue-inmemory':
         specifier: workspace:*
         version: link:../../queue-inmemory
+      awilix:
+        specifier: ^12.0.5
+        version: 12.0.5
+    devDependencies:
+      '@types/node':
+        specifier: ^24.8.1
+        version: 24.8.1
 
   packages/i18n:
     dependencies:
@@ -5048,6 +5055,9 @@ packages:
 
   '@types/node@24.7.2':
     resolution: {integrity: sha512-/NbVmcGTP+lj5oa4yiYxxeBjRivKQ5Ns1eSZeB99ExsEQ6rX5XYU1Zy/gGxY/ilqtD4Etx9mKyrPxZRetiahhA==}
+
+  '@types/node@24.8.1':
+    resolution: {integrity: sha512-alv65KGRadQVfVcG69MuB4IzdYVpRwMG/mq8KWOaoOdyY617P5ivaDiMCGOFDWD2sAn5Q0mR3mRtUOgm99hL9Q==}
 
   '@types/nodemailer@7.0.2':
     resolution: {integrity: sha512-Zo6uOA9157WRgBk/ZhMpTQ/iCWLMk7OIs/Q9jvHarMvrzUUP/MDdPHL2U1zpf57HrrWGv4nYQn5uIxna0xY3xw==}
@@ -15493,6 +15503,10 @@ snapshots:
       undici-types: 5.26.5
 
   '@types/node@24.7.2':
+    dependencies:
+      undici-types: 7.14.0
+
+  '@types/node@24.8.1':
     dependencies:
       undici-types: 7.14.0
 

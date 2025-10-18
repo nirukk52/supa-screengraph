@@ -16,5 +16,8 @@ export async function processRunDeterministically(
 		cancelToken: new StubCancellationToken(),
 	});
 
+	// Wait for async append chain to complete
+	await new Promise((resolve) => setTimeout(resolve, 100));
+
 	await drainOutboxForRun(runId);
 }

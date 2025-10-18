@@ -16,11 +16,6 @@ export default defineConfig({
 		],
 		globalSetup: "packages/database/prisma/test/setup.ts",
 		globalTeardown: "packages/database/prisma/test/teardown.ts",
-		poolOptions: {
-			threads: {
-				singleThread: true,
-			},
-		},
 	},
 	coverage: {
 		reporter: ["text", "json", "lcov"],
