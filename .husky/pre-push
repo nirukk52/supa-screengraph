@@ -4,6 +4,13 @@
 if [ "$SKIP_TESTS" = "1" ]; then
   echo "SKIP_TESTS=1 set; skipping tests"
 else
+  # Check for active bug work requiring pre-push validation
+  if grep -q "BUG-TEST-004.*In Progress" docs/jira/bug-logs/BUG-TEST-004.md 2>/dev/null; then
+    echo "⚠️  BUG-TEST-004 (Skipped Integration Tests) in progress: Ensure pre-push checklist complete before pushing code"
+    echo "See docs/jira/bug-logs/BUG-TEST-004.md for checklist"
+    # Allow push to continue but warn
+  fi
+
   # Determine affected tests (fallback to full suite)
   patterns="$(node tooling/scripts/test/affected.ts 2>/dev/null || echo '')"
   if [ -z "$patterns" ] || [ "$patterns" = "NO_AFFECTED" ]; then

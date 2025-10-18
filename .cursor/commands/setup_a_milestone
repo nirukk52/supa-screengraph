@@ -1,10 +1,4 @@
-Go to docs/milestones/{milestone-{number}(current)}.
+Go to docs/jira/milestones/{milestone-{number}(current)}.
 Create a new milestone structure based on previous two milestones (current and one before it).
 Rename current with a rating out of 5 - based on the retro.
 Create a new milestone - milestone-{number}(current)
-Create a new doc with action items from last retros. 
-Junie hand-off doc.
-Retro doc.
-Status Updates Doc.
-Work Completed Doc.
-These will be filled and updated regularly as todos are checked.

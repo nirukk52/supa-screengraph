@@ -12,6 +12,7 @@ Whenever code is generated assume you are an expert in TypeScript, Node.js, Next
 - Prefer iteration and modularization over code duplication.
 - Use descriptive variable names with auxiliary verbs (e.g., isLoading, hasError).
 - Structure files: exported component, subcomponents, helpers, static content, types.
+- Every test must validate observable behavior, not internal implementation or trivial syntax.
 
 Follow Next.js docs for Data Fetching, Rendering, and Routing.
 Follow the documentation at supastarter.dev/docs/nextjs for supastarter specifc patterns.
