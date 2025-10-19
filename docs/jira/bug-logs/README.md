@@ -15,16 +15,17 @@
 | BUG-TEST-003 | Unit Tests Missing Run Init | ✅ Resolved | High | Test Setup |
 | BUG-TEST-004 | Skipped Integration Tests | 🔄 In Progress | Medium | Test Coverage |
 | BUG-TEST-005 | Test Harness Variable Naming | 🆕 Open | Low | Test Clarity |
+| BUG-TEST-006 | Fragile 100ms Timeout in Process Helper | 🆕 Open | Medium | Test Determinism |
 | BUG-INFRA-001 | E2E DATABASE_URL Not Found | 🆕 Open | Medium | Infrastructure |
 
 ---
 
 ## Summary
 
-- **Total**: 8 bugs
+- **Total**: 9 bugs
 - **Resolved**: 5
 - **In Progress**: 1
-- **Open**: 2
+- **Open**: 3
 
 ---
 

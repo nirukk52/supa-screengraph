@@ -40,7 +40,7 @@ This repository maintains a six-page Claude documentation set. Each category mus
 - **oRPC Native SSE**: Migrated from fallback HTTP/SSE routes to oRPC's Event Iterator for streaming. Workers start at API boot with singleton guard. See `docs/retro/milestone-4(currrent)/retro.md` for details.
 - **JIRA Structure**: Consolidated bug-logs, feature-requests, and tech-debt into `docs/jira/` with workflow documentation and milestone sequences.
 - **M5 Status**: Phase 1 (Ports-first Infra Seam) complete in PR #66. Facade pattern fixes stale singleton refs. Phase 3 (Awilix DI) in progress.
-- **Bug Tracking**: Added BUG-TEST-005 (test harness naming clarity) and BUG-INFRA-001 (e2e DATABASE_URL). Total: 8 bugs (5 resolved, 1 in progress, 2 open).
+- **Bug Tracking**: Added BUG-TEST-005 (test harness naming), BUG-TEST-006 (100ms timeout fragility), BUG-INFRA-001 (e2e DATABASE_URL). Total: 9 bugs (5 resolved, 1 in progress, 3 open).
 
 ---
 
