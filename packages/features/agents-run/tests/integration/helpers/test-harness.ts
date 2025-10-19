@@ -20,16 +20,19 @@ async function clearDatabase() {
 	await db.run.deleteMany({});
 }
 
+type Resettable = { reset?: () => void };
+
 export async function runAgentsRunTest(
-	fn: () => Promise<void>,
-	options?: TestOptions,
+    fn: () => Promise<void>,
+    options?: TestOptions,
 ): Promise<void> {
 	const normalized = normalizeOptions(options);
 
 	// Setup: clear DB, reset infra, start worker
 	await clearDatabase();
-	const previous = getInfra();
-	setInfra({ bus: new InMemoryEventBus(), queue: new InMemoryQueue() });
+    const previous = getInfra();
+    const previousSnapshot = { bus: previous.bus, queue: previous.queue };
+    setInfra({ bus: new InMemoryEventBus(), queue: new InMemoryQueue() });
 	const stop = normalized.startWorker ? startWorker() : undefined;
 
 	// Small delay to ensure worker/queue fully registered
@@ -46,9 +49,11 @@ export async function runAgentsRunTest(
 			// Let worker interval clear before cleanup
 			await new Promise((r) => setTimeout(r, 150));
 		}
-		await clearDatabase();
-		resetInfra();
-		setInfra(previous);
+        await clearDatabase();
+        resetInfra();
+        setInfra(previousSnapshot);
+        (previousSnapshot.bus as Resettable).reset?.();
+        (previousSnapshot.queue as Resettable).reset?.();
 		// Extra delay to ensure full cleanup before next test
 		await new Promise((r) => setTimeout(r, 50));
 	}

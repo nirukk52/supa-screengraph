@@ -39,7 +39,7 @@ This repository maintains a six-page Claude documentation set. Each category mus
 ## Recent Changes (2025-10-18)
 - **oRPC Native SSE**: Migrated from fallback HTTP/SSE routes to oRPC's Event Iterator for streaming. Workers start at API boot with singleton guard. See `docs/retro/milestone-4(currrent)/retro.md` for details.
 - **JIRA Structure**: Consolidated bug-logs, feature-requests, and tech-debt into `docs/jira/` with workflow documentation and milestone sequences.
-- **M5 Status**: Phase 1 (Ports-first Infra Seam) blocked pending PR #64 merge. Phases 2, 3, 4 complete (83% milestone done).
+- **M5 Status**: Phase 1 (Ports-first Infra Seam) complete in PR #66. Facade pattern fixes stale singleton refs. Phase 3 (Awilix DI) in progress.
 
 ---
 
