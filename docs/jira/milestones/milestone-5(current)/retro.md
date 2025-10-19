@@ -64,6 +64,27 @@
 - **Worker lifecycle must be deterministic**: Test env should skip API boot workers; tests control their own worker lifecycle
 - **Test helpers must be explicit**: `waitForRunCompletion` > `awaitOutboxFlush` because it polls state + drains outbox synchronously
 
+## Progress Update (2025-10-19)
+
+### BUG-TEST-006 Resolved
+- Added `FeatureLayerTracer.waitForCompletion(runId)` to await append chain deterministically
+- Replaced fragile 100ms `setTimeout` in `processRunDeterministically`
+- 2/7 integration tests now pass 3x locally (orchestrator golden path, debug-stream)
+
+### BUG-TEST-007 Identified
+- Background outbox interval from prior test consumes manually seeded events
+- Logged as new bug; deferred until DEBT-0003 (deterministic outbox stepping)
+
+### DEBT-0003 Proposed
+- Replace polling interval with pg-listen + step API (`drainOutboxOnce`)
+- BullMQ for jobs (Testcontainers Redis in tests)
+- Path to parallel test execution and prod-ready infra
+
+### Tests Status
+- Passing (2): orchestrator-integration golden path, debug-stream
+- Skipped (5): stream.spec, stream-backfill (2 tests), outbox.spec, orchestrator concurrent
+- Reason: worker races, DB shared state, interval interference
+
 ## Acceptance for Milestone Close
 _Final checklist before marking M5 complete_
 - [ ] All planned features implemented

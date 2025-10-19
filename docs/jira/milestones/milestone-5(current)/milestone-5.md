@@ -133,22 +133,24 @@
   - BUG-DB-001 resolved
   - BUG-TEST-004 documented/deferred (will be resolved by Phase 1)
 
-### Phase 3: Technical Debt ✅
-- **Total**: 2 items
-- **Complete**: 2 (both documented for M6)
-  - DEBT-0001 documented
-  - DEBT-0002 documented
+### Phase 3: Infrastructure Quality & Cleanup 🔵
+- **Total**: 3 items
+- **Complete**: 0
+- **In Progress**: 1 (DEBT-0001)
+- **Blocked**: 1 (DEBT-0002 blocked by DEBT-0001)
+- **Open**: 1 (BUG-INFRA-001)
 
 ### Phase 4: Documentation ✅
 - **Total**: 1 item
 - **Complete**: 1
 
 ### Overall Progress
-- **Total Items**: 6
-- **Complete**: 5 (Phase 2, 3, 4)
-- **Blocked**: 1 (Phase 1 - FEAT-0001-5)
-- **Completion**: 83% (5/6)
-- **Status**: Ready for Phase 1 once PR #64 merges
+- **Total Items**: 7
+- **Complete**: 4 (Phase 2, Phase 4, and previously Phase 1)
+- **In Progress**: 2 (DEBT-0001, Phase 3 work)
+- **Open**: 1 (BUG-INFRA-001)
+- **Completion**: 57% (4/7)
+- **Status**: Phase 1 complete (PR #66), Phase 3 in progress
 
 ---
 
@@ -163,6 +165,9 @@
 - BUG-DB-001: Critical for test stability, blocking all integration tests
 - DEBT-0002: Documenting root cause of test flakiness for M6 planning
 - FEAT-0001-5: Incremental approach reduces risk, defers full DI to M6
+
+### Moved Out of M5
+- **BUG-TEST-005**: Scaffold tooling improvement (Prisma mock guard) - low severity, moved to scaffold improvements backlog
 
 ---
 

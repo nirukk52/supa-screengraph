@@ -5,35 +5,30 @@ import {
 	awaitStreamCompletion,
 	waitForRunCompletion,
 } from "./helpers/await-outbox";
-import { processRunDeterministically } from "./helpers/process-run";
 import { runAgentsRunTest } from "./helpers/test-harness";
 
-describe("stream run", () => {
+describe.sequential("stream run", () => {
 	it.skip("emits canonical sequence and terminates", async () => {
-		await runAgentsRunTest(
-			async () => {
-				// Arrange
-				const runId = `r-${Math.random().toString(36).slice(2)}`;
-				const iter = streamRun(runId);
+		await runAgentsRunTest(async () => {
+			// Arrange
+			const runId = `r-${Math.random().toString(36).slice(2)}`;
+			const iter = streamRun(runId);
 
-				// Act
-				await startRun(runId);
-				await processRunDeterministically(runId);
-				await waitForRunCompletion(runId);
-				const events = await awaitStreamCompletion(iter);
+			// Act
+			await startRun(runId);
+			await waitForRunCompletion(runId);
+			const events = await awaitStreamCompletion(iter);
 
-				// Assert: observable behavior only
-				expect(events.length).toBeGreaterThanOrEqual(4);
-				expect(events[0].type).toBe("RunStarted");
-				expect(events.at(-1)?.type).toBe("RunFinished");
+			// Assert: observable behavior only
+			expect(events.length).toBeGreaterThanOrEqual(4);
+			expect(events[0].type).toBe("RunStarted");
+			expect(events.at(-1)?.type).toBe("RunFinished");
 
-				// Assert: monotonic sequence (observable invariant)
-				const seqs = events.map((e) => e.seq);
-				for (let i = 1; i < seqs.length; i++) {
-					expect(seqs[i]).toBeGreaterThan(seqs[i - 1]);
-				}
-			},
-			{ startWorker: false },
-		);
+			// Assert: monotonic sequence (observable invariant)
+			const seqs = events.map((e) => e.seq);
+			for (let i = 1; i < seqs.length; i++) {
+				expect(seqs[i]).toBeGreaterThan(seqs[i - 1]);
+			}
+		});
 	}, 20000);
 });
