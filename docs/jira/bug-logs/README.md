@@ -14,15 +14,17 @@
 | BUG-TEST-002 | Shared Singleton Collision | ✅ Resolved | High | Test Architecture |
 | BUG-TEST-003 | Unit Tests Missing Run Init | ✅ Resolved | High | Test Setup |
 | BUG-TEST-004 | Skipped Integration Tests | 🔄 In Progress | Medium | Test Coverage |
+| BUG-TEST-005 | Test Harness Variable Naming | 🆕 Open | Low | Test Clarity |
+| BUG-INFRA-001 | E2E DATABASE_URL Not Found | 🆕 Open | Medium | Infrastructure |
 
 ---
 
 ## Summary
 
-- **Total**: 6 bugs
+- **Total**: 8 bugs
 - **Resolved**: 5
 - **In Progress**: 1
-- **Open**: 0
+- **Open**: 2
 
 ---
 
