@@ -52,6 +52,10 @@ const formSchema = z.union([
 		email: z.string().email(),
 		password: z.string().min(1),
 	}),
+	z.object({
+		mode: z.literal("app-config"),
+		apkPath: z.string().min(1, "APK path is required"),
+	}),
 ]);
 
 type FormValues = z.infer<typeof formSchema>;
@@ -74,6 +78,7 @@ export function LoginForm() {
 		defaultValues: {
 			email: email ?? "",
 			password: "",
+			apkPath: "",
 			mode: config.auth.enablePasswordLogin ? "password" : "magic-link",
 		},
 	});
@@ -114,7 +119,7 @@ export function LoginForm() {
 				});
 
 				router.replace(redirectPath);
-			} else {
+			} else if (values.mode === "magic-link") {
 				const { error } = await authClient.signIn.magicLink({
 					...values,
 					callbackURL: redirectPath,
@@ -123,6 +128,20 @@ export function LoginForm() {
 				if (error) {
 					throw error;
 				}
+			} else if (values.mode === "app-config") {
+				// Generate a unique run ID
+				const runId = `run_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+				// Store APK path in localStorage or session
+				if (typeof window !== "undefined") {
+					localStorage.setItem(
+						`run_${runId}_apkPath`,
+						values.apkPath,
+					);
+				}
+
+				// Navigate to the run page
+				router.replace(`/run/${runId}`);
 			}
 		} catch (e) {
 			form.setError("root", {
@@ -184,18 +203,15 @@ export function LoginForm() {
 							className="space-y-4"
 							onSubmit={form.handleSubmit(onSubmit)}
 						>
-							{config.auth.enableMagicLink &&
-								config.auth.enablePasswordLogin && (
-									<LoginModeSwitch
-										activeMode={signinMode}
-										onChange={(mode) =>
-											form.setValue(
-												"mode",
-												mode as typeof signinMode,
-											)
-										}
-									/>
-								)}
+							<LoginModeSwitch
+								activeMode={signinMode}
+								onChange={(mode) =>
+									form.setValue(
+										"mode",
+										mode as typeof signinMode,
+									)
+								}
+							/>
 
 							{form.formState.isSubmitted &&
 								form.formState.errors.root?.message && (
@@ -207,23 +223,25 @@ export function LoginForm() {
 									</Alert>
 								)}
 
-							<FormField
-								control={form.control}
-								name="email"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>
-											{t("auth.signup.email")}
-										</FormLabel>
-										<FormControl>
-											<Input
-												{...field}
-												autoComplete="email"
-											/>
-										</FormControl>
-									</FormItem>
-								)}
-							/>
+							{signinMode !== "app-config" && (
+								<FormField
+									control={form.control}
+									name="email"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>
+												{t("auth.signup.email")}
+											</FormLabel>
+											<FormControl>
+												<Input
+													{...field}
+													autoComplete="email"
+												/>
+											</FormControl>
+										</FormItem>
+									)}
+								/>
+							)}
 
 							{config.auth.enablePasswordLogin &&
 								signinMode === "password" && (
@@ -282,6 +300,24 @@ export function LoginForm() {
 									/>
 								)}
 
+							{signinMode === "app-config" && (
+								<FormField
+									control={form.control}
+									name="apkPath"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>APK Path</FormLabel>
+											<FormControl>
+												<Input
+													{...field}
+													placeholder="/path/to/app.apk"
+												/>
+											</FormControl>
+										</FormItem>
+									)}
+								/>
+							)}
+
 							<Button
 								className="w-full"
 								type="submit"
@@ -290,7 +326,9 @@ export function LoginForm() {
 							>
 								{signinMode === "magic-link"
 									? t("auth.login.sendMagicLink")
-									: t("auth.login.submit")}
+									: signinMode === "app-config"
+										? "Connect"
+										: t("auth.login.submit")}
 							</Button>
 						</form>
 					</Form>

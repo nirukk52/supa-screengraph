@@ -8,7 +8,7 @@ export function LoginModeSwitch({
 	onChange,
 	className,
 }: {
-	activeMode: "password" | "magic-link";
+	activeMode: "password" | "magic-link" | "app-config";
 	onChange: (mode: string) => void;
 	className?: string;
 }) {
@@ -21,6 +21,9 @@ export function LoginModeSwitch({
 				</TabsTrigger>
 				<TabsTrigger value="magic-link" className="flex-1">
 					{t("auth.login.modes.magicLink")}
+				</TabsTrigger>
+				<TabsTrigger value="app-config" className="flex-1">
+					App Config
 				</TabsTrigger>
 			</TabsList>
 		</Tabs>
