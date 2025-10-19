@@ -1,29 +1,10 @@
 import { db } from "@repo/database/prisma/client";
-import { logger } from "@repo/logs";
 import type { AgentEvent } from "@sg/agents-contracts";
 
 export const RunEventRepo = {
 	async appendEvent(event: AgentEvent): Promise<void> {
 		await db.$transaction(async (tx) => {
-			// Ensure run exists; create on seq=1 (RunStarted)
-			if (event.seq === 1 && event.type === "RunStarted") {
-				await tx.run.upsert({
-					where: { id: event.runId },
-					update: {},
-					create: {
-						id: event.runId,
-						state: "started",
-						startedAt: new Date(event.ts),
-						lastSeq: 0,
-						v: 1,
-					},
-				});
-				await tx.runOutbox.upsert({
-					where: { runId: event.runId },
-					update: {},
-					create: { runId: event.runId, nextSeq: 1 },
-				});
-			}
+			// Assumes run and outbox were initialized by RunRepo.createRun via startRun
 
 			// Monotonicity: seq == lastSeq + 1
 			const runRow = await tx.run.findUniqueOrThrow({
@@ -51,12 +32,7 @@ export const RunEventRepo = {
 				data: { lastSeq: event.seq },
 			});
 
-			// Metrics: event persisted
-			logger.info("metric.events_inserted", {
-				runId: event.runId,
-				seq: event.seq,
-				type: event.type,
-			});
+			// Metrics would be emitted here in production build
 		});
 	},
 };

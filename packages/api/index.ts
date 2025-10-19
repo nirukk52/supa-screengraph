@@ -11,9 +11,50 @@ export type ApiApp = Hono;
 
 import { cors } from "hono/cors";
 import { logger as honoLogger } from "hono/logger";
-import { registerFallbackAgentsRunRoutes } from "./modules/agents/fallback";
 import { openApiHandler, rpcHandler } from "./orpc/handler";
 import { router } from "./orpc/router";
+
+// Start workers once at boot (singleton guard)
+let workersStarted = false;
+let disposeWorkers: (() => void) | undefined;
+
+function startWorkersOnce() {
+	if (workersStarted) {
+		return;
+	}
+	workersStarted = true;
+
+	// Dynamic import to avoid circular dependencies
+	import("@sg/feature-agents-run")
+		.then((mod) => {
+			disposeWorkers = mod.startWorker();
+			logger.info("[api] agents-run workers started");
+		})
+		.catch((err) => {
+			logger.error("[api] failed to start agents-run workers", err);
+		});
+}
+
+// Graceful shutdown
+if (typeof process !== "undefined") {
+	const cleanup = () => {
+		if (disposeWorkers) {
+			disposeWorkers();
+			logger.info("[api] agents-run workers stopped");
+		}
+	};
+	process.on("SIGINT", cleanup);
+	process.on("SIGTERM", cleanup);
+}
+
+// Start workers immediately (skip in test env to avoid collision with test workers)
+const isTestEnv =
+	process.env.NODE_ENV === "test" ||
+	process.env.VITEST === "true" ||
+	process.env.E2E_TEST === "true";
+if (!isTestEnv) {
+	startWorkersOnce();
+}
 
 export const app: ApiApp = new Hono().basePath("/api");
 
@@ -76,9 +117,6 @@ app.get(
 
 // Health check
 app.get("/health", (c) => c.text("OK"));
-
-// Temporary direct fallback routes for agents-run SSE (bypass oRPC for streaming)
-registerFallbackAgentsRunRoutes(app);
 
 // oRPC handlers (for RPC and OpenAPI)
 app.use("*", async (c, next) => {

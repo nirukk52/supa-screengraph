@@ -18,6 +18,7 @@ Build vertical slices; keep UI dumb; move business logic to features that compos
 - Unit test every branch in domain/application.
 - Contract test schemas/fixtures (compatibility is king).
 - Integration test routes/workers; a thin e2e for ordering & terminal semantics.
+- Tests must be deterministic: await tracer appends, use step/drain APIs, no setTimeout waits.
 
 ## Operational discipline
 - Observability at the node/usecase boundary (logs, spans, metrics).

@@ -12,6 +12,10 @@ export class InMemoryQueue implements QueuePort {
 	async enqueue<T>(name: string, data: T): Promise<void> {
 		const h = this.handlers.get(name);
 		if (!h) {
+			console.warn(
+				`[InMemoryQueue] No handler for "${name}", job dropped:`,
+				data,
+			);
 			return;
 		}
 		// Use macrotask to allow consumers (e.g., SSE subscribers) to attach before processing

@@ -21,9 +21,38 @@ Hard, enforceable rules (cap ≤25):
 17. Document module top with purpose, dependencies, public API.
 18. Consistent naming: noun for types, verb for functions, adjective for flags.
 19. Document architectural decisions in `docs/adr`.
-20. Tests live with modules; e2e in apps/tests only.
+20. Tests live with modules (unit/ and integration/ subdirectories); e2e in apps/tests only.
 21. Feature isolation: no cross-feature imports.
-22. Contracts are source-of-truth: if not in agents-contracts, it doesn’t exist.
+22. Contracts are source-of-truth: if not in agents-contracts, it doesn't exist.
 23. Tenancy must be enforced at data and event levels.
 24. Telemetry for every node/usecase (span + metrics).
 25. PRs must include `Claude-Update` trailer and follow checklists.
+
+---
+
+## Naming Conventions (At-a-Glance)
+
+**Files & Folders:**
+- Directories: `lowercase-with-dashes` (e.g., `auth-wizard`)
+- Files: PascalCase for components (e.g., `Button.tsx`); camelCase for utilities
+- File name = first class/function name
+
+**Code Elements:**
+- Types/Interfaces: `PascalCase` (e.g., `UserProfile`)
+- Functions: `camelCase` with verb (e.g., `fetchUserData`, `startWorker`)
+- Variables: `camelCase` with auxiliary verbs (e.g., `isLoading`, `hasError`)
+- Constants: `SCREAMING_SNAKE_CASE` for exported (e.g., `EVENT_TYPES`)
+
+**Layer Prefixes:**
+- Domain: plain nouns (e.g., `User`, `Order`)
+- Application: `*UseCase` suffix (e.g., `CreateUserUseCase`)
+- Infra: `*Repo`, `*Adapter`, `*Worker` suffixes (e.g., `UserRepository`)
+
+**No Magic Strings:**
+- Use const objects + unions instead of TS enums
+- Export VALUE arrays for Zod schemas (e.g., `EVENT_TYPE_VALUES`)
+- All string literals come from centralized constants
+
+**Domain Vocabulary:**
+- Use business terminology (e.g., `AgentRunTracer` not `FeatureLayerTracer`)
+- Function names describe intent clearly (e.g., `publishPendingOutboxEventsOnce`)

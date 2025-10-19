@@ -10,7 +10,7 @@ import type {
 	Tracer,
 } from "@repo/agents-core";
 import type { AgentEvent } from "@sg/agents-contracts";
-import { SCHEMA_VERSION } from "@sg/agents-contracts";
+import { EVENT_SOURCES, SCHEMA_VERSION } from "@sg/agents-contracts";
 import { nextSeq } from "../../application/usecases/sequencer";
 import { RunEventRepo } from "../repos/run-event-repo";
 
@@ -29,7 +29,7 @@ export class FeatureLayerTracer implements Tracer {
 			...payload,
 			seq: nextSeq(payload.runId),
 			v: SCHEMA_VERSION,
-			source: "worker",
+			source: EVENT_SOURCES.worker,
 		} as AgentEvent;
 
 		// Serialize appends per run to maintain monotonicity despite async writes
@@ -49,6 +49,10 @@ export class FeatureLayerTracer implements Tracer {
 				}
 			});
 		appendChains.set(key, next);
+	}
+
+	async waitForCompletion(runId: string): Promise<void> {
+		await appendChains.get(runId);
 	}
 }
 

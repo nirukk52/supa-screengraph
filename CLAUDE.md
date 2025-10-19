@@ -27,6 +27,20 @@ This repository maintains a six-page Claude documentation set. Each category mus
 ## Architecture Notes
 - [PR #39 Backend Patterns](docs/architecture/pr39-backend-patterns.md)
 
+## JIRA – Bug/Feature/Debt Tracking
+- **Overview**: [docs/jira/README.md](docs/jira/README.md)
+- **Workflow**: [docs/jira/CLAUDE.md](docs/jira/CLAUDE.md)
+- **Categories**:
+  - **Bugs**: `docs/jira/bug-logs/` – Broken functionality, test failures, regressions
+  - **Features**: `docs/jira/feature-requests/` – New capabilities, enhancements, architectural additions
+  - **Technical Debt**: `docs/jira/tech-debt/` – Deferred work, architectural shortcuts, refactoring
+- **Milestones**: `docs/jira/milestones/` – Ordered sequences of bugs/features/debt per milestone
+
+## Recent Changes (2025-10-18)
+- **oRPC Native SSE**: Migrated from fallback HTTP/SSE routes to oRPC's Event Iterator for streaming. Workers start at API boot with singleton guard. See `docs/retro/milestone-4(currrent)/retro.md` for details.
+- **JIRA Structure**: Consolidated bug-logs, feature-requests, and tech-debt into `docs/jira/` with workflow documentation and milestone sequences.
+- **M5 Status**: Phase 1 (Ports-first Infra Seam) complete in PR #66. Facade pattern fixes stale singleton refs. Phase 3 (Awilix DI) in progress.
+
 ---
 
 Update policy (enforced):

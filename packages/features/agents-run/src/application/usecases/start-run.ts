@@ -1,6 +1,7 @@
+import { EVENT_SOURCES, EVENT_TYPES } from "@sg/agents-contracts";
 import { RunEventRepo } from "../../infra/repos/run-event-repo";
 import { RunRepo } from "../../infra/repos/run-repo";
-import { bus, queue } from "../singletons";
+import { getInfra } from "../infra";
 import { logFn } from "./log";
 import { setNextSeq } from "./sequencer";
 
@@ -21,20 +22,21 @@ export async function startRun(runId: string) {
 		runId,
 		seq: 1,
 		ts,
-		type: "RunStarted",
+		type: EVENT_TYPES.RunStarted,
 		v: 1,
-		source: "api",
+		source: EVENT_SOURCES.api,
 	} as any);
 	// Prime in-memory sequencer so worker emits seq starting from 2
 	setNextSeq(runId, 2);
+	const { queue } = getInfra();
 	await queue.enqueue(QUEUE_NAME, { runId });
 	return { accepted: true };
 }
 
 export function getEventBus() {
-	return bus;
+	return getInfra().bus;
 }
 
 export function getQueue() {
-	return queue;
+	return getInfra().queue;
 }

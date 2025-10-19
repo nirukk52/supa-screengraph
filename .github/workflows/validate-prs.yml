@@ -43,31 +43,12 @@ jobs:
         env:
           PR_PRECHECK_ONLY: '1'
 
-  # 2) Build backend (after lint)
-  build_backend:
-    name: 2) Build backend
+  # 2) Unit tests with coverage (after lint)
+  unit_tests:
+    name: 2) Unit tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: [lint]
-    steps:
-      - *checkout_pr_branch
-
-      - *setup_pnpm
-
-      - *setup_node
-
-      - name: Build backend (skip vitest coverage and e2e)
-        run: node tooling/scripts/pr-check.mjs
-        env:
-          SKIP_COVERAGE: '1'
-          SKIP_E2E: '1'
-
-  # 3) Unit tests with coverage (after build)
-  unit_tests:
-    name: 3) Unit tests
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    needs: [build_backend]
     steps:
       - *checkout_pr_branch
 
@@ -80,9 +61,9 @@ jobs:
         env:
           SKIP_E2E: '1'
 
-  # 4) Backend e2e tests (needs Postgres)
+  # 3) Backend e2e tests (needs Postgres)
   backend_e2e:
-    name: 4) Backend e2e
+    name: 3) Backend e2e
     runs-on: ubuntu-latest
     timeout-minutes: 40
     needs: [unit_tests]
@@ -120,12 +101,12 @@ jobs:
           GOOGLE_CLIENT_SECRET: "test-google-client-secret"
           SKIP_FRONTEND_E2E: '1'
 
-  # 5) Frontend e2e for apps/web (final)
+  # 4) Frontend e2e for apps/web
   web_e2e:
-    name: 5) E2E apps/web (frontend)
+    name: 4) E2E apps/web (frontend)
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    needs: [backend_e2e]
+    needs: [unit_tests]
     services:
       postgres:
         image: postgres:16

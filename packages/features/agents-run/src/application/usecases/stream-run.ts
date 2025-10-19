@@ -1,7 +1,7 @@
 import { db } from "@repo/database/prisma/client";
 import type { AgentEvent } from "@sg/agents-contracts";
-import { TOPIC_AGENTS_RUN } from "@sg/agents-contracts";
-import { bus } from "../singletons";
+import { EVENT_SOURCES, TOPIC_AGENTS_RUN } from "@sg/agents-contracts";
+import { getInfra } from "../infra";
 
 export async function* streamRun(
 	runId: string,
@@ -21,7 +21,7 @@ export async function* streamRun(
 			ts: Number(r.ts),
 			type: r.type as AgentEvent["type"],
 			v: 1,
-			source: "outbox",
+			source: EVENT_SOURCES.outbox,
 			...(r.name ? { name: r.name } : {}),
 			...(r.fn ? { fn: r.fn } : {}),
 		} as AgentEvent;
@@ -33,6 +33,7 @@ export async function* streamRun(
 	}
 
 	// Then subscribe for live events; de-dupe on seq
+	const { bus } = getInfra();
 	for await (const evt of bus.subscribe(TOPIC_AGENTS_RUN)) {
 		if (evt.runId !== runId) {
 			continue;

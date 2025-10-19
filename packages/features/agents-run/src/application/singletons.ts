@@ -1,13 +1,24 @@
-import { InMemoryEventBus } from "@sg/eventbus-inmemory";
-import { InMemoryQueue } from "@sg/queue-inmemory";
+import type { EventBusPort } from "@sg/eventbus";
+import type { QueuePort } from "@sg/queue";
+import { getInfra, resetInfra } from "./infra";
 
-export const bus = new InMemoryEventBus();
-export const queue = new InMemoryQueue();
+// Live-forwarding facades so imports stay fresh after setInfra()
+export const bus: EventBusPort = {
+	publish(topic, event) {
+		return getInfra().bus.publish(topic, event);
+	},
+	subscribe(topic) {
+		return getInfra().bus.subscribe(topic);
+	},
+};
 
-export function resetInfra(): void {
-	// Reset event bus topics to ensure clean subscription state between tests.
-	bus.reset?.();
-	// Do NOT reset queue handlers here: some tests call resetInfra() after starting
-	// the worker; clearing handlers would stop the worker and cause timeouts.
-	// The worker registration will overwrite handlers as needed across tests.
-}
+export const queue: QueuePort = {
+	enqueue(name, data) {
+		return getInfra().queue.enqueue(name, data);
+	},
+	worker(name, handler) {
+		return getInfra().queue.worker(name, handler);
+	},
+};
+
+export { resetInfra };
