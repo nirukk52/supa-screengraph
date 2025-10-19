@@ -189,6 +189,10 @@ function main() {
 			path.join(base, "tests", "integration", "helpers", "test-harness.ts"),
 			"import { db } from '@repo/database/prisma/client';\n" +
 				"import { getInfra, setInfra, resetInfra } from '../../../src/application/infra';\n\n" +
+				"// Runtime guard: ensure db is a real PrismaClient, not a mock\n" +
+				"if (typeof (db as any).$connect !== 'function') {\n" +
+				"  throw new Error('Integration helpers require a real PrismaClient; remove unit mocks.');\n" +
+				"}\n\n" +
 				"export async function runTest(fn: () => Promise<void>): Promise<void> {\n" +
 				"  const defaultInfra = getInfra();\n" +
 				"  setInfra({  /* fresh instances */ });\n\n" +
