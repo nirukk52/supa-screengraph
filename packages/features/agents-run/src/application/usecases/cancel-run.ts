@@ -5,7 +5,7 @@ import {
 	SCHEMA_VERSION,
 	TOPIC_AGENTS_RUN,
 } from "@sg/agents-contracts";
-import { bus } from "../singletons";
+import { getInfra } from "../infra";
 import { nextSeq } from "./sequencer";
 
 export async function cancelRun(runId: string) {
@@ -21,6 +21,7 @@ export async function cancelRun(runId: string) {
 		source: EVENT_SOURCES.api,
 		fn: "cancelRequested",
 	};
+	const { bus } = getInfra();
 	await bus.publish(TOPIC_AGENTS_RUN, evt);
 	return { accepted: true };
 }

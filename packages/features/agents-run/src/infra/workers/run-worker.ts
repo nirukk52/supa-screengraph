@@ -1,5 +1,5 @@
 import { orchestrateRun } from "@repo/agents-core";
-import { queue } from "../../application/singletons";
+import { getInfra } from "../../application/infra";
 import { logFn } from "../../application/usecases/log";
 import { QUEUE_NAME } from "../../application/usecases/start-run";
 import {
@@ -17,6 +17,7 @@ import { startOutboxWorker } from "./outbox-publisher";
  * flush persisted events to the event bus.
  */
 export function startWorker() {
+	const { queue } = getInfra();
 	queue.worker<{ runId: string }>(QUEUE_NAME, async ({ runId }) => {
 		logFn("worker:job:start");
 

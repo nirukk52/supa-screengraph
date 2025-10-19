@@ -7,18 +7,19 @@
 
 ## Ordered Worklist
 
-### Phase 1: Infrastructure Seam 🔵 **[BLOCKED - Waiting for current PR to merge]**
+### Phase 1: Infrastructure Seam ✅ **[COMPLETE - PR #66]**
 **Goal**: Introduce ports-first abstraction for event bus and queue.
 
-- [ ] **[FEAT-0001-5]** Ports-first Infra Seam  
+- [x] **[FEAT-0001-5]** Ports-first Infra Seam  
   **File**: `docs/jira/feature-requests/0001-ports-first-infra-seam.md`  
-  **Status**: Planned (blocked by PR #64)  
+  **Status**: Complete → PR #66  
   **Owner**: @infra  
-  **Acceptance**:
-  - `src/application/infra.ts` created with `getInfra/setInfra/resetInfra`
-  - All usage sites (workers, use cases) updated to use `getInfra()`
-  - Test harness provides per-test infra instances
-  - ESLint boundaries enforced
+  **Resolution**:
+  - ✅ `src/application/infra.ts` created with `getInfra/setInfra/resetInfra`
+  - ✅ All usage sites (workers, use cases) updated to use `getInfra()`
+  - ✅ Test harness provides per-test infra instances
+  - ✅ Integration tests pass deterministically (3x runs)
+  - ⚪ ESLint boundaries (deferred - optional)
 
 ### Phase 2: Test Stabilization ✅ **[COMPLETE - PR #64 merged to base]**
 **Goal**: Fix skipped integration tests and achieve deterministic execution.
@@ -43,27 +44,36 @@
   - Idempotent with P2002 guard
   - No race conditions in concurrent tests
 
-### Phase 3: Technical Debt (Deferred Follow-ups) ⚪ **[DOCUMENTED - M6]**
-**Goal**: Document architectural improvements for M6.
+### Phase 3: Infrastructure Quality & Cleanup 🔵 **[IN PROGRESS - After Phase 1]**
+**Goal**: Achieve steady state for rapid dev + TDD before M6.
 
-- [x] **[DEBT-0001]** Awilix DI Container & pg-listen Follow-ups  
+- [ ] **[BUG-INFRA-001]** E2E Playwright Test - DATABASE_URL Not Found  
+  **File**: `docs/jira/bug-logs/BUG-INFRA-001.md`  
+  **Status**: Open  
+  **Owner**: @infra  
+  **Acceptance**:
+  - E2E tests run with clean logs (no Prisma errors)
+  - Workers skip boot during e2e, OR
+  - DATABASE_URL properly loaded in Next.js test env
+
+- [ ] **[DEBT-0001]** Awilix DI Container Integration  
   **File**: `docs/jira/tech-debt/0001-awilix-di-followups.md`  
-  **Status**: Documented (M6)  
+  **Status**: In Progress (M5 - not M6!)  
   **Owner**: @infra  
   **Acceptance**:
   - DI container introduced with per-scope instances
+  - Test harness builds per-test container
   - Prod binding via config
-  - `pg-listen`-backed wait helpers
-  - Parallel tests stable
+  - Parallel tests stable (remove `singleThread: true`)
 
-- [x] **[DEBT-0002]** Parallel Test Isolation for Shared Singletons  
+- [ ] **[DEBT-0002]** Parallel Test Isolation Completion  
   **File**: `docs/jira/tech-debt/0002-parallel-test-isolation.md`  
-  **Status**: Documented (M6)  
+  **Status**: Blocked by DEBT-0001 (M5 - not M6!)  
   **Owner**: @infra  
   **Acceptance**:
   - `singleThread: true` removed from Vitest config
   - Tests run in parallel without flakiness
-  - Per-worker infra instances
+  - BUG-TEST-004 resolved (4 skipped tests passing)
 
 ### Phase 4: Documentation ✅ **[COMPLETE - PR #64]**
 **Goal**: Update CLAUDE docs and milestone tracking.
@@ -82,16 +92,17 @@
 ## Dependencies
 
 ### Execution Order
-**Current status: Phase 1 is blocked, waiting for PR #64 to merge**
+**Current status: Phase 1 complete (PR #66), Phase 3 in progress**
 
-1. ✅ **Phase 2** (Test Stabilization) - COMPLETE - Merged in PR #64
-2. ✅ **Phase 4** (Documentation) - COMPLETE - Merged in PR #64  
-3. ✅ **Phase 3** (Tech Debt Documentation) - COMPLETE - Documented for M6
-4. 🔵 **Phase 1** (Infrastructure Seam) - BLOCKED - Starts after PR #64 merges
+1. ✅ **Phase 2** (Test Stabilization) - COMPLETE - PR #64 merged
+2. ✅ **Phase 4** (Documentation) - COMPLETE - PR #64 merged
+3. ✅ **Phase 1** (Infrastructure Seam) - COMPLETE - PR #66 opened
+4. 🔵 **Phase 3** (Infrastructure Quality & Cleanup) - IN PROGRESS - Awilix DI next
 
 **Dependencies**:
-- Phase 1 → blocked by PR #64 merge (foundation work)
-- Phase 1 completion → unlocks BUG-TEST-004 resolution (4 skipped tests)
+- Phase 1 → ✅ Complete (PR #66 - ports-first seam)
+- Phase 3 → 🔵 In Progress (Awilix DI integration starting)
+- Phase 3 completion → will unlock BUG-TEST-004 resolution (4 skipped tests)
 
 ---
 
