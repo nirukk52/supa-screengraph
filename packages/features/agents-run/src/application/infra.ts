@@ -11,10 +11,7 @@ export interface Infra {
 let currentContainer = createAgentsRunContainer();
 
 export function getInfra(): Infra {
-	return {
-		bus: currentContainer.resolve("bus"),
-		queue: currentContainer.resolve("queue"),
-	};
+	return currentContainer.cradle as Infra;
 }
 
 export function setInfra(next: Infra): void {

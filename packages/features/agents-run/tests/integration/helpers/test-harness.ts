@@ -23,20 +23,30 @@ async function clearDatabase() {
 type Resettable = { reset?: () => void };
 
 export async function runAgentsRunTest(
-    fn: () => Promise<void>,
-    options?: TestOptions,
+	fn: () => Promise<void>,
+	options?: TestOptions,
 ): Promise<void> {
 	const normalized = normalizeOptions(options);
 
 	// Setup: clear DB, reset infra, start worker
 	await clearDatabase();
-    const previous = getInfra();
-    const previousSnapshot = { bus: previous.bus, queue: previous.queue };
-    setInfra({ bus: new InMemoryEventBus(), queue: new InMemoryQueue() });
+	const previous = getInfra();
+	const previousSnapshot = { bus: previous.bus, queue: previous.queue };
+	setInfra({ bus: new InMemoryEventBus(), queue: new InMemoryQueue() });
 	const stop = normalized.startWorker ? startWorker() : undefined;
 
-	// Small delay to ensure worker/queue fully registered
+	// Ensure worker handler is registered before proceeding
 	if (normalized.startWorker) {
+		// Verify queue worker is registered by checking internal state
+		const queue = getInfra().queue as any;
+		let retries = 0;
+		while (retries++ < 50) {
+			if (queue.handlers?.has?.("agents.run")) {
+				break;
+			}
+			await new Promise((r) => setTimeout(r, 10));
+		}
+		// Extra safety margin for async processing
 		await new Promise((r) => setTimeout(r, 50));
 	}
 
@@ -49,11 +59,11 @@ export async function runAgentsRunTest(
 			// Let worker interval clear before cleanup
 			await new Promise((r) => setTimeout(r, 150));
 		}
-        await clearDatabase();
-        resetInfra();
-        setInfra(previousSnapshot);
-        (previousSnapshot.bus as Resettable).reset?.();
-        (previousSnapshot.queue as Resettable).reset?.();
+		await clearDatabase();
+		resetInfra();
+		setInfra(previousSnapshot);
+		(previousSnapshot.bus as Resettable).reset?.();
+		(previousSnapshot.queue as Resettable).reset?.();
 		// Extra delay to ensure full cleanup before next test
 		await new Promise((r) => setTimeout(r, 50));
 	}

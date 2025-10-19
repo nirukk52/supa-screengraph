@@ -9,15 +9,16 @@ import { drainOutboxForRun } from "../../../src/infra/workers/outbox-publisher";
 export async function processRunDeterministically(
 	runId: string,
 ): Promise<void> {
+	const tracer = new FeatureLayerTracer();
 	await orchestrateRun({
 		runId,
 		clock: new InMemoryClock(),
-		tracer: new FeatureLayerTracer(),
+		tracer,
 		cancelToken: new StubCancellationToken(),
 	});
 
-	// Wait for async append chain to complete
-	await new Promise((resolve) => setTimeout(resolve, 100));
+	// Wait for async append chain to complete deterministically
+	await tracer.waitForCompletion(runId);
 
 	await drainOutboxForRun(runId);
 }

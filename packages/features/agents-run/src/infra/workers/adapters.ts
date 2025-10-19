@@ -50,6 +50,10 @@ export class FeatureLayerTracer implements Tracer {
 			});
 		appendChains.set(key, next);
 	}
+
+	async waitForCompletion(runId: string): Promise<void> {
+		await appendChains.get(runId);
+	}
 }
 
 export class StubCancellationToken implements CancellationToken {
