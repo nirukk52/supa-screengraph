@@ -142,7 +142,7 @@ function main() {
 				"}\n\n" +
 				"export function resetInfra(): void {\n" +
 				"  const infra = getInfra();\n" +
-				"  // Call reset() on resetable dependencies\n" +
+				"  // Call reset() on resettable dependencies\n" +
 				"}\n",
 		);
 		write(
