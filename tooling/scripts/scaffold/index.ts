@@ -138,7 +138,7 @@ function main() {
 				"}\n\n" +
 				"export function setInfra(next: Partial<Infra>): void {\n" +
 				"  currentContainer = createContainer();\n" +
-				"  currentContainer.register(next as any);\n" +
+				"  currentContainer.register(Object.fromEntries(Object.entries(next).map(([k, v]) => [k, asValue(v)])) as any);\n" +
 				"}\n\n" +
 				"export function resetInfra(): void {\n" +
 				"  const infra = getInfra();\n" +
