@@ -33,10 +33,13 @@ export default defineConfig({
 	],
 	webServer: {
 		command:
-			"PORT=3000 pnpm --filter web run build && PORT=3000 pnpm --filter web run start",
+			"PORT=3000 E2E_TEST=true pnpm --filter web run build && PORT=3000 E2E_TEST=true pnpm --filter web run start",
 		url: "http://localhost:3000",
 		reuseExistingServer: !process.env.CI,
 		stdout: "pipe",
 		timeout: 300 * 1000,
+		env: {
+			E2E_TEST: "true",
+		},
 	},
 });

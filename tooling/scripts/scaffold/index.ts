@@ -124,6 +124,38 @@ function main() {
 		for (const dir of ["contracts", "domain", "application", "infra"]) {
 			write(path.join(base, "src", dir, ".keep"), "");
 		}
+		// Ports-first infra seam (M5 pattern)
+		write(
+			path.join(base, "src/application/infra.ts"),
+			"import { asValue } from 'awilix';\n" +
+				"import { createContainer } from './container';\n\n" +
+				"export interface Infra {\n" +
+				"  // Add your ports here (e.g., bus, queue, repos)\n" +
+				"}\n\n" +
+				"let currentContainer = createContainer();\n\n" +
+				"export function getInfra(): Infra {\n" +
+				"  return currentContainer.cradle;\n" +
+				"}\n\n" +
+				"export function setInfra(next: Partial<Infra>): void {\n" +
+				"  currentContainer = createContainer();\n" +
+				"  currentContainer.register(next as any);\n" +
+				"}\n\n" +
+				"export function resetInfra(): void {\n" +
+				"  const infra = getInfra();\n" +
+				"  // Call reset() on resetable dependencies\n" +
+				"}\n",
+		);
+		write(
+			path.join(base, "src/application/container.ts"),
+			"import { createContainer as awilixContainer } from 'awilix';\n\n" +
+				"export function createContainer() {\n" +
+				"  const container = awilixContainer();\n" +
+				"  container.register({\n" +
+				"    // Register your dependencies here with asClass/asValue/asFunction\n" +
+				"  });\n" +
+				"  return container;\n" +
+				"}\n",
+		);
 		write(
 			path.join(base, "src/infra/api/register.ts"),
 			"export function register(router: any) { /* mount routes */ }\n",
@@ -135,6 +167,13 @@ function main() {
 		for (const dir of ["unit", "integration"]) {
 			write(path.join(base, "tests", dir, ".keep"), "");
 		}
+		// Unit test with mock setup
+		write(
+			path.join(base, "tests", "unit", "mocks", "db-mock.ts"),
+			"import { vi } from 'vitest';\n\n" +
+				"export const mockDb = {};\n\n" +
+				"vi.mock('@repo/database/prisma/client', () => ({ db: mockDb }));\n",
+		);
 		write(
 			path.join(base, "tests", "unit", "feature.spec.ts"),
 			"import './mocks/db-mock';\n" +
@@ -145,24 +184,49 @@ function main() {
 				"  });\n" +
 				"});\n",
 		);
+		// Integration test harness
 		write(
-			path.join(
-				base,
-				"src",
-				"application",
-				"usecases",
-				"__tests__",
-				"example-usecase.spec.ts",
-			),
-			'import { describe, it, expect } from "vitest";\n\n' +
-				"describe('example usecase', () => {\n" +
-				"  it('arrange-act-assert', () => {\n" +
-				"    // Arrange\n\n" +
-				"    // Act\n\n" +
-				"    // Assert\n" +
-				"    expect(true).toBe(true);\n" +
+			path.join(base, "tests", "integration", "helpers", "test-harness.ts"),
+			"import { db } from '@repo/database/prisma/client';\n" +
+				"import { getInfra, setInfra, resetInfra } from '../../../src/application/infra';\n\n" +
+				"export async function runTest(fn: () => Promise<void>): Promise<void> {\n" +
+				"  const defaultInfra = getInfra();\n" +
+				"  setInfra({  /* fresh instances */ });\n\n" +
+				"  try {\n" +
+				"    await fn();\n" +
+				"  } finally {\n" +
+				"    resetInfra();\n" +
+				"    setInfra(defaultInfra);\n" +
+				"  }\n" +
+				"}\n",
+		);
+		write(
+			path.join(base, "tests", "integration", "sample.spec.ts"),
+			"import { describe, expect, it } from 'vitest';\n" +
+				"import { runTest } from './helpers/test-harness';\n\n" +
+				"describe('integration test', () => {\n" +
+				"  it('runs against real Postgres', async () => {\n" +
+				"    await runTest(async () => {\n" +
+				"      expect(true).toBe(true);\n" +
+				"    });\n" +
 				"  });\n" +
 				"});\n",
+		);
+		// Test organization docs
+		write(
+			path.join(base, "tests", "CLAUDE.md"),
+			"# Test Organization\n\n" +
+				"## Unit Tests (`tests/unit/`)\n" +
+				"- Fast, deterministic, zero I/O\n" +
+				"- Use `mocks/db-mock.ts` to stub Prisma\n" +
+				"- Do NOT import helpers from `integration/helpers/`\n\n" +
+				"## Integration Tests (`tests/integration/`)\n" +
+				"- Run against real Postgres via Testcontainers\n" +
+				"- Use helpers from `integration/helpers/`\n" +
+				"- Do NOT import `unit/mocks/db-mock.ts`\n\n" +
+				"## Enforcement\n" +
+				"- Integration helpers assume PrismaClient and will throw if mock is active\n" +
+				"- CI runs both suites; integration tests provision per-worker schemas\n",
 		);
 		console.log(`Scaffolded feature at ${base}`);
 		return;
