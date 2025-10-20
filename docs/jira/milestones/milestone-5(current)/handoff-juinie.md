@@ -5,6 +5,9 @@
 ## Current State
 - ✅ BullMQ + pg-listen infrastructure landed in PR #71
 - ✅ 28/34 tests passing (28 passed | 6 skipped)
+- ✅ All CI checks passing (pr:check green)
+- ✅ TypeScript project references fixed
+- ✅ Database package build configuration updated
 - ⚠️ 5 integration tests skipped due to async drain race (BUG-TEST-008)
 - ⚠️ CI not running on PR (workflow only configured for `main` branch)
 
@@ -15,6 +18,10 @@
 - ✅ Refactored outbox into focused modules (subscriber, drain, events)
 - ✅ Fixed critical bugs (BUG-INFRA-001, BUG-INFRA-003)
 - ✅ Moved infrastructure constants to `@sg/agents-contracts`
+- ✅ Fixed TypeScript project references for queue-bullmq package
+- ✅ Updated database package build configuration (main: ./dist/index.js)
+- ✅ Standardized import paths (@repo/database instead of @repo/database/prisma/client)
+- ✅ Created PR check failures tracking document
 
 ## Available Endpoints
 - `POST /api/rpc/agents/runs` (start run)
@@ -45,4 +52,5 @@
 ## Questions / Clarifications Needed
 - Should we merge PR #71 now (local checks pass) or wait for CI workflow fix?
 - Should outbox logic be extracted to `@sg/outbox` package now or defer until second feature needs it?
+- Ready to proceed with Phase 4 (Awilix DI container) or focus on BUG-TEST-008 first?
 

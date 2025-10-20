@@ -31,10 +31,16 @@ _Last Updated: 2025-10-19_
 - ✅ Refactored outbox modules to meet size limits
 - ✅ Fixed critical bugs (BUG-INFRA-001, 003)
 - ✅ PR #71 opened (feat/m5-bullmq-pg-listen)
+- ✅ TypeScript project references fixed for queue-bullmq package
+- ✅ Database package build configuration updated
+- ✅ Import paths standardized across agents-run package
+- ✅ All CI checks passing (pr:check green)
+- ✅ PR #71 ready for review
 
 ### In Progress
 - BUG-TEST-008: Resolve 5 skipped integration tests (async drain race)
 - BUG-INFRA-002: Move subscriber to DI container
+- BUG-INFRA-004: Fix pg-listen connect() await issue
 
 ### Blocked
 - None (CI workflow doesn't run on m4_cleanup branch, but local pr:check passes)
