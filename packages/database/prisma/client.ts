@@ -1,5 +1,7 @@
 import { PrismaClient } from "./generated/client";
 
+export type { AiChat, Prisma } from "./generated/client";
+
 const prismaClientSingleton = () => {
 	return new PrismaClient();
 };

@@ -13,6 +13,7 @@ export default defineConfig({
 			"**/node_modules/**",
 			"**/dist/**",
 			"**/build/**",
+			"packages/api/tests/**/*.e2e.spec.ts",
 		],
 		globalSetup: "packages/database/prisma/test/setup.ts",
 		globalTeardown: "packages/database/prisma/test/teardown.ts",

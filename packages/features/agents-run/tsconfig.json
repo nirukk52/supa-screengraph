@@ -7,6 +7,17 @@
 		"emitDeclarationOnly": false,
 		"composite": true
 	},
+	"references": [
+		{ "path": "../../database" },
+		{ "path": "../../queue" },
+		{ "path": "../../queue-bullmq" },
+		{ "path": "../../queue-inmemory" },
+		{ "path": "../../eventbus" },
+		{ "path": "../../eventbus-inmemory" },
+		{ "path": "../../agents-contracts" },
+		{ "path": "../../logs" },
+		{ "path": "../../utils" }
+	],
 	"include": ["src/**/*"],
 	"exclude": ["dist", "node_modules", "tests"]
 }

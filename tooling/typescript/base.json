@@ -19,8 +19,13 @@
 		"strict": true,
 		"strictNullChecks": true,
 		"paths": {
-			"@repo/config": ["../../config"],
-			"@sg/feature-agents-run": ["../../packages/features/agents-run"]
+			"@repo/database": ["../../packages/database"],
+			"@repo/database/*": ["../../packages/database/*"],
+			"@repo/database/prisma/*": ["../../packages/database/prisma/*"],
+			"@sg/feature-agents-run": ["../../packages/features/agents-run"],
+			"@sg/queue": ["../../packages/queue"],
+			"@sg/queue-bullmq": ["../../packages/queue-bullmq"],
+			"@sg/queue-inmemory": ["../../packages/queue-inmemory"]
 		}
 	},
 	"display": "Default",

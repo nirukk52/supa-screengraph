@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { startRun } from "../../src/application/usecases/start-run";
 import { streamRun } from "../../src/application/usecases/stream-run";
@@ -11,7 +12,7 @@ describe.sequential("stream run", () => {
 	it.skip("emits canonical sequence and terminates", async () => {
 		await runAgentsRunTest(async () => {
 			// Arrange
-			const runId = `r-${Math.random().toString(36).slice(2)}`;
+			const runId = randomUUID();
 			const iter = streamRun(runId);
 
 			// Act

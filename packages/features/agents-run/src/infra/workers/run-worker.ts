@@ -29,8 +29,8 @@ export function startWorker() {
 		});
 	});
 
-	const stopOutbox = startOutboxWorker(25);
-	return () => {
-		stopOutbox();
+	const stopOutbox = startOutboxWorker();
+	return async () => {
+		await stopOutbox();
 	};
 }

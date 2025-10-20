@@ -1,13 +1,13 @@
 import { EVENT_SOURCES, EVENT_TYPES } from "@sg/agents-contracts";
 import { RunEventRepo } from "../../infra/repos/run-event-repo";
 import { RunRepo } from "../../infra/repos/run-repo";
+import { AGENTS_RUN_QUEUE_NAME } from "../constants";
 import { getInfra } from "../infra";
 import { logFn } from "./log";
 import { setNextSeq } from "./sequencer";
 
 // Exported constant names must not be string literals per repo rule.
-const DEFAULT_QUEUE_NAME = "agents.run" as const;
-export const QUEUE_NAME = DEFAULT_QUEUE_NAME as string;
+export const QUEUE_NAME = AGENTS_RUN_QUEUE_NAME;
 
 export async function startRun(runId: string) {
 	logFn("start-run");

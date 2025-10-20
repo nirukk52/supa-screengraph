@@ -1,4 +1,4 @@
-import { db } from "@repo/database/prisma/client";
+import { db } from "@repo/database";
 import type { AgentEvent } from "@sg/agents-contracts";
 import { EVENT_SOURCES, TOPIC_AGENTS_RUN } from "@sg/agents-contracts";
 import { getInfra } from "../infra";

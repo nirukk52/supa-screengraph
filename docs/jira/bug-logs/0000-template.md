@@ -1,10 +1,6 @@
-# [BUG-0000] Short Descriptive Title
+# [BUG-XXX] Title
 
-**Status:** Open | In Progress | Resolved | Closed  
-**Priority:** Critical | High | Medium | Low  
-**Created:** YYYY-MM-DD  
-**Resolved:** YYYY-MM-DD (if applicable)  
-**Assignee:** @username (optional)
+> Template for documenting bugs.
 
 ---
 

@@ -85,6 +85,11 @@
 - Skipped (5): stream.spec, stream-backfill (2 tests), outbox.spec, orchestrator concurrent
 - Reason: worker races, DB shared state, interval interference
 
+### BullMQ + pg-listen Plan
+- Feature request `docs/jira/feature-requests/0002-bullmq-pg-listen.md` approved
+- Implements BullMQ (Redis) queue adapter and pg-listen-based outbox stepping
+- Goal: unskip 5 integration specs, enable parallel Vitest workers, eliminate background interval races
+
 ## Acceptance for Milestone Close
 _Final checklist before marking M5 complete_
 - [ ] All planned features implemented
