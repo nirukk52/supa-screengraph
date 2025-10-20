@@ -16,18 +16,18 @@
 	},
 	"name": "@repo/database",
 	"version": "0.0.0",
-	"main": "./index.ts",
-	"types": "./index.ts",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
 	"exports": {
 		".": {
-			"types": "./index.ts",
-			"import": "./index.ts",
-			"default": "./index.ts"
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js",
+			"default": "./dist/index.js"
 		},
 		"./prisma/client": {
-			"types": "./prisma/client.ts",
-			"import": "./prisma/client.ts",
-			"default": "./prisma/client.ts"
+			"types": "./dist/prisma/client.d.ts",
+			"import": "./dist/prisma/client.js",
+			"default": "./dist/prisma/client.js"
 		}
 	},
 	"scripts": {
