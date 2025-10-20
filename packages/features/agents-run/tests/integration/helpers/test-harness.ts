@@ -48,7 +48,10 @@ async function configureInfra(driver: "memory" | "bullmq") {
 		const container = await initRedis();
 		const infra = createBullMqInfra({
 			queueName: "agents.run",
-			connection: container.getConnectionOptions(),
+			connection: {
+				host: container.getHost(),
+				port: container.getMappedPort(6379),
+			},
 		});
 		setInfra({
 			bus: new InMemoryEventBus(),
@@ -91,7 +94,7 @@ export async function runAgentsRunTest<T>(
 			await dispose();
 		}
 		await clearDatabase();
-		if (driver === "bullmq" && !process.env.CI) {
+		if (driver === "bullmq") {
 			await disposeRedis();
 		}
 	}

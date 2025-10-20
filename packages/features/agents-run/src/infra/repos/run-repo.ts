@@ -3,22 +3,22 @@ import { db } from "@repo/database/prisma/client";
 export const RunRepo = {
 	async createRun(runId: string, startedAt: number): Promise<void> {
 		await db.$transaction(async (tx) => {
-			const run = await tx.run.findUnique({ where: { id: runId } });
-			if (!run) {
-				await tx.run.create({
-					data: {
-						id: runId,
-						state: "started",
-						startedAt: new Date(startedAt),
-						lastSeq: 0,
-						v: 1,
-					},
-				});
-			}
-			const outbox = await tx.runOutbox.findUnique({ where: { runId } });
-			if (!outbox) {
-				await tx.runOutbox.create({ data: { runId, nextSeq: 1 } });
-			}
+			await tx.run.upsert({
+				where: { id: runId },
+				update: {},
+				create: {
+					id: runId,
+					state: "started",
+					startedAt: new Date(startedAt),
+					lastSeq: 0,
+					v: 1,
+				},
+			});
+			await tx.runOutbox.upsert({
+				where: { runId },
+				update: {},
+				create: { runId, nextSeq: 1 },
+			});
 		});
 	},
 
