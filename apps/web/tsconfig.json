@@ -5,6 +5,7 @@
 		"paths": {
 			"@analytics": ["./modules/analytics"],
 			"@marketing/*": ["./modules/marketing/*"],
+			"@run/*": ["./modules/run/*"],
 			"@saas/*": ["./modules/saas/*"],
 			"@ui/*": ["./modules/ui/*"],
 			"@i18n": ["./modules/i18n"],

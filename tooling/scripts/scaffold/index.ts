@@ -186,7 +186,13 @@ function main() {
 		);
 		// Integration test harness
 		write(
-			path.join(base, "tests", "integration", "helpers", "test-harness.ts"),
+			path.join(
+				base,
+				"tests",
+				"integration",
+				"helpers",
+				"test-harness.ts",
+			),
 			"import { db } from '@repo/database/prisma/client';\n" +
 				"import { getInfra, setInfra, resetInfra } from '../../../src/application/infra';\n\n" +
 				"// Runtime guard: ensure db is a real PrismaClient, not a mock\n" +

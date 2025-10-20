@@ -75,7 +75,18 @@ env/
 worktrees/
 
 # Ignore generated JS files that fail Biome linting
-packages/database/prisma/index.js
-packages/database/prisma/test/setup.js
+packages/database/index.js
+packages/database/prisma/**/*.js
+!packages/database/prisma/**/*.spec.js
+
+# Ignore generated .d.ts and .js files from TypeScript compilation in packages
+packages/*/src/**/*.d.ts
+packages/*/src/**/*.js
+packages/*/auth.d.ts
+packages/*/index.d.ts
+packages/*/types.d.ts
+packages/*/lib/**/*.d.ts
+packages/*/plugins/**/*.d.ts
+packages/database/prisma/**/*.d.ts
 
 .idea/
