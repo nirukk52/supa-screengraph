@@ -68,7 +68,9 @@ export function getProcedureFeatures(): FeatureDefinition[] {
 	return featureRegistry.getAll().filter((f) => !!f.procedures);
 }
 
-let agentsRunWorkerDisposer: (() => void) | undefined;
+type WorkerDisposer = () => Promise<void> | void;
+
+let agentsRunWorkerDisposer: WorkerDisposer | undefined;
 
 export async function ensureFeatureWorkerStarted() {
 	if (agentsRunWorkerDisposer) {
@@ -84,5 +86,5 @@ export async function ensureFeatureWorkerStopped() {
 	}
 	const dispose = agentsRunWorkerDisposer;
 	agentsRunWorkerDisposer = undefined;
-	dispose();
+	await dispose();
 }

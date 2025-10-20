@@ -36,13 +36,10 @@ export function createOutboxSubscriber(
 	onNotification: (runId?: string) => void,
 ) {
 	if (activeSubscriber) {
-		const existing = activeSubscriber;
-		return {
-			close: async () => {
-				await existing.close().catch(() => undefined);
-				activeSubscriber = undefined;
-			},
-		};
+		throw new Error(
+			"Outbox subscriber already active. Call close() on previous subscriber first. " +
+				"This indicates a test isolation or lifecycle issue.",
+		);
 	}
 
 	const subscriber = createSubscriber({
