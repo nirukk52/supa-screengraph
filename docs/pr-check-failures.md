@@ -29,7 +29,7 @@ Each entry should include:
 #### Root Cause
 **Initial Issue**: PR was pushed using `git push --no-verify` multiple times without running `pnpm run pr:check` locally. The `--no-verify` flag bypassed pre-push hooks that should have enforced `pr:check`.
 
-**Current Issue**: CI unit test job failing due to Docker registry infrastructure issue (503 Service Unavailable) when pulling PostgreSQL image for backend e2e tests.
+**Current Issue**: CI unit test job failing due to missing package build step. The `pr:check` script doesn't build `@sg/feature-agents-run` before running tests, but CI `validate-prs.yml` also doesn't. The backend e2e test (`agents-run.e2e.spec.ts`) requires the package to be built first because it imports from `@repo/database` which uses directory imports that only resolve correctly when compiled to JavaScript.
 
 #### What Broke
 1. **TypeScript Build (`build:backend`)** - RESOLVED:
@@ -86,35 +86,16 @@ Each entry should include:
    - Gate worker startup on `!process.env.E2E_TEST` in Next.js build context
    - Defer to follow-up PR
 
-4. **Database Package Exports** (configuration):
-   - `packages/database/package.json` `exports` field pointing to non-existent `dist/` files
-   - TypeScript compilation fails in CI: `Cannot find module '@repo/database'`
-   - **Root Cause**: `exports` pointed to build artifacts that don't exist in fresh CI environment
+4. **Missing Package Build Step** (configuration):
+   - Backend e2e test failing: `Directory import './prisma' is not supported resolving ES modules`
+   - **Root Cause**: `packages/api/tests/agents-run.e2e.spec.ts` requires `@sg/feature-agents-run` to be built first, but neither `pr:check` nor CI workflow includes this build step
    - **Why not caught locally**: 
-     1. Local `dist/` directory persisted from previous builds
-     2. Stray `prisma/index.js` compiled file was being used
-     3. Node.js module resolution fell back gracefully
-   - **Resolution**: Point `exports` to source files + use explicit `/index` in directory imports
-   - **Additional Fix**: Remove compiled artifacts (`dist/`, `prisma/index.js`) from source tree
-   - **Fix**:
-     ```json
-     {
-       "main": "./index.ts",
-       "types": "./index.ts",
-       "exports": {
-         ".": {
-           "types": "./index.ts",
-           "import": "./index.ts",
-           "default": "./index.ts"
-         },
-         "./prisma/client": {
-           "types": "./prisma/client.ts",
-           "import": "./prisma/client.ts",
-           "default": "./prisma/client.ts"
-         }
-       }
-     }
-     ```
+     1. The affected test (`agents-run.e2e.spec.ts`) is marked as "backend:e2e" which runs separately from unit tests
+     2. Local `backend:e2e` script includes `pnpm --filter @sg/feature-agents-run build` before tests
+     3. `pr:check` doesn't call `backend:e2e` by default (uses `SKIP_BACKEND_E2E`)
+     4. CI unit test job runs `vitest run --coverage` which includes the e2e test but doesn't build first
+   - **Resolution**: Either skip e2e test in unit test job OR build agents-run package before unit tests
+   - **Fix**: Update CI workflow to run `backend:e2e` instead of including e2e tests in unit test coverage
 
 #### Prevention
 
