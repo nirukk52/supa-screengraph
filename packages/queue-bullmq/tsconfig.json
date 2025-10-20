@@ -1,0 +1,12 @@
+{
+	"extends": "../../tooling/typescript/base.json",
+	"compilerOptions": {
+		"rootDir": "src",
+		"outDir": "dist",
+		"declaration": true,
+		"emitDeclarationOnly": false
+	},
+	"include": ["src/**/*"],
+	"exclude": ["dist", "node_modules"]
+}
+

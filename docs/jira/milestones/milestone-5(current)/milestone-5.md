@@ -7,6 +7,8 @@
 
 ## Ordered Worklist
 
+Feature 0002 is also handled by this milestone! - Founder
+
 ### Phase 1: Infrastructure Seam ✅ **[COMPLETE - PR #66]**
 **Goal**: Introduce ports-first abstraction for event bus and queue.
 

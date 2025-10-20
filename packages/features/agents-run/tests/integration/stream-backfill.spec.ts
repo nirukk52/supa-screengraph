@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { EVENT_TYPES } from "@sg/agents-contracts";
 import { describe, expect, it } from "vitest";
 import { startRun } from "../../src/application/usecases/start-run";
@@ -17,7 +18,7 @@ describe.sequential("SSE stream backfill", () => {
 	it.skip("backfills from fromSeq and de-dupes live", async () => {
 		await runAgentsRunTest(async () => {
 			// Arrange
-			const runId = `r-stream-${Math.random().toString(36).slice(2)}`;
+			const runId = randomUUID();
 
 			// Act: start run and wait for completion
 			await startRun(runId);
@@ -37,10 +38,10 @@ describe.sequential("SSE stream backfill", () => {
 		});
 	}, 30000);
 
-	it.skip("subscribes for live events after backfill", async () => {
+	it("subscribes for live events after backfill", async () => {
 		await runAgentsRunTest(async () => {
 			// Arrange
-			const runId = `r-stream-live-${Math.random().toString(36).slice(2)}`;
+			const runId = randomUUID();
 
 			// Act: start run and wait for completion
 			await startRun(runId);

@@ -1,17 +1,40 @@
+import process from "node:process";
+
 import { db } from "@repo/database/prisma/client";
 import { InMemoryEventBus } from "@sg/eventbus-inmemory";
+import { createBullMqInfra } from "@sg/queue-bullmq";
 import { InMemoryQueue } from "@sg/queue-inmemory";
-import { getInfra, resetInfra, setInfra } from "../../../src/application/infra";
+import { RedisContainer } from "testcontainers";
+
+import { resetInfra, setInfra } from "../../../src/application/infra";
 import { startWorker } from "../../../src/infra/workers/run-worker";
 
+const DEFAULT_DRIVER = process.env.AGENTS_RUN_QUEUE_DRIVER ?? "memory";
+
 type TestOptions = {
+	driver?: "memory" | "bullmq";
 	startWorker?: boolean;
 };
 
-function normalizeOptions(options?: TestOptions): Required<TestOptions> {
-	return {
-		startWorker: options?.startWorker ?? true,
-	};
+let redisContainer: RedisContainer | undefined;
+
+type Dispose = () => Promise<void> | void;
+
+async function initRedis() {
+	if (redisContainer) {
+		return redisContainer;
+	}
+	const container = await new RedisContainer("redis:7.4").start();
+	redisContainer = container;
+	return container;
+}
+
+async function disposeRedis() {
+	if (!redisContainer) {
+		return;
+	}
+	await redisContainer.stop();
+	redisContainer = undefined;
 }
 
 async function clearDatabase() {
@@ -20,51 +43,62 @@ async function clearDatabase() {
 	await db.run.deleteMany({});
 }
 
-type Resettable = { reset?: () => void };
+async function configureInfra(driver: "memory" | "bullmq") {
+	if (driver === "bullmq") {
+		const container = await initRedis();
+		const infra = createBullMqInfra({
+			queueName: "agents.run",
+			connection: container.getConnectionOptions(),
+		});
+		setInfra({
+			bus: new InMemoryEventBus(),
+			queue: infra.port,
+		});
+		return async () => {
+			await infra.close();
+			resetInfra();
+		};
+	}
+	setInfra({
+		bus: new InMemoryEventBus(),
+		queue: new InMemoryQueue(),
+	});
+	return async () => {
+		resetInfra();
+	};
+}
 
-export async function runAgentsRunTest(
-	fn: () => Promise<void>,
-	options?: TestOptions,
-): Promise<void> {
-	const normalized = normalizeOptions(options);
-
-	// Setup: clear DB, reset infra, start worker
+export async function runAgentsRunTest<T>(
+	fn: () => Promise<T>,
+	options: TestOptions = {},
+): Promise<T> {
+	const driver = options.driver ?? (DEFAULT_DRIVER as "memory" | "bullmq");
+	const shouldStartWorker = options.startWorker ?? true;
 	await clearDatabase();
-	const previous = getInfra();
-	const previousSnapshot = { bus: previous.bus, queue: previous.queue };
-	setInfra({ bus: new InMemoryEventBus(), queue: new InMemoryQueue() });
-	const stop = normalized.startWorker ? startWorker() : undefined;
-
-	// Ensure worker handler is registered before proceeding
-	if (normalized.startWorker) {
-		// Verify queue worker is registered by checking internal state
-		const queue = getInfra().queue as any;
-		let retries = 0;
-		while (retries++ < 50) {
-			if (queue.handlers?.has?.("agents.run")) {
-				break;
-			}
-			await new Promise((r) => setTimeout(r, 10));
-		}
-		// Extra safety margin for async processing
-		await new Promise((r) => setTimeout(r, 50));
+	const disposers: Dispose[] = [];
+	const disposeInfra = await configureInfra(driver);
+	disposers.push(disposeInfra);
+	if (shouldStartWorker) {
+		const stopRunWorker = startWorker();
+		disposers.push(stopRunWorker);
 	}
 
 	try {
-		await fn();
+		const result = await fn();
+		return result;
 	} finally {
-		// Teardown: stop worker first, then cleanup
-		if (stop) {
-			stop();
-			// Let worker interval clear before cleanup
-			await new Promise((r) => setTimeout(r, 150));
+		for (const dispose of disposers.reverse()) {
+			await dispose();
 		}
 		await clearDatabase();
-		resetInfra();
-		setInfra(previousSnapshot);
-		(previousSnapshot.bus as Resettable).reset?.();
-		(previousSnapshot.queue as Resettable).reset?.();
-		// Extra delay to ensure full cleanup before next test
-		await new Promise((r) => setTimeout(r, 50));
+		if (driver === "bullmq" && !process.env.CI) {
+			await disposeRedis();
+		}
 	}
+}
+
+export function afterAllAgentsRun() {
+	afterAll(async () => {
+		await disposeRedis();
+	});
 }

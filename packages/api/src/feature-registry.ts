@@ -67,3 +67,22 @@ export function getRouterFeatures(): FeatureDefinition[] {
 export function getProcedureFeatures(): FeatureDefinition[] {
 	return featureRegistry.getAll().filter((f) => !!f.procedures);
 }
+
+let agentsRunWorkerDisposer: (() => void) | undefined;
+
+export async function ensureFeatureWorkerStarted() {
+	if (agentsRunWorkerDisposer) {
+		return;
+	}
+	const { startWorker } = await import("@sg/feature-agents-run");
+	agentsRunWorkerDisposer = startWorker();
+}
+
+export async function ensureFeatureWorkerStopped() {
+	if (!agentsRunWorkerDisposer) {
+		return;
+	}
+	const dispose = agentsRunWorkerDisposer;
+	agentsRunWorkerDisposer = undefined;
+	dispose();
+}

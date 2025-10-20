@@ -1,6 +1,7 @@
 import type { EventBusPort } from "@sg/eventbus";
 import type { QueuePort } from "@sg/queue";
-import { asValue } from "awilix";
+import { createBullMqInfra } from "@sg/queue-bullmq";
+import { AGENTS_RUN_CONFIG_KEYS, AGENTS_RUN_QUEUE_NAME } from "./constants";
 import { createAgentsRunContainer } from "./container";
 
 export interface Infra {
@@ -8,17 +9,65 @@ export interface Infra {
 	queue: QueuePort;
 }
 
-let currentContainer = createAgentsRunContainer();
+type BullMqConnectionConfig = ReturnType<typeof extractBullMqConnection>;
+
+function extractBullMqConnection(urlString: string): BullMqConnectionConfig {
+	const url = new URL(urlString);
+	if (url.protocol !== "redis:" && url.protocol !== "rediss:") {
+		throw new Error(`Unsupported Redis protocol: ${url.protocol}`);
+	}
+	if (url.hostname === "" && url.pathname) {
+		return {
+			queue: { url: urlString },
+			worker: { url: urlString },
+		};
+	}
+	return {
+		queue: {
+			host: url.hostname,
+			port: Number(url.port) || undefined,
+			username: url.username || undefined,
+			password: url.password || undefined,
+		},
+		worker: {
+			host: url.hostname,
+			port: Number(url.port) || undefined,
+			username: url.username || undefined,
+			password: url.password || undefined,
+		},
+	};
+}
+
+function buildDefaultContainer() {
+	const driver = process.env[AGENTS_RUN_CONFIG_KEYS.driver]?.toLowerCase();
+	if (driver === "bullmq") {
+		const redisUrl = process.env[AGENTS_RUN_CONFIG_KEYS.redisUrl];
+		if (!redisUrl) {
+			throw new Error(
+				"AGENTS_RUN_REDIS_URL must be set when using BullMQ driver",
+			);
+		}
+		const connection = extractBullMqConnection(redisUrl);
+		const infra = createBullMqInfra({
+			queueName: AGENTS_RUN_QUEUE_NAME,
+			connection: connection.queue,
+			workerConnection: connection.worker,
+		});
+		return createAgentsRunContainer({ queue: infra.port });
+	}
+	return createAgentsRunContainer();
+}
+
+let currentContainer = buildDefaultContainer();
 
 export function getInfra(): Infra {
 	return currentContainer.cradle as Infra;
 }
 
 export function setInfra(next: Infra): void {
-	currentContainer = createAgentsRunContainer();
-	currentContainer.register({
-		bus: asValue(next.bus),
-		queue: asValue(next.queue),
+	currentContainer = createAgentsRunContainer({
+		bus: next.bus,
+		queue: next.queue,
 	});
 }
 

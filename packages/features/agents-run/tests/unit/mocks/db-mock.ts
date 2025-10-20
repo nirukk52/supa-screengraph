@@ -145,7 +145,10 @@ export const mockDb = {
 	$transaction: async (arg: any) => {
 		// Support both Prisma styles: callback and array of promises
 		if (typeof arg === "function") {
-			return await arg(mockDb);
+			return await arg({
+				...mockDb,
+				$executeRaw: async () => 0, // Mock for pg_notify calls
+			});
 		}
 		if (Array.isArray(arg)) {
 			// Execute all operations and return their results
@@ -157,6 +160,7 @@ export const mockDb = {
 		}
 		throw new Error("$transaction expects a function or an array");
 	},
+	$executeRaw: async () => 0, // Mock for pg_notify calls
 };
 
 vi.mock("@repo/database/prisma/client", () => ({

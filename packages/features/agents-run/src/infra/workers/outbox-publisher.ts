@@ -6,6 +6,8 @@ import {
 	EVENT_TYPES,
 	TOPIC_AGENTS_RUN,
 } from "@sg/agents-contracts";
+import createSubscriber from "pg-listen";
+import { AGENTS_RUN_OUTBOX_CHANNEL } from "../../application/constants";
 import { getInfra } from "../../application/infra";
 
 /**
@@ -104,23 +106,131 @@ export async function publishPendingOutboxEventsOnce(runId?: string) {
 	}
 }
 
-/**
- * Start the outbox publisher worker.
- *
- * Periodically polls the outbox table and publishes pending events to the
- * in-memory event bus topic `TOPIC_AGENTS_RUN`. Returns a disposer to stop
- * polling. Uses at-least-once delivery to the bus; consumers should de-dupe
- * on `(runId, seq)`.
- */
-export function startOutboxWorker(pollMs = 200) {
-	const id = setInterval(() => {
-		void publishPendingOutboxEventsOnce();
-	}, pollMs);
+let activeSubscriber: ReturnType<typeof createSubscriber> | undefined;
+const pendingRuns = new Map<string, Promise<void>>();
+let globalDrain: Promise<void> | undefined;
 
-	void publishPendingOutboxEventsOnce();
+function getConnectionString(): string {
+	const url = process.env.DATABASE_URL;
+	if (!url) {
+		throw new Error("DATABASE_URL must be set to start outbox worker");
+	}
+	return url;
+}
 
-	return () => {
-		clearInterval(id);
+type OutboxNotification = { data?: { runId?: string } } | { runId?: string };
+
+function parseNotification(payload: unknown): { runId?: string } {
+	if (typeof payload !== "string") {
+		return {};
+	}
+	try {
+		const parsed = JSON.parse(payload) as OutboxNotification;
+		const runId =
+			typeof parsed.runId === "string"
+				? parsed.runId
+				: typeof parsed.data?.runId === "string"
+					? parsed.data.runId
+					: undefined;
+		return runId ? { runId } : {};
+	} catch {
+		return {};
+	}
+}
+
+function enqueueDrain(runId?: string) {
+	if (runId) {
+		const current = pendingRuns.get(runId) ?? Promise.resolve();
+		const next = current
+			.catch(() => undefined)
+			.then(async () => {
+				await publishPendingOutboxEventsOnce(runId);
+			})
+			.catch((error) => {
+				logger.error("outbox.publish.error", { runId, error });
+			})
+			.finally(() => {
+				if (pendingRuns.get(runId) === next) {
+					pendingRuns.delete(runId);
+				}
+			});
+		pendingRuns.set(runId, next);
+		return;
+	}
+
+	globalDrain = (globalDrain ?? Promise.resolve())
+		.catch(() => undefined)
+		.then(async () => {
+			await publishPendingOutboxEventsOnce();
+		})
+		.catch((error) => {
+			logger.error("outbox.publish.error", { error });
+		});
+}
+
+async function drainPending(): Promise<void> {
+	const drains: Promise<void>[] = [];
+	for (const promise of pendingRuns.values()) {
+		drains.push(promise.catch(() => undefined));
+	}
+	if (globalDrain) {
+		drains.push(globalDrain.catch(() => undefined));
+	}
+	if (drains.length > 0) {
+		await Promise.allSettled(drains);
+	}
+	pendingRuns.clear();
+	globalDrain = undefined;
+}
+
+export function startOutboxWorker() {
+	if (activeSubscriber) {
+		return async () => {
+			await drainPending();
+			void activeSubscriber?.close().catch(() => undefined);
+			activeSubscriber = undefined;
+		};
+	}
+
+	const subscriber = createSubscriber({
+		connectionString: getConnectionString(),
+	});
+	activeSubscriber = subscriber;
+
+	subscriber.notifications.on(AGENTS_RUN_OUTBOX_CHANNEL, (payload) => {
+		const { runId } = parseNotification(payload);
+		enqueueDrain(runId);
+	});
+
+	subscriber.events.on("error", (error) => {
+		logger.error("outbox.subscriber.error", { error });
+	});
+
+	void subscriber
+		.connect()
+		.then(async () => {
+			await subscriber.listenTo(AGENTS_RUN_OUTBOX_CHANNEL);
+			enqueueDrain();
+		})
+		.catch((error) => {
+			logger.error("outbox.subscriber.connect_failed", { error });
+		});
+
+	return async () => {
+		if (!activeSubscriber) {
+			return;
+		}
+		activeSubscriber.notifications.removeAllListeners(
+			AGENTS_RUN_OUTBOX_CHANNEL,
+		);
+		await drainPending();
+		void activeSubscriber
+			.unlisten(AGENTS_RUN_OUTBOX_CHANNEL)
+			.catch(() => undefined)
+			.finally(() => {
+				void activeSubscriber?.close().catch(() => undefined);
+				activeSubscriber = undefined;
+			});
 	};
 }
 
