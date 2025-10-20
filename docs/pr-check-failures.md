@@ -87,22 +87,26 @@ Each entry should include:
    - Defer to follow-up PR
 
 4. **Database Package Exports** (configuration):
-   - `packages/database/package.json` missing proper `exports` field
-   - Vite cannot resolve module entry point in CI environment
-   - **Resolution**: Add proper `exports` field to support ESM resolution
+   - `packages/database/package.json` `exports` field pointing to non-existent `dist/` files
+   - TypeScript compilation fails in CI: `Cannot find module '@repo/database'`
+   - **Root Cause**: `exports` pointed to build artifacts that don't exist in fresh CI environment
+   - **Why not caught locally**: Local `dist/` directory persisted from previous builds, masking the issue
+   - **Resolution**: Point `exports` to source files (`.ts`) instead of build artifacts
    - **Fix**:
      ```json
      {
+       "main": "./index.ts",
+       "types": "./index.ts",
        "exports": {
          ".": {
-           "types": "./dist/index.d.ts",
-           "import": "./dist/index.js",
-           "require": "./dist/index.js"
+           "types": "./index.ts",
+           "import": "./index.ts",
+           "default": "./index.ts"
          },
          "./prisma/client": {
-           "types": "./dist/prisma/client.d.ts",
-           "import": "./dist/prisma/client.js",
-           "require": "./dist/prisma/client.js"
+           "types": "./prisma/client.ts",
+           "import": "./prisma/client.ts",
+           "default": "./prisma/client.ts"
          }
        }
      }
@@ -152,6 +156,10 @@ Each entry should include:
 - Port conflicts are common in local development; ephemeral ports or process cleanup is essential
 - **CI can fail due to external infrastructure issues (Docker registry) even when code is correct**
 - **Local test success doesn't guarantee CI success when external dependencies are involved**
+- **Package.json `exports` pointing to build artifacts (`dist/`) fails in CI when artifacts aren't committed**
+  - Local: `dist/` exists from previous builds, masks the issue
+  - CI: Fresh environment, `dist/` doesn't exist until build runs
+  - Solution: Point `exports` to source files (`.ts`) for monorepo packages
 
 ---
 
