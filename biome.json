@@ -47,8 +47,8 @@
 	"files": {
 		"includes": ["**/*.{ts,tsx,js,jsx,json,md,mdx,cjs,mjs}"],
 		"experimentalScannerIgnores": [
-			"packages/database/**/*.js",
-			"!packages/database/**/*.spec.js"
+			"packages/database/index.js",
+			"packages/database/prisma/**/*.js"
 		]
 	},
 	"javascript": {
