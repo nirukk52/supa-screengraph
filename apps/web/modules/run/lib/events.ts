@@ -1,5 +1,12 @@
-import { EVENT_TYPES } from "@sg/agents-contracts";
 import type { StreamEvent } from "../hooks/useRunStream";
+
+const EVENT_TYPES = {
+	RunStarted: "RunStarted",
+	NodeStarted: "NodeStarted",
+	DebugTrace: "DebugTrace",
+	NodeFinished: "NodeFinished",
+	RunFinished: "RunFinished",
+} as const;
 
 export const EVENT_TYPE_LABELS: Record<StreamEvent["type"], string> = {
 	[EVENT_TYPES.RunStarted]: "Run Started",

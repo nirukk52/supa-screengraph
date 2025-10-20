@@ -73,20 +73,23 @@ export function LoginForm() {
 	const email = searchParams.get("email");
 	const redirectTo = searchParams.get("redirectTo");
 
-	const defaultMode = config.auth.enablePasswordLogin ? "password" : "magic-link";
-	
+	const defaultMode = config.auth.enablePasswordLogin
+		? "password"
+		: "magic-link";
+
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
-		defaultValues: defaultMode === "password"
-			? {
-					mode: "password" as const,
-					email: email ?? "",
-					password: "",
-				}
-			: {
-					mode: "magic-link" as const,
-					email: email ?? "",
-				},
+		defaultValues:
+			defaultMode === "password"
+				? {
+						mode: "password" as const,
+						email: email ?? "",
+						password: "",
+					}
+				: {
+						mode: "magic-link" as const,
+						email: email ?? "",
+					},
 	});
 
 	const redirectPath = invitationId
@@ -134,42 +137,44 @@ export function LoginForm() {
 				if (error) {
 					throw error;
 				}
-		} else if (values.mode === "app-config") {
-			// Generate a unique run ID
-			const { generateRunId } = await import("@run/lib/runId");
-			const { buildStartRunPath } = await import("@sg/agents-contracts");
-			const runId = generateRunId();
-
-			// Store APK path in localStorage
-			if (typeof window !== "undefined") {
-				localStorage.setItem(
-					`run_${runId}_apkPath`,
-					values.apkPath,
+			} else if (values.mode === "app-config") {
+				// Generate a unique run ID
+				const { generateRunId } = await import("@run/lib/runId");
+				const { buildStartRunPath } = await import(
+					"@sg/agents-contracts"
 				);
-			}
+				const runId = generateRunId();
 
-			// Call the API to start the run
-			const response = await fetch(buildStartRunPath(), {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({
-					runId,
-					appPath: {
-						kind: "local",
-						value: values.apkPath,
+				// Store APK path in localStorage
+				if (typeof window !== "undefined") {
+					localStorage.setItem(
+						`run_${runId}_apkPath`,
+						values.apkPath,
+					);
+				}
+
+				// Call the API to start the run
+				const response = await fetch(buildStartRunPath(), {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
 					},
-				}),
-			});
+					body: JSON.stringify({
+						runId,
+						appPath: {
+							kind: "local",
+							value: values.apkPath,
+						},
+					}),
+				});
 
-			if (!response.ok) {
-				throw new Error(`Failed to start run: ${response.status}`);
+				if (!response.ok) {
+					throw new Error(`Failed to start run: ${response.status}`);
+				}
+
+				// Navigate to the run page
+				router.replace(`/run/${runId}`);
 			}
-
-			// Navigate to the run page
-			router.replace(`/run/${runId}`);
-		}
 		} catch (e) {
 			form.setError("root", {
 				message: getAuthErrorMessage(
@@ -233,7 +238,8 @@ export function LoginForm() {
 							<LoginModeSwitch
 								activeMode={signinMode}
 								onChange={(mode) => {
-									const currentEmail = (form.getValues() as any).email ?? "";
+									const currentEmail =
+										(form.getValues() as any).email ?? "";
 									if (mode === "password") {
 										form.reset({
 											mode: "password",

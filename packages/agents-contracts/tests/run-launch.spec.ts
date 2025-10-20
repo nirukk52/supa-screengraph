@@ -85,4 +85,3 @@ describe("APP_PATH_KIND_VALUES", () => {
 		expect(APP_PATH_KIND_VALUES).toEqual(["local", "remote"]);
 	});
 });
-
