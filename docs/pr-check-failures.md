@@ -90,8 +90,12 @@ Each entry should include:
    - `packages/database/package.json` `exports` field pointing to non-existent `dist/` files
    - TypeScript compilation fails in CI: `Cannot find module '@repo/database'`
    - **Root Cause**: `exports` pointed to build artifacts that don't exist in fresh CI environment
-   - **Why not caught locally**: Local `dist/` directory persisted from previous builds, masking the issue
-   - **Resolution**: Point `exports` to source files (`.ts`) instead of build artifacts
+   - **Why not caught locally**: 
+     1. Local `dist/` directory persisted from previous builds
+     2. Stray `prisma/index.js` compiled file was being used
+     3. Node.js module resolution fell back gracefully
+   - **Resolution**: Point `exports` to source files + use explicit `/index` in directory imports
+   - **Additional Fix**: Remove compiled artifacts (`dist/`, `prisma/index.js`) from source tree
    - **Fix**:
      ```json
      {
