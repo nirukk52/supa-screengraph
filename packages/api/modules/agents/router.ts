@@ -1,4 +1,9 @@
 import type { AgentEvent } from "@sg/agents-contracts";
+import {
+	AppLaunchConfigSchema,
+	type AppLaunchConfigSuccess,
+	buildStreamPath,
+} from "@sg/agents-contracts";
 import { publicProcedure, type } from "../../orpc/procedures";
 
 export const agentsRouter = publicProcedure.router({
@@ -8,6 +13,18 @@ export const agentsRouter = publicProcedure.router({
 		.handler(async ({ input }) => {
 			const mod = await import("@sg/feature-agents-run");
 			return await mod.postStartRun({ runId: input.runId });
+		}),
+	postLaunchRun: publicProcedure
+		.route({ method: "POST", path: "/agents/runs/start" })
+		.input(AppLaunchConfigSchema)
+		.handler(async ({ input }): Promise<AppLaunchConfigSuccess> => {
+			const mod = await import("@sg/feature-agents-run");
+			// postStartRun internally calls startRun
+			await mod.postStartRun({ runId: input.runId });
+			return {
+				runId: input.runId,
+				streamPath: buildStreamPath(input.runId),
+			};
 		}),
 	postCancelRun: publicProcedure
 		.route({ method: "POST", path: "/agents/runs/{runId}/cancel" })

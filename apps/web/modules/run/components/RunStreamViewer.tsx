@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useApkPath } from "../hooks/useApkPath";
 import { useRunStream } from "../hooks/useRunStream";
 import { RunEventsPanel } from "./RunEventsPanel";
@@ -27,6 +27,11 @@ export function RunStreamViewer({ runId }: RunStreamViewerProps) {
 		clearEvents();
 		connect();
 	}, [clearEvents, connect]);
+
+	// Auto-connect to stream on mount
+	useEffect(() => {
+		connect();
+	}, [connect]);
 
 	return (
 		<div className="space-y-8">
