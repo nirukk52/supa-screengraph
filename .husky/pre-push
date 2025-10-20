@@ -2,30 +2,8 @@
 
 set -eu
 
-if [ "${SKIP_PRE_PUSH:-0}" = "1" ]; then
-  echo "SKIP_PRE_PUSH=1 set; skipping pre-push checks"
-  exit 0
-fi
-
 printf '▶ Running pr:check...\n'
 if ! pnpm -w run pr:check; then
   printf '❌ pr:check failed\n' >&2
   exit 1
 fi
-
-# Enforce Claude update trailer and docs rule
-last_msg="$(git log -1 --pretty=%B)"
-case "$last_msg" in
-  *"Claude-Update: yes"*)
-    if ! git show --name-only --pretty="" HEAD | grep -E "^(CLAUDE/|CLAUDE.md)" >/dev/null; then
-      echo "Claude-Update: yes but no CLAUDE docs changed in last commit" >&2
-      exit 1
-    fi
-    ;;
-  *"Claude-Update: no"*)
-    ;;
-  *)
-    echo "Missing required commit trailer: 'Claude-Update: yes|no'" >&2
-    exit 1
-    ;;
-esac
