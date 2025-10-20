@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "generatorVersion": "unknown",
-  "generatedAt": "2025-10-20T04:56:54.786Z",
+  "generatedAt": "2025-10-20T08:19:22.967Z",
   "outputPath": "/Users/priyankalalge/RealSaas/Screengraph/base/packages/database/prisma/zod",
   "files": [
     "index.ts"

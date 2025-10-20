@@ -163,6 +163,6 @@ export const mockDb = {
 	$executeRaw: async () => 0, // Mock for pg_notify calls
 };
 
-vi.mock("@repo/database/prisma/client", () => ({
+vi.mock("@repo/database", () => ({
 	db: mockDb,
 }));

@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { db } from "@repo/database/prisma/client";
+import { db } from "@repo/database";
 import { EVENT_SOURCES, EVENT_TYPES } from "@sg/agents-contracts";
 import { describe, expect, it } from "vitest";
 import { drainOutboxForRun } from "../../src/infra/workers/outbox-publisher";

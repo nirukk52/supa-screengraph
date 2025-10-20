@@ -20,7 +20,10 @@
 		"strictNullChecks": true,
 		"paths": {
 			"@repo/config": ["../../config"],
-			"@sg/feature-agents-run": ["../../packages/features/agents-run"]
+			"@sg/feature-agents-run": ["../../packages/features/agents-run"],
+			"@sg/queue": ["../../packages/queue"],
+			"@sg/queue-bullmq": ["../../packages/queue-bullmq"],
+			"@sg/queue-inmemory": ["../../packages/queue-inmemory"]
 		}
 	},
 	"display": "Default",

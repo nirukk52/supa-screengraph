@@ -1,5 +1,5 @@
 import type { PrismaClient } from "@prisma/client";
-import { db } from "@repo/database/prisma/client";
+import { db } from "@repo/database";
 import { drainOutboxForRun } from "../../../src/infra/workers/outbox-publisher";
 
 /**

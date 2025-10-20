@@ -6,6 +6,7 @@
 		{ "path": "../../packages/eventbus" },
 		{ "path": "../../packages/eventbus-inmemory" },
 		{ "path": "../../packages/queue" },
+		{ "path": "../../packages/queue-bullmq" },
 		{ "path": "../../packages/queue-inmemory" },
 		{ "path": "../../packages/utils" },
 		{ "path": "../../packages/i18n" },

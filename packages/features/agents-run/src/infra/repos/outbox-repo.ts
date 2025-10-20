@@ -1,4 +1,4 @@
-import { db } from "@repo/database/prisma/client";
+import { db } from "@repo/database";
 
 export const OutboxRepo = {
 	async getNextSeq(runId: string): Promise<number> {

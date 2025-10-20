@@ -1,6 +1,6 @@
 import process from "node:process";
 
-import { db } from "@repo/database/prisma/client";
+import { db } from "@repo/database";
 import { InMemoryEventBus } from "@sg/eventbus-inmemory";
 import { createBullMqInfra } from "@sg/queue-bullmq";
 import { InMemoryQueue } from "@sg/queue-inmemory";

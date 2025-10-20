@@ -1,4 +1,4 @@
-import { db } from "@repo/database/prisma/client";
+import { db } from "@repo/database";
 
 export const RunRepo = {
 	async createRun(runId: string, startedAt: number): Promise<void> {

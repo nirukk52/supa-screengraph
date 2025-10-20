@@ -14,15 +14,16 @@
 		"prisma": "6.17.1",
 		"prisma-zod-generator": "^1.25.0"
 	},
-	"main": "./index.ts",
+	"main": "./dist/index.js",
 	"name": "@repo/database",
 	"scripts": {
+		"build": "tsc --outDir dist --declaration",
 		"generate": "prisma generate --no-hints --schema=./prisma/schema.prisma",
 		"push": "dotenv -c -e ../../.env -- prisma db push --skip-generate --schema=./prisma/schema.prisma",
 		"migrate": "dotenv -c -e ../../.env -- prisma migrate dev --schema=./prisma/schema.prisma",
 		"studio": "dotenv -c -e ../../.env -- prisma studio --schema=./prisma/schema.prisma",
 		"type-check": "tsc --noEmit"
 	},
-	"types": "./**/.tsx",
+	"types": "./dist/index.d.ts",
 	"version": "0.0.0"
 }

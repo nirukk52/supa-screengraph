@@ -1,4 +1,4 @@
-import { db } from "@repo/database/prisma/client";
+import { db } from "@repo/database";
 import type { AgentEvent } from "@sg/agents-contracts";
 import { AGENTS_RUN_OUTBOX_CHANNEL } from "../../application/constants";
 

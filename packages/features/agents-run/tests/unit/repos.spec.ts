@@ -1,5 +1,5 @@
 import "./mocks/db-mock";
-import { db } from "@repo/database/prisma/client";
+import { db } from "@repo/database";
 import { EVENT_SOURCES, EVENT_TYPES } from "@sg/agents-contracts";
 import { beforeEach, describe, expect, it } from "vitest";
 import { RunEventRepo } from "../../src/infra/repos/run-event-repo";
