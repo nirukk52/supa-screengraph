@@ -7,10 +7,10 @@ test.describe("App Config → Run Stream Flow", () => {
 		// Navigate to login page
 		await page.goto("/auth/login");
 
-		// Wait for page to load
-		await expect(
-			page.getByRole("heading", { name: /login/i }),
-		).toBeVisible();
+		// Wait for page to load (increased timeout for potential redirects)
+		await expect(page.getByRole("heading", { name: /login/i })).toBeVisible(
+			{ timeout: 10000 },
+		);
 
 		// Click on "App Config" tab
 		await page.getByRole("tab", { name: "App Config" }).click();
@@ -98,6 +98,9 @@ test.describe("App Config → Run Stream Flow", () => {
 	test("should validate APK path is required", async ({ page }) => {
 		await page.goto("/auth/login");
 
+		// Wait for page to load
+		await page.waitForLoadState("networkidle");
+
 		// Click on "App Config" tab
 		await page.getByRole("tab", { name: "App Config" }).click();
 
@@ -117,34 +120,41 @@ test.describe("App Config → Run Stream Flow", () => {
 	test("should allow switching between auth modes", async ({ page }) => {
 		await page.goto("/auth/login");
 
-		// Start with password mode (or magic-link depending on config)
-		const passwordTab = page.getByRole("tab", {
-			name: /password|magic link/i,
-		});
-		if (await passwordTab.isVisible()) {
-			await passwordTab.click();
+		// Wait for page to load
+		await page.waitForLoadState("networkidle");
 
-			// Should show email input
+		// Check which mode is default and click it
+		const passwordTab = page.getByRole("tab", { name: "Password" });
+		const magicLinkTab = page.getByRole("tab", { name: "Magic link" });
+
+		const hasPassword = await passwordTab.isVisible().catch(() => false);
+		const hasMagicLink = await magicLinkTab.isVisible().catch(() => false);
+
+		if (hasPassword) {
+			await passwordTab.click();
+			// Should show email and password inputs
+			await expect(page.getByLabel(/email/i)).toBeVisible();
+			await expect(page.getByLabel(/password/i)).toBeVisible();
+		} else if (hasMagicLink) {
+			await magicLinkTab.click();
+			// Should show email input only
 			await expect(page.getByLabel(/email/i)).toBeVisible();
 		}
 
 		// Switch to App Config
 		await page.getByRole("tab", { name: "App Config" }).click();
 
-		// Should show APK path input and hide email
+		// Should show APK path input
 		await expect(page.getByLabel("APK Path")).toBeVisible();
-		const emailInput = page.getByLabel(/email/i);
-		if (await emailInput.isVisible().catch(() => false)) {
-			expect(await emailInput.isVisible()).toBe(false);
-		}
 
-		// Switch back
-		const firstTab = page.getByRole("tab", {
-			name: /password|magic link/i,
-		});
-		if (await firstTab.isVisible()) {
-			await firstTab.click();
+		// Email input should not be visible
+		await expect(page.getByLabel(/email/i)).not.toBeVisible();
+
+		// Switch back to Password if available
+		if (hasPassword) {
+			await passwordTab.click();
 			await expect(page.getByLabel(/email/i)).toBeVisible();
+			await expect(page.getByLabel("APK Path")).not.toBeVisible();
 		}
 	});
 });
