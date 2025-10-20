@@ -1,4 +1,5 @@
 import { ORPCError } from "@orpc/client";
+import type { AiChat } from "@repo/database";
 import { getAiChatById, updateAiChat } from "@repo/database";
 import { z } from "zod";
 import { protectedProcedure } from "../../../orpc/procedures";
@@ -18,7 +19,7 @@ export const updateChat = protectedProcedure
 			title: z.string().optional(),
 		}),
 	)
-	.handler(async ({ input, context }) => {
+	.handler(async ({ input, context }): Promise<{ chat: AiChat }> => {
 		const { id, title } = input;
 		const user = context.user;
 

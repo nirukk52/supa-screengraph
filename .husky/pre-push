@@ -1,5 +1,14 @@
 #!/bin/sh
 
+# Fast pr:check before push
+if [ "$SKIP_PR_CHECK" != "1" ]; then
+  echo "🔍 Running fast pr:check before push..."
+  SKIP_E2E=1 SKIP_COVERAGE=1 pnpm run pr:check || {
+    echo "❌ pr:check failed. Fix issues or use SKIP_PR_CHECK=1 to bypass."
+    exit 1
+  }
+fi
+
 # Optional skip
 if [ "$SKIP_TESTS" = "1" ]; then
   echo "SKIP_TESTS=1 set; skipping tests"

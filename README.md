@@ -24,6 +24,8 @@ This is a hybrid monorepo containing:
 
 ## Development
 
+- [Local CI Parity](docs/guides/local-ci-parity.md)
+
 ### Prerequisites
 - Node.js 20+
 - Python 3.11+

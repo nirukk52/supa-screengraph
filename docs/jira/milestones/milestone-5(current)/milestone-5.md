@@ -74,6 +74,10 @@ Feature 0002 is also handled by this milestone! - Founder
   - Remove `singleThread: true` from vitest config
   - Verify parallel tests pass 3x locally + CI
   - Unskip 4 integration tests (BUG-TEST-004)
+- **FEAT-0003-5**: CI/Local Parity Tooling with act & mise
+  - Eliminate local-pass/CI-fail pain
+  - Deterministic environment with act (runs GitHub Actions locally)
+  - Zero toolchain drift with mise (pins Node/pnpm versions)
 
 **📋 PHASE 4 ACTION PLAN**:
 1. **Step 1**: Update test harness (`test-harness.ts`)
@@ -131,6 +135,21 @@ Feature 0002 is also handled by this milestone! - Founder
   - 🔵 **TODO**: Verify CI parallel workers pass
   - 🔵 **TODO**: Unskip BUG-TEST-004 tests (4 skipped integration tests)
 
+- [ ] **[FEAT-0003-5]** CI/Local Parity Tooling with act & mise  
+  **File**: `docs/jira/feature-requests/0003-ci-local-parity-tooling.md`  
+  **Status**: Approved (Ready to implement)  
+  **Priority**: High  
+  **Effort**: Small (< 1 day, ~2-4 hours)  
+  **Owner**: @infra  
+  **Goal**: Eliminate CI/local environment drift and validation failures  
+  **Remaining Work**:
+  - 🔵 **TODO**: Install and configure `act` (`.actrc` + `tooling/ci/act.env`)
+  - 🔵 **TODO**: Install and configure `mise` (`.mise.toml`)
+  - 🔵 **TODO**: Add npm scripts for local CI runs (`ci:local`, `ci:local:lint`, etc.)
+  - 🔵 **TODO**: Update `.husky/pre-push` to run fast pr:check
+  - 🔵 **TODO**: Create `docs/guides/local-ci-parity.md` documentation
+  - 🔵 **TODO**: Validate full parity (local pass = CI pass)
+
 ### Phase 4: Documentation ✅ **[COMPLETE - PR #64]**
 **Goal**: Update CLAUDE docs and milestone tracking.
 
@@ -174,7 +193,8 @@ Feature 0002 is also handled by this milestone! - Founder
 - [x] CI green on PR #71 (`pnpm pr:check` passes)
 - [x] Critical bugs resolved (BUG-INFRA-001, 003)
 - [x] All passing tests deterministic (28 passed | 6 skipped)
-- [ ] Remaining Phase 4 items complete (DEBT-0001, DEBT-0002)
+- [ ] Remaining Phase 4 items complete (DEBT-0001, DEBT-0002, FEAT-0003-5)
+- [ ] CI/Local parity tooling validated (act + mise setup working)
 - [ ] CLAUDE trailer included in final commit
 
 ---
@@ -197,9 +217,10 @@ Feature 0002 is also handled by this milestone! - Founder
 - **Complete**: 1 (FEAT-0002-5 - PR #71 ready for review)
 
 ### Phase 4: Infrastructure Quality & Cleanup 🔵
-- **Total**: 4 items
+- **Total**: 5 items
 - **Complete**: 2 (BUG-INFRA-001, BUG-INFRA-003)
 - **In Progress**: 2 (DEBT-0001, DEBT-0002)
+- **Approved/Ready**: 1 (FEAT-0003-5 - CI/Local Parity Tooling)
 - **Blocked**: 0 (DEBT-0002 unblocked - can work in parallel)
 - **Open**: 0
 
@@ -208,12 +229,13 @@ Feature 0002 is also handled by this milestone! - Founder
 - **Complete**: 1
 
 ### Overall Progress
-- **Total Items**: 9
+- **Total Items**: 10
 - **Complete**: 6 (Phase 1, Phase 2, Phase 3, Phase 4 partial)
 - **In Progress**: 2 (DEBT-0001, DEBT-0002)
+- **Approved/Ready**: 1 (FEAT-0003-5)
 - **Open**: 0
-- **Completion**: 67% (6/9)
-- **Status**: Phase 3 complete (PR #71 ready), Phase 4 in progress (7 TODOs remaining)
+- **Completion**: 60% (6/10)
+- **Status**: Phase 3 complete (PR #71 ready), Phase 4 in progress (13 TODOs remaining)
 
 ---
 
@@ -223,11 +245,13 @@ Feature 0002 is also handled by this milestone! - Founder
 1. **BUG-DB-001**: Discovered during test stabilization (non-atomic run/outbox creation causing P2002 errors)
 2. **DEBT-0002**: Identified single-threaded test execution as architectural issue requiring per-worker isolation
 3. **FEAT-0001-5**: Originally planned as "Redis adapters", scoped down to ports-first seam only
+4. **FEAT-0003-5**: CI/Local parity tooling - Added after PR #71 CI failures revealed environment drift pain
 
 ### Rationale
 - BUG-DB-001: Critical for test stability, blocking all integration tests
 - DEBT-0002: Documenting root cause of test flakiness for M6 planning
 - FEAT-0001-5: Incremental approach reduces risk, defers full DI to M6
+- FEAT-0003-5: High ROI (< 1 day effort) to eliminate constant CI/local drift pain going forward
 
 ### Moved Out of M5
 - **BUG-TEST-005**: Scaffold tooling improvement (Prisma mock guard) - low severity, moved to scaffold improvements backlog
