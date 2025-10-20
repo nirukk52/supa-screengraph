@@ -1,3 +1,4 @@
+import type { Prisma } from "@repo/database";
 import { db } from "@repo/database";
 import { logger } from "@repo/logs";
 import type { AgentEvent } from "@sg/agents-contracts";
@@ -10,7 +11,7 @@ import { getInfra } from "../../application/infra";
 
 async function publishNextOutboxEvent(runId: string) {
 	return db.$transaction(
-		async (tx) => {
+		async (tx: Prisma.TransactionClient) => {
 			const outbox = await tx.runOutbox.findUnique({ where: { runId } });
 			if (!outbox) {
 				return false;

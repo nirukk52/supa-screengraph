@@ -12,7 +12,6 @@
 		{ "path": "../../packages/i18n" },
 		{ "path": "../../packages/database" },
 		{ "path": "../../packages/auth" },
-		{ "path": "../../config" },
 		{ "path": "../../packages/api" },
 		{ "path": "../../packages/features/agents-run" }
 	]

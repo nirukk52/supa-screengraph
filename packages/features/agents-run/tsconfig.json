@@ -8,6 +8,7 @@
 		"composite": true
 	},
 	"references": [
+		{ "path": "../../database" },
 		{ "path": "../../queue" },
 		{ "path": "../../queue-bullmq" },
 		{ "path": "../../queue-inmemory" },

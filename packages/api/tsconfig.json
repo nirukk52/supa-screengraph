@@ -9,7 +9,10 @@
 		"emitDeclarationOnly": false,
 		"composite": true
 	},
-	"references": [{ "path": "../features/agents-run" }],
+	"references": [
+		{ "path": "../database" },
+		{ "path": "../features/agents-run" }
+	],
 	"include": [
 		"index.ts",
 		"lib/**/*.ts",
