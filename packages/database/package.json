@@ -14,8 +14,24 @@
 		"prisma": "6.17.1",
 		"prisma-zod-generator": "^1.25.0"
 	},
-	"main": "./dist/index.js",
 	"name": "@repo/database",
+	"version": "0.0.0",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js",
+			"require": "./dist/index.js",
+			"default": "./dist/index.js"
+		},
+		"./prisma/client": {
+			"types": "./dist/prisma/client.d.ts",
+			"import": "./dist/prisma/client.js",
+			"require": "./dist/prisma/client.js",
+			"default": "./dist/prisma/client.js"
+		}
+	},
 	"scripts": {
 		"build": "tsc --outDir dist --declaration",
 		"generate": "prisma generate --no-hints --schema=./prisma/schema.prisma",
@@ -23,7 +39,5 @@
 		"migrate": "dotenv -c -e ../../.env -- prisma migrate dev --schema=./prisma/schema.prisma",
 		"studio": "dotenv -c -e ../../.env -- prisma studio --schema=./prisma/schema.prisma",
 		"type-check": "tsc --noEmit"
-	},
-	"types": "./dist/index.d.ts",
-	"version": "0.0.0"
+	}
 }
