@@ -2,8 +2,16 @@
 
 set -eu
 
-printf '▶ Running pr:check...\n'
-if ! pnpm -w run pr:check; then
-  printf '❌ pr:check failed\n' >&2
-  exit 1
+if [ "${ACT_RUN:-0}" = "1" ]; then
+  printf '▶ Running full act workflow (ci:act)...\n'
+  if ! pnpm -w run ci:act; then
+    printf '❌ ci:act failed\n' >&2
+    exit 1
+  fi
+else
+  printf '▶ Running pr:check...\n'
+  if ! pnpm -w run pr:check; then
+    printf '❌ pr:check failed\n' >&2
+    exit 1
+  fi
 fi
