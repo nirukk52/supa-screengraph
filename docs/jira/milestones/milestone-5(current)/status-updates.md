@@ -25,16 +25,24 @@ _Last Updated: 2025-10-19_
 
 ## Week of 2025-10-20
 ### Completed
-- _Planned work: migrate queue/outbox to BullMQ + pg-listen_
+- ✅ BullMQ adapter (`@sg/queue-bullmq`) with lifecycle control
+- ✅ pg-listen outbox worker (replaced polling)
+- ✅ Redis Testcontainers in integration harness
+- ✅ Refactored outbox modules to meet size limits
+- ✅ Fixed critical bugs (BUG-INFRA-001, 003)
+- ✅ PR #71 opened (feat/m5-bullmq-pg-listen)
 
 ### In Progress
-- TBD
+- BUG-TEST-008: Resolve 5 skipped integration tests (async drain race)
+- BUG-INFRA-002: Move subscriber to DI container
 
 ### Blocked
-- TBD
+- None (CI workflow doesn't run on m4_cleanup branch, but local pr:check passes)
 
 ### Next Steps
-- TBD
+- Merge PR #71 once reviewed
+- Follow-up PR: Fix BUG-TEST-008 (subscriber.connect await + worker readiness)
+- Update scaffold with BullMQ + pg-listen patterns
 
 ---
 
