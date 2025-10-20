@@ -3,7 +3,7 @@ import type { StreamEvent } from "../hooks/useRunStream";
 // Local EVENT_TYPES definition to avoid Next.js webpack bundling issues.
 // This is validated against @sg/agents-contracts in tests to prevent drift.
 // See: packages/agents-contracts/tests/run-launch.spec.ts
-// 
+//
 // NOTE: This is a temporary workaround for Next.js webpack module resolution.
 // The proper solution would be to fix the package.json exports or use a different
 // bundling strategy, but this maintains type safety while avoiding build issues.
