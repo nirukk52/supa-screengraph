@@ -75,10 +75,6 @@ const nextConfig: NextConfig = {
 			...(config.resolve.alias || {}),
 			"@repo/api": path.resolve(__dirname, "../../packages/api"),
 			"@repo/api/*": path.resolve(__dirname, "../../packages/api"),
-			"@sg/agents-contracts": path.resolve(
-				__dirname,
-				"../../packages/agents-contracts/src",
-			),
 			"@sg/eventbus": path.resolve(
 				__dirname,
 				"../../packages/eventbus/src",

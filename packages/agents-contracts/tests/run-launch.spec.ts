@@ -85,3 +85,15 @@ describe("APP_PATH_KIND_VALUES", () => {
 		expect(APP_PATH_KIND_VALUES).toEqual(["local", "remote"]);
 	});
 });
+
+describe("EVENT_TYPES contract validation", () => {
+	it("exports EVENT_TYPES for frontend consumption", async () => {
+		const { EVENT_TYPES } = await import("../dist/contracts/constants");
+		expect(EVENT_TYPES).toBeDefined();
+		expect(EVENT_TYPES.RunStarted).toBe("RunStarted");
+		expect(EVENT_TYPES.NodeStarted).toBe("NodeStarted");
+		expect(EVENT_TYPES.DebugTrace).toBe("DebugTrace");
+		expect(EVENT_TYPES.NodeFinished).toBe("NodeFinished");
+		expect(EVENT_TYPES.RunFinished).toBe("RunFinished");
+	});
+});

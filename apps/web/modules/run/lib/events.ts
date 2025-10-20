@@ -1,5 +1,8 @@
 import type { StreamEvent } from "../hooks/useRunStream";
 
+// Local EVENT_TYPES definition to avoid Next.js webpack bundling issues.
+// This is validated against @sg/agents-contracts in tests to prevent drift.
+// See: packages/agents-contracts/tests/run-launch.spec.ts
 const EVENT_TYPES = {
 	RunStarted: "RunStarted",
 	NodeStarted: "NodeStarted",

@@ -125,7 +125,7 @@
 	"scripts": {
 		"build": "next build",
 		"dev": "sh -c \"PORT=${WEB_PORT:-3000} next dev --turbo\"",
-		"dev:mock": "NEXT_PUBLIC_API_MOCKING=true pnpm dev",
+		"dev:mock": "API_MOCKING=true E2E_TEST=true NEXT_PUBLIC_API_MOCKING=true pnpm dev",
 		"e2e": "pnpm exec playwright test --ui",
 		"e2e:ci": "pnpm exec playwright install && pnpm exec playwright test",
 		"test": "pnpm exec playwright install && pnpm exec playwright test",

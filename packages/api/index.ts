@@ -51,7 +51,8 @@ if (typeof process !== "undefined") {
 const isTestEnv =
 	process.env.NODE_ENV === "test" ||
 	process.env.VITEST === "true" ||
-	process.env.E2E_TEST === "true";
+	process.env.E2E_TEST === "true" ||
+	process.env.API_MOCKING === "true";
 if (!isTestEnv) {
 	startWorkersOnce();
 }
