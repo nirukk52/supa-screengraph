@@ -45,11 +45,7 @@
 	},
 	"assist": { "actions": { "source": { "organizeImports": "on" } } },
 	"files": {
-		"includes": ["**/*.{ts,tsx,js,jsx,json,md,mdx,cjs,mjs}"],
-		"experimentalScannerIgnores": [
-			"packages/database/index.js",
-			"packages/database/prisma/**/*.js"
-		]
+		"includes": ["**/*.{ts,tsx,js,jsx,json,md,mdx,cjs,mjs}"]
 	},
 	"javascript": {
 		"jsxRuntime": "reactClassic"
