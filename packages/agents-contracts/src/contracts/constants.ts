@@ -1,6 +1,10 @@
 export const TOPIC_AGENTS_RUN = "agents.run" as const;
 export const SCHEMA_VERSION = 1 as const;
 
+// Infrastructure constants
+export const AGENTS_RUN_QUEUE_NAME = "agents.run" as const;
+export const AGENTS_RUN_OUTBOX_CHANNEL = "agents_run_outbox" as const;
+
 // Event types as constants and derived union
 export const EVENT_TYPE_VALUES = [
 	"RunStarted",

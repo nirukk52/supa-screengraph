@@ -36,6 +36,47 @@ export interface BullMqInfra {
 	obliterate(opts?: { force?: boolean }): Promise<void>;
 }
 
+function createWorker(
+	config: BullMqConfig,
+	handlers: Map<string, (data: unknown) => Promise<void>>,
+): Worker {
+	const worker = new Worker(
+		config.queueName,
+		async (job) => {
+			const task = handlers.get(job.name);
+			if (!task) {
+				console.warn(`BullMQ: missing handler for job "${job.name}"`);
+				return;
+			}
+			try {
+				config.onJobStart?.(job.name);
+				await task(job.data as unknown);
+				config.onJobFinish?.(job.name);
+			} catch (error) {
+				config.onJobError?.(job.name, error);
+				throw error;
+			}
+		},
+		{
+			connection: config.workerConnection ?? config.connection,
+			prefix: config.prefix,
+			...(config.worker ?? {}),
+		},
+	);
+
+	worker.on("failed", (job, err) => {
+		console.error(
+			`BullMQ worker failed for job "${job?.name ?? "unknown"}"`,
+			err,
+		);
+	});
+	worker.on("error", (err) => {
+		console.error("BullMQ worker error", err);
+	});
+
+	return worker;
+}
+
 export function createBullMqInfra(config: BullMqConfig): BullMqInfra {
 	const queue = new Queue(config.queueName, {
 		connection: config.connection,
@@ -47,40 +88,7 @@ export function createBullMqInfra(config: BullMqConfig): BullMqInfra {
 
 	function ensureWorker(): Worker {
 		if (!worker) {
-			worker = new Worker(
-				config.queueName,
-				async (job) => {
-					const task = handlers.get(job.name);
-					if (!task) {
-						console.warn(
-							`BullMQ: missing handler for job "${job.name}"`,
-						);
-						return;
-					}
-					try {
-						config.onJobStart?.(job.name);
-						await task(job.data as unknown);
-						config.onJobFinish?.(job.name);
-					} catch (error) {
-						config.onJobError?.(job.name, error);
-						throw error;
-					}
-				},
-				{
-					connection: config.workerConnection ?? config.connection,
-					prefix: config.prefix,
-					...(config.worker ?? {}),
-				},
-			);
-			worker.on("failed", (job, err) => {
-				console.error(
-					`BullMQ worker failed for job "${job?.name ?? "unknown"}"`,
-					err,
-				);
-			});
-			worker.on("error", (err) => {
-				console.error("BullMQ worker error", err);
-			});
+			worker = createWorker(config, handlers);
 		}
 		return worker;
 	}

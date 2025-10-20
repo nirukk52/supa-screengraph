@@ -9,32 +9,27 @@ export interface Infra {
 	queue: QueuePort;
 }
 
-type BullMqConnectionConfig = ReturnType<typeof extractBullMqConnection>;
+interface RedisConnectionOptions {
+	host?: string;
+	port?: number;
+	username?: string;
+	password?: string;
+	url?: string;
+}
 
-function extractBullMqConnection(urlString: string): BullMqConnectionConfig {
+function extractBullMqConnection(urlString: string): RedisConnectionOptions {
 	const url = new URL(urlString);
 	if (url.protocol !== "redis:" && url.protocol !== "rediss:") {
 		throw new Error(`Unsupported Redis protocol: ${url.protocol}`);
 	}
 	if (url.hostname === "" && url.pathname) {
-		return {
-			queue: { url: urlString },
-			worker: { url: urlString },
-		};
+		return { url: urlString };
 	}
 	return {
-		queue: {
-			host: url.hostname,
-			port: Number(url.port) || undefined,
-			username: url.username || undefined,
-			password: url.password || undefined,
-		},
-		worker: {
-			host: url.hostname,
-			port: Number(url.port) || undefined,
-			username: url.username || undefined,
-			password: url.password || undefined,
-		},
+		host: url.hostname,
+		port: Number(url.port) || undefined,
+		username: url.username || undefined,
+		password: url.password || undefined,
 	};
 }
 
@@ -50,8 +45,7 @@ function buildDefaultContainer() {
 		const connection = extractBullMqConnection(redisUrl);
 		const infra = createBullMqInfra({
 			queueName: AGENTS_RUN_QUEUE_NAME,
-			connection: connection.queue,
-			workerConnection: connection.worker,
+			connection,
 		});
 		return createAgentsRunContainer({ queue: infra.port });
 	}

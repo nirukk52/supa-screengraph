@@ -1,5 +1,7 @@
-export const AGENTS_RUN_QUEUE_NAME = "agents.run" as const;
-export const AGENTS_RUN_OUTBOX_CHANNEL = "agents_run_outbox" as const;
+export {
+	AGENTS_RUN_OUTBOX_CHANNEL,
+	AGENTS_RUN_QUEUE_NAME,
+} from "@sg/agents-contracts";
 
 export const AGENTS_RUN_CONFIG_KEYS = {
 	driver: "AGENTS_RUN_QUEUE_DRIVER",
