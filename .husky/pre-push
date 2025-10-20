@@ -7,19 +7,11 @@ if [ "${SKIP_PRE_PUSH:-0}" = "1" ]; then
   exit 0
 fi
 
-run_job() {
-  job="$1"
-  printf '▶ %s\n' "$job"
-  if ! eval "$job"; then
-    printf '❌ %s failed\n' "$job" >&2
-    exit 1
-  fi
-}
-
-run_job "pnpm -w run ci:local:lint"
-run_job "pnpm -w run ci:local:unit"
-run_job "pnpm -w run ci:local:be"
-run_job "pnpm -w run ci:local:web"
+printf '▶ Running pr:check...\n'
+if ! pnpm -w run pr:check; then
+  printf '❌ pr:check failed\n' >&2
+  exit 1
+fi
 
 # Enforce Claude update trailer and docs rule
 last_msg="$(git log -1 --pretty=%B)"

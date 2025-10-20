@@ -25,11 +25,11 @@
 		"lint:deps": "dependency-cruiser --config tooling/arch/dependency-cruiser.cjs .",
 		"backend:e2e": "pnpm --filter @sg/feature-agents-run build && pnpm -w vitest run --config vitest.e2e.config.ts",
 		"backend:test": "pnpm run build:backend && pnpm run backend:lint && pnpm run backend:e2e",
-		"ci:local": "act pull_request -W tooling/ci/validate-prs.local.yml --container-architecture linux/amd64 --secret-file tooling/ci/act.env",
-		"ci:local:lint": "act --job lint -W tooling/ci/validate-prs.local.yml --container-architecture linux/amd64 --secret-file tooling/ci/act.env",
-		"ci:local:unit": "act --job unit_tests -W tooling/ci/validate-prs.local.yml --container-architecture linux/amd64 --secret-file tooling/ci/act.env",
-		"ci:local:be": "act --job backend_e2e -W tooling/ci/validate-prs.local.yml --container-architecture linux/amd64 --secret-file tooling/ci/act.env",
-		"ci:local:web": "act --job web_e2e -W tooling/ci/validate-prs.local.yml --container-architecture linux/amd64 --secret-file tooling/ci/act.env"
+		"ci:act": "act pull_request -W tooling/ci/validate-prs.local.yml --container-architecture linux/amd64 --secret-file tooling/ci/act.env",
+		"ci:act:lint": "act --job lint -W tooling/ci/validate-prs.local.yml --container-architecture linux/amd64 --secret-file tooling/ci/act.env",
+		"ci:act:unit": "act --job unit_tests -W tooling/ci/validate-prs.local.yml --container-architecture linux/amd64 --secret-file tooling/ci/act.env",
+		"ci:act:be": "act --job backend_e2e -W tooling/ci/validate-prs.local.yml --container-architecture linux/amd64 --secret-file tooling/ci/act.env",
+		"ci:act:web": "act --job web_e2e -W tooling/ci/validate-prs.local.yml --container-architecture linux/amd64 --secret-file tooling/ci/act.env"
 	},
 	"engines": {
 		"node": ">=20"
