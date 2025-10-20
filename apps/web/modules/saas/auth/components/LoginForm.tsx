@@ -73,20 +73,23 @@ export function LoginForm() {
 	const email = searchParams.get("email");
 	const redirectTo = searchParams.get("redirectTo");
 
-	const defaultMode = config.auth.enablePasswordLogin ? "password" : "magic-link";
-	
+	const defaultMode = config.auth.enablePasswordLogin
+		? "password"
+		: "magic-link";
+
 	const form = useForm<FormValues>({
 		resolver: zodResolver(formSchema),
-		defaultValues: defaultMode === "password"
-			? {
-					mode: "password" as const,
-					email: email ?? "",
-					password: "",
-				}
-			: {
-					mode: "magic-link" as const,
-					email: email ?? "",
-				},
+		defaultValues:
+			defaultMode === "password"
+				? {
+						mode: "password" as const,
+						email: email ?? "",
+						password: "",
+					}
+				: {
+						mode: "magic-link" as const,
+						email: email ?? "",
+					},
 	});
 
 	const redirectPath = invitationId
@@ -212,7 +215,8 @@ export function LoginForm() {
 							<LoginModeSwitch
 								activeMode={signinMode}
 								onChange={(mode) => {
-									const currentEmail = (form.getValues() as any).email ?? "";
+									const currentEmail =
+										(form.getValues() as any).email ?? "";
 									if (mode === "password") {
 										form.reset({
 											mode: "password",

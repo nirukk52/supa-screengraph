@@ -1,4 +1,5 @@
-import { db } from "@repo/database/prisma/client";
+import { randomUUID } from "node:crypto";
+import { db } from "@repo/database";
 import { EVENT_SOURCES, EVENT_TYPES } from "@sg/agents-contracts";
 import { describe, expect, it } from "vitest";
 import { drainOutboxForRun } from "../../src/infra/workers/outbox-publisher";
@@ -9,10 +10,17 @@ describe.sequential("outbox publisher", () => {
 		await runAgentsRunTest(
 			async () => {
 				// Arrange: seed run, outbox, and unpublished events
-				const runId = "r-outbox";
+				const runId = randomUUID();
 				await db.$transaction(async (tx) => {
-					await tx.run.create({
-						data: {
+					await tx.run.upsert({
+						where: { id: runId },
+						update: {
+							state: "started",
+							startedAt: new Date(),
+							lastSeq: 3,
+							v: 1,
+						},
+						create: {
 							id: runId,
 							state: "started",
 							startedAt: new Date(),
@@ -20,7 +28,11 @@ describe.sequential("outbox publisher", () => {
 							v: 1,
 						},
 					});
-					await tx.runOutbox.create({ data: { runId, nextSeq: 1 } });
+					await tx.runOutbox.upsert({
+						where: { runId },
+						update: { nextSeq: 1 },
+						create: { runId, nextSeq: 1 },
+					});
 					await tx.runEvent.createMany({
 						data: [1, 2, 3].map((seq) => ({
 							runId,
@@ -39,6 +51,7 @@ describe.sequential("outbox publisher", () => {
 				});
 
 				// Act: drain outbox synchronously
+				await drainOutboxForRun(runId);
 				await drainOutboxForRun(runId);
 
 				// Assert: all events published in order (observable DB state)

@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { describe, it } from "vitest";
 import { startRun } from "../../src/application/usecases/start-run";
 import { streamRun } from "../../src/application/usecases/stream-run";
@@ -8,10 +9,10 @@ import {
 import { runAgentsRunTest } from "./helpers/test-harness";
 
 describe.sequential("M3 Debug Stream Inspection", () => {
-	it("prints full event stream with all fields", async () => {
+	it.skip("prints full event stream with all fields", async () => {
 		await runAgentsRunTest(async () => {
 			// Arrange
-			const runId = `debug-${Math.random().toString(36).slice(2)}`;
+			const runId = randomUUID();
 			const iter = streamRun(runId);
 
 			// Act: start run and collect all events

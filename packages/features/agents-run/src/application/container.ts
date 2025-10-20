@@ -1,6 +1,13 @@
 import { InMemoryEventBus } from "@sg/eventbus-inmemory";
 import { InMemoryQueue } from "@sg/queue-inmemory";
-import { asClass, createContainer } from "awilix";
+import { asClass, asValue, createContainer } from "awilix";
+
+import type { Infra } from "./infra";
+
+export interface AgentsRunContainerOptions {
+	bus?: Infra["bus"];
+	queue?: Infra["queue"];
+}
 
 /**
  * Create a new Awilix container for agents-run with default in-memory registrations.
@@ -9,12 +16,18 @@ import { asClass, createContainer } from "awilix";
  * Tests create a fresh container per test for isolation.
  * Production uses a single container with optional Redis/BullMQ registrations.
  */
-export function createAgentsRunContainer() {
+export function createAgentsRunContainer(
+	options: AgentsRunContainerOptions = {},
+) {
 	const container = createContainer();
 
 	container.register({
-		bus: asClass(InMemoryEventBus).singleton(),
-		queue: asClass(InMemoryQueue).singleton(),
+		bus: options.bus
+			? asValue(options.bus)
+			: asClass(InMemoryEventBus).singleton(),
+		queue: options.queue
+			? asValue(options.queue)
+			: asClass(InMemoryQueue).singleton(),
 	});
 
 	return container;

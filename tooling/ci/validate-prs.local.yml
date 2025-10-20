@@ -1,0 +1,154 @@
+name: validate-prs
+on:
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+  pull-requests: read
+concurrency:
+  group: validate-prs-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  # 1) Lint-only precheck (format + biome + backend lint)
+  lint:
+    name: 1) Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.14.0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Run lint precheck (local/CI parity)
+        run: node tooling/scripts/pr-check.mjs
+        env:
+          PR_PRECHECK_ONLY: '1'
+  # 2) Unit tests with coverage (after lint)
+  unit_tests:
+    name: 2) Unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [lint]
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.14.0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Run unit tests (with coverage)
+        run: node tooling/scripts/pr-check.mjs
+        env:
+          SKIP_E2E: '1'
+  # 3) Backend e2e tests (needs Postgres)
+  backend_e2e:
+    name: 3) Backend e2e
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    needs: [unit_tests]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U test -d test" --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.14.0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Run backend e2e (skip frontend e2e)
+        run: node tooling/scripts/pr-check.mjs
+        env:
+          DATABASE_URL: "postgresql://test:test@localhost:5432/test"
+          TEST_DATABASE_URL: "postgresql://test:test@localhost:5432/test"
+          BETTER_AUTH_SECRET: "test-secret-for-ci-only"
+          NEXT_PUBLIC_SITE_URL: "http://localhost:3000"
+          GITHUB_CLIENT_ID: "test-github-client-id"
+          GITHUB_CLIENT_SECRET: "test-github-client-secret"
+          GOOGLE_CLIENT_ID: "test-google-client-id"
+          GOOGLE_CLIENT_SECRET: "test-google-client-secret"
+          SKIP_FRONTEND_E2E: '1'
+  # 4) Frontend e2e for apps/web
+  web_e2e:
+    name: 4) E2E apps/web (frontend)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    needs: [unit_tests]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U test -d test" --health-interval 5s --health-timeout 5s --health-retries 20
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.14.0
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - name: Install Playwright browsers and system deps
+        run: pnpm dlx playwright@1.56.0 install --with-deps
+      - name: Run web e2e (skip unit + backend e2e)
+        run: node tooling/scripts/pr-check.mjs
+        env:
+          DATABASE_URL: "postgresql://test:test@localhost:5432/test"
+          TEST_DATABASE_URL: "postgresql://test:test@localhost:5432/test"
+          BETTER_AUTH_SECRET: "test-secret-for-ci-only"
+          NEXT_PUBLIC_SITE_URL: "http://localhost:3000"
+          GITHUB_CLIENT_ID: "test-github-client-id"
+          GITHUB_CLIENT_SECRET: "test-github-client-secret"
+          GOOGLE_CLIENT_ID: "test-google-client-id"
+          GOOGLE_CLIENT_SECRET: "test-google-client-secret"
+          SKIP_COVERAGE: '1'
+          SKIP_BACKEND_E2E: '1'
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report/
+          retention-days: 30

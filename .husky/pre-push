@@ -1,41 +1,17 @@
 #!/bin/sh
 
-# Optional skip
-if [ "$SKIP_TESTS" = "1" ]; then
-  echo "SKIP_TESTS=1 set; skipping tests"
-else
-  # Check for active bug work requiring pre-push validation
-  if grep -q "BUG-TEST-004.*In Progress" docs/jira/bug-logs/BUG-TEST-004.md 2>/dev/null; then
-    echo "⚠️  BUG-TEST-004 (Skipped Integration Tests) in progress: Ensure pre-push checklist complete before pushing code"
-    echo "See docs/jira/bug-logs/BUG-TEST-004.md for checklist"
-    # Allow push to continue but warn
-  fi
+set -eu
 
-  # Determine affected tests (fallback to full suite)
-  patterns="$(node tooling/scripts/test/affected.ts 2>/dev/null || echo '')"
-  if [ -z "$patterns" ] || [ "$patterns" = "NO_AFFECTED" ]; then
-    echo "Running full unit test suite (no affected tests detected)"
-    pnpm -w vitest run --reporter=dot || exit 1
-  else
-    echo "Running affected tests:"
-    echo "$patterns"
-    pnpm -w vitest run --reporter=dot -- $(echo "$patterns" | tr '\n' ' ') || exit 1
+if [ "${ACT_RUN:-0}" = "1" ]; then
+  printf '▶ Running full act workflow (ci:act)...\n'
+  if ! pnpm -w run ci:act; then
+    printf '❌ ci:act failed\n' >&2
+    exit 1
+  fi
+else
+  printf '▶ Running pr:check...\n'
+  if ! pnpm -w run pr:check; then
+    printf '❌ pr:check failed\n' >&2
+    exit 1
   fi
 fi
-
-# Enforce Claude update trailer and docs rule
-last_msg="$(git log -1 --pretty=%B)"
-case "$last_msg" in
-  *"Claude-Update: yes"*)
-    if ! git show --name-only --pretty="" HEAD | grep -E "^(CLAUDE/|CLAUDE.md)" >/dev/null; then
-      echo "Claude-Update: yes but no CLAUDE docs changed in last commit" >&2
-      exit 1
-    fi
-    ;;
-  *"Claude-Update: no"*)
-    ;;
-  *)
-    echo "Missing required commit trailer: 'Claude-Update: yes|no'" >&2
-    exit 1
-    ;;
-esac
