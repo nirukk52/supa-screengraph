@@ -1,2 +1,2 @@
-packages/database/prisma/index.js
-packages/database/prisma/test/setup.js
+packages/database/*.js
+packages/database/prisma/**/*.js

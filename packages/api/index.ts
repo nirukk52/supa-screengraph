@@ -49,7 +49,9 @@ if (typeof process !== "undefined") {
 
 // Start workers immediately (skip in test env to avoid collision with test workers)
 const isTestEnv =
-	process.env.NODE_ENV === "test" || process.env.VITEST === "true";
+	process.env.NODE_ENV === "test" ||
+	process.env.VITEST === "true" ||
+	process.env.E2E_TEST === "true";
 if (!isTestEnv) {
 	startWorkersOnce();
 }
