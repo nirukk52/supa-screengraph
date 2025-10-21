@@ -15,12 +15,13 @@
 		"test:db": "pnpm vitest run",
 		"test:affected": "node tooling/scripts/test/affected.ts",
 		"prepare": "husky",
+		"lint:tsconfig": "node tooling/scripts/validate-tsconfig-extends.mjs",
 		"lint:arch": "node tooling/arch/check-arch.js && node tooling/arch/check-sizes.js && node tooling/arch/check-literals.js",
 		"scaffold": "ts-node tooling/scripts/scaffold/index.ts",
 		"pr:checks": "pnpm run pr:check",
 		"pr:check": "node tooling/scripts/pr-check.mjs",
 		"build:backend": "tsc -b tooling/typescript/tsconfig.backend.json",
-		"backend:lint": "pnpm run lint:arch && pnpm run lint:publint && pnpm run lint:deps",
+		"backend:lint": "pnpm run lint:tsconfig && pnpm run lint:arch && pnpm run lint:publint && pnpm run lint:deps",
 		"lint:publint": "node tooling/scripts/run-publint.mjs",
 		"lint:deps": "dependency-cruiser --config tooling/arch/dependency-cruiser.cjs .",
 		"backend:e2e": "pnpm --filter @sg/feature-agents-run build && pnpm -w vitest run --config vitest.e2e.config.ts",
@@ -52,6 +53,7 @@
 		"turbo": "^2.5.8",
 		"typescript": "5.9.3",
 		"vitest": "^2.0.5",
+		"vite-tsconfig-paths": "^5.1.1",
 		"zod": "^4.1.11"
 	},
 	"pnpm": {
