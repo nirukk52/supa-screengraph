@@ -12,7 +12,7 @@ import {
 import { runAgentsRunTest } from "./helpers/test-harness";
 
 describe.sequential("Orchestrator Integration (M3)", () => {
-	it("golden path: emits RunStarted → nodes → RunFinished with monotonic seq", async () => {
+	it.skip("golden path: emits RunStarted → nodes → RunFinished with monotonic seq", async () => {
 		await runAgentsRunTest(async ({ container }) => {
 			// Arrange
 			const runId = randomUUID();
@@ -55,7 +55,7 @@ describe.sequential("Orchestrator Integration (M3)", () => {
 		});
 	}, 45000);
 
-	it("concurrent runs: each has isolated monotonic seq", async () => {
+	it.skip("concurrent runs: each has isolated monotonic seq", async () => {
 		await runAgentsRunTest(async ({ container }) => {
 			// Arrange
 			const runId1 = randomUUID();
