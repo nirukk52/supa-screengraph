@@ -17,7 +17,7 @@ describe.sequential("Orchestrator Integration (M3)", () => {
 
 			// Act: start run and wait for completion
 			await startRun(runId, container);
-            await waitForRunCompletion(runId, { container, timeoutMs: 90_000 });
+			await waitForRunCompletion(runId, { container, timeoutMs: 90_000 });
 			const events = await db.runEvent.findMany({
 				where: { runId },
 				orderBy: { seq: "asc" },
@@ -44,7 +44,7 @@ describe.sequential("Orchestrator Integration (M3)", () => {
 				expect(event).toHaveProperty("source");
 			}
 		});
-    }, 90000);
+	}, 90000);
 
 	it.skip("concurrent runs: each has isolated monotonic seq", async () => {
 		await runAgentsRunTest(async () => {

@@ -3,6 +3,7 @@ import { db } from "@repo/database";
 import { EVENT_SOURCES, EVENT_TYPES } from "@sg/agents-contracts";
 import { describe, expect, it } from "vitest";
 import { runAgentsRunTest } from "./helpers/test-harness";
+import { awaitOutboxFlush } from "./helpers/await-outbox";
 
 describe.sequential("outbox publisher", () => {
 	it("publishes in order and marks publishedAt", async () => {
@@ -49,9 +50,8 @@ describe.sequential("outbox publisher", () => {
 					});
 				});
 
-				// Act: drain outbox synchronously using DI container
-				await container.cradle.drainOutboxForRun(runId);
-				await container.cradle.drainOutboxForRun(runId);
+				// Act: deterministically wait until all events are published
+				await awaitOutboxFlush(runId, undefined, { container });
 
 				// Assert: all events published in order (observable DB state)
 				const published = await db.runEvent.findMany({
