@@ -16,7 +16,8 @@
 		{ "path": "../../eventbus-inmemory" },
 		{ "path": "../../agents-contracts" },
 		{ "path": "../../logs" },
-		{ "path": "../../utils" }
+		{ "path": "../../utils" },
+		{ "path": "../../agents-core" }
 	],
 	"include": ["src/**/*"],
 	"exclude": ["dist", "node_modules", "tests"]

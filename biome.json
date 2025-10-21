@@ -45,7 +45,8 @@
 	},
 	"assist": { "actions": { "source": { "organizeImports": "on" } } },
 	"files": {
-		"includes": ["**/*.{ts,tsx,js,jsx,json,md,mdx,cjs,mjs}"]
+		"includes": ["**/*.{ts,tsx,json,md,mdx,cjs,mjs}"],
+		"experimentalScannerIgnores": ["packages/**/*.js"]
 	},
 	"javascript": {
 		"jsxRuntime": "reactClassic"
