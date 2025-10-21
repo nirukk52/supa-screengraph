@@ -5,11 +5,15 @@ import { InMemoryEventBus } from "@sg/eventbus-inmemory";
 import { createBullMqInfra } from "@sg/queue-bullmq";
 import { InMemoryQueue } from "@sg/queue-inmemory";
 import { RedisContainer } from "testcontainers";
+import type { AwilixContainer } from "awilix";
 import { createAgentsRunContainer } from "../../../src/application/container";
 import type { AgentsRunContainerCradle } from "../../../src/application/container.types";
 import { getInfra, resetInfra, setInfra } from "../../../src/application/infra";
 import { drainPending } from "../../../src/infra/workers/outbox-drain";
 import { startWorker } from "../../../src/infra/workers/run-worker";
+import { resetSequencer } from "../../../src/application/usecases/sequencer";
+import { resetTracerState } from "../../../src/infra/workers/adapters";
+import { resetOutboxSubscriber } from "../../../src/infra/workers/outbox-subscriber";
 
 const DEFAULT_DRIVER = process.env.AGENTS_RUN_QUEUE_DRIVER ?? "memory";
 
@@ -19,10 +23,7 @@ type TestOptions = {
 };
 
 type TestContext = {
-	container: {
-		cradle: AgentsRunContainerCradle;
-		dispose: () => Promise<void>;
-	};
+	container: AwilixContainer<AgentsRunContainerCradle>;
 };
 
 let redisContainer: RedisContainer | undefined;
@@ -115,6 +116,9 @@ export async function runAgentsRunTest<T>(
 		}
 		await drainPending();
 		await clearDatabase();
+		resetSequencer(); // Clear sequencer state for test isolation
+		resetTracerState(); // Clear tracer state for test isolation
+		resetOutboxSubscriber(); // Clear outbox subscriber state for test isolation
 		if (driver === "bullmq") {
 			await disposeRedis();
 		}

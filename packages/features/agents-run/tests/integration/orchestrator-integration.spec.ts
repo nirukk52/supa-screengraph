@@ -5,28 +5,34 @@ import { describe, expect, it } from "vitest";
 import { startRun } from "../../src/application/usecases/start-run";
 import { streamRun } from "../../src/application/usecases/stream-run";
 import {
-	awaitOutboxFlush,
 	awaitStreamCompletion,
 	waitForRunCompletion,
 } from "./helpers/await-outbox";
 import { runAgentsRunTest } from "./helpers/test-harness";
 
 describe.sequential("Orchestrator Integration (M3)", () => {
-	it.skip("golden path: emits RunStarted → nodes → RunFinished with monotonic seq", async () => {
+	it("golden path: emits RunStarted → nodes → RunFinished with monotonic seq", async () => {
 		await runAgentsRunTest(async ({ container }) => {
 			// Arrange
 			const runId = randomUUID();
 
-			// Act: start run, wait for completion, ensure outbox drained
+			// Act: start run and process deterministically
 			await startRun(runId, container);
-			await waitForRunCompletion(runId, {
-				container,
-				timeoutMs: 60_000,
-			});
-			await awaitOutboxFlush(runId, undefined, {
-				container,
-				timeoutMs: 10_000,
-			});
+			
+			// Get outbox controller for deterministic stepping
+			const outbox = container.cradle.outboxController;
+			
+			// Step until completion
+			let attempts = 0;
+			while (attempts < 100) {
+				await outbox.stepAll(runId);
+				const run = await db.run.findUnique({ where: { id: runId } });
+				if (run?.state === "finished") {
+					break;
+				}
+				attempts++;
+			}
+			
 			const events = await db.runEvent.findMany({
 				where: { runId },
 				orderBy: { seq: "asc" },
@@ -55,7 +61,7 @@ describe.sequential("Orchestrator Integration (M3)", () => {
 		});
 	}, 45000);
 
-	it.skip("concurrent runs: each has isolated monotonic seq", async () => {
+	it("concurrent runs: each has isolated monotonic seq", async () => {
 		await runAgentsRunTest(async ({ container }) => {
 			// Arrange
 			const runId1 = randomUUID();

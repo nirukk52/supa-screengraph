@@ -19,24 +19,36 @@ import { createOutboxController } from "./outbox-publisher";
  * flush persisted events to the event bus.
  */
 export function startWorker(
-    container?: AwilixContainer<AgentsRunContainerCradle>,
+	container?: AwilixContainer<AgentsRunContainerCradle>,
 ) {
-    const { queue } = getInfra(container);
-    queue.worker<{ runId: string }>(QUEUE_NAME, async ({ runId }) => {
-        logFn("worker:job:start");
+	const { queue } = getInfra(container);
+	const tracers = new Map<string, FeatureLayerTracer>();
+	
+	queue.worker<{ runId: string }>(QUEUE_NAME, async ({ runId }) => {
+		logFn("worker:job:start");
 
-        await orchestrateRun({
-            runId,
-            clock: new InMemoryClock(),
-            tracer: new FeatureLayerTracer(),
-            cancelToken: new StubCancellationToken(),
-        });
-    });
+		const tracer = new FeatureLayerTracer();
+		tracers.set(runId, tracer);
 
-    // Outbox controller available for deterministic stepping in tests
-    const outbox = createOutboxController(container);
-    outbox.start();
-    return async () => {
-        await outbox.stop();
-    };
+		await orchestrateRun({
+			runId,
+			clock: new InMemoryClock(),
+			tracer,
+			cancelToken: new StubCancellationToken(),
+		});
+		
+		// Wait for all events to be persisted
+		await tracer.waitForCompletion(runId);
+		tracers.delete(runId);
+	});
+
+	// Outbox controller available for deterministic stepping in tests
+	const outbox = createOutboxController(container);
+	// Only start subscriber in production; tests use stepAll/stepOnce
+	if (!container) {
+		outbox.start();
+	}
+	return async () => {
+		await outbox.stop();
+	};
 }

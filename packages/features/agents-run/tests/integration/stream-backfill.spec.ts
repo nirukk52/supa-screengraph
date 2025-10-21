@@ -1,9 +1,9 @@
 import { randomUUID } from "node:crypto";
+import { db } from "@repo/database";
 import { EVENT_TYPES } from "@sg/agents-contracts";
 import { describe, expect, it } from "vitest";
 import { startRun } from "../../src/application/usecases/start-run";
 import { streamRun } from "../../src/application/usecases/stream-run";
-import { waitForRunCompletion } from "./helpers/await-outbox";
 import { runAgentsRunTest } from "./helpers/test-harness";
 
 async function collect<T>(iter: AsyncIterable<T>): Promise<T[]> {
@@ -15,14 +15,27 @@ async function collect<T>(iter: AsyncIterable<T>): Promise<T[]> {
 }
 
 describe.sequential("SSE stream backfill", () => {
-	it.skip("backfills from fromSeq and de-dupes live", async () => {
+	it("backfills from fromSeq and de-dupes live", async () => {
 		await runAgentsRunTest(async ({ container }) => {
 			// Arrange
 			const runId = randomUUID();
 
-			// Act: start run and wait for completion
+			// Act: start run and process deterministically
 			await startRun(runId, container);
-			await waitForRunCompletion(runId, { container });
+			
+			// Get outbox controller for deterministic stepping
+			const outbox = container.cradle.outboxController;
+			
+			// Step until completion
+			let attempts = 0;
+			while (attempts < 100) {
+				await outbox.stepAll(runId);
+				const run = await db.run.findUnique({ where: { id: runId } });
+				if (run?.state === "finished") {
+					break;
+				}
+				attempts++;
+			}
 
 			// Assert: full stream contains all events
 			const recorded = await collect(
@@ -40,14 +53,27 @@ describe.sequential("SSE stream backfill", () => {
 		});
 	}, 30000);
 
-	it.skip("subscribes for live events after backfill", async () => {
+	it("subscribes for live events after backfill", async () => {
 		await runAgentsRunTest(async ({ container }) => {
 			// Arrange
 			const runId = randomUUID();
 
-			// Act: start run and wait for completion
+			// Act: start run and process deterministically
 			await startRun(runId, container);
-			await waitForRunCompletion(runId, { container });
+			
+			// Get outbox controller for deterministic stepping
+			const outbox = container.cradle.outboxController;
+			
+			// Step until completion
+			let attempts = 0;
+			while (attempts < 100) {
+				await outbox.stepAll(runId);
+				const run = await db.run.findUnique({ where: { id: runId } });
+				if (run?.state === "finished") {
+					break;
+				}
+				attempts++;
+			}
 
 			// Assert: stream delivers all events
 			const iter = streamRun(runId, undefined, container);

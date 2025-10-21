@@ -85,3 +85,8 @@ export function createOutboxSubscriber(
 		},
 	};
 }
+
+// Reset outbox subscriber state (for test isolation)
+export function resetOutboxSubscriber(): void {
+	activeSubscriber = undefined;
+}

@@ -8,45 +8,48 @@ import { createOutboxSubscriber } from "./outbox-subscriber";
 let subscriber: ReturnType<typeof createOutboxSubscriber> | undefined;
 
 export type OutboxController = {
-    start: () => void;
-    stop: () => Promise<void>;
-    stepOnce: (runId?: string) => Promise<void>;
-    stepAll: (runId?: string) => Promise<void>;
+	start: () => void;
+	stop: () => Promise<void>;
+	stepOnce: (runId?: string) => Promise<void>;
+	stepAll: (runId?: string) => Promise<void>;
 };
 
 export function createOutboxController(
-    container?: AwilixContainer<AgentsRunContainerCradle>,
+	container?: AwilixContainer<AgentsRunContainerCradle>,
 ): OutboxController {
-    const infra = container?.cradle ?? getInfra();
+	const infra = container?.cradle ?? getInfra();
 
-    function start(): void {
-        if (subscriber) return;
-        subscriber = createOutboxSubscriber((runId) => {
-            enqueueDrain(runId);
-        });
-    }
+	function start(): void {
+		// Only start subscriber if not already active (avoid test interference)
+		if (subscriber) {
+			return;
+		}
+		subscriber = createOutboxSubscriber((runId) => {
+			enqueueDrain(runId);
+		});
+	}
 
-    async function stop(): Promise<void> {
-        await drainPending();
-        await subscriber?.close();
-        subscriber = undefined;
-    }
+	async function stop(): Promise<void> {
+		await drainPending();
+		await subscriber?.close();
+		subscriber = undefined;
+	}
 
-    async function stepOnce(runId?: string): Promise<void> {
-        await publishPendingOutboxEventsOnce(runId, infra);
-    }
+	async function stepOnce(runId?: string): Promise<void> {
+		await publishPendingOutboxEventsOnce(runId, infra);
+	}
 
-    async function stepAll(runId?: string): Promise<void> {
-        await publishPendingOutboxEventsOnce(runId, infra);
-    }
+	async function stepAll(runId?: string): Promise<void> {
+		await publishPendingOutboxEventsOnce(runId, infra);
+	}
 
-    return { start, stop, stepOnce, stepAll };
+	return { start, stop, stepOnce, stepAll };
 }
 
 export function startOutboxWorker() {
-    const controller = createOutboxController();
-    controller.start();
-    return controller.stop;
+	const controller = createOutboxController();
+	controller.start();
+	return controller.stop;
 }
 
 export async function drainOutboxForRun(

@@ -56,6 +56,11 @@ export class FeatureLayerTracer implements Tracer {
 	}
 }
 
+// Reset tracer state (for test isolation)
+export function resetTracerState(): void {
+	appendChains.clear();
+}
+
 export class StubCancellationToken implements CancellationToken {
 	isCancelled(): boolean {
 		return false; // No cancellation in M3
