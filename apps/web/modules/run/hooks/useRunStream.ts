@@ -1,4 +1,5 @@
 import type { AgentEvent } from "@sg/agents-contracts";
+import { buildStreamPath } from "@sg/agents-contracts";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export type StreamStatus = "idle" | "connecting" | "streaming" | "error";
@@ -24,11 +25,6 @@ export interface UseRunStreamResult {
 	connect: (options?: { fromSeq?: number }) => void;
 	disconnect: () => void;
 	clearEvents: () => void;
-}
-
-function buildStreamPath(runId: string, fromSeq?: number) {
-	const base = `/api/agents/runs/${encodeURIComponent(runId)}/stream`;
-	return typeof fromSeq === "number" ? `${base}?fromSeq=${fromSeq}` : base;
 }
 
 export function useRunStream(runId: string): UseRunStreamResult {

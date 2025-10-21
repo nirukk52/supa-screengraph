@@ -139,14 +139,37 @@ export function LoginForm() {
 				}
 			} else if (values.mode === "app-config") {
 				// Generate a unique run ID
-				const runId = `run_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+				const { generateRunId } = await import("@run/lib/runId");
+				const { buildStartRunPath } = await import(
+					"@sg/agents-contracts"
+				);
+				const runId = generateRunId();
 
-				// Store APK path in localStorage or session
+				// Store APK path in localStorage
 				if (typeof window !== "undefined") {
 					localStorage.setItem(
 						`run_${runId}_apkPath`,
 						values.apkPath,
 					);
+				}
+
+				// Call the API to start the run
+				const response = await fetch(buildStartRunPath(), {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify({
+						runId,
+						appPath: {
+							kind: "local",
+							value: values.apkPath,
+						},
+					}),
+				});
+
+				if (!response.ok) {
+					throw new Error(`Failed to start run: ${response.status}`);
 				}
 
 				// Navigate to the run page

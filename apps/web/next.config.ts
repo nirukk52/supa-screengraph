@@ -11,10 +11,16 @@ const nextConfig: NextConfig = {
 	typescript: {
 		ignoreBuildErrors: true,
 	},
+	// Keep server-only packages external (not bundled for client)
+	serverComponentsExternalPackages: [
+		"@repo/database",
+		"@prisma/client",
+		"prisma",
+		"pg-format",
+	],
 	transpilePackages: [
 		"@repo/api",
 		"@repo/auth",
-		"@repo/database",
 		"@sg/feature-agents-run",
 		"@sg/agents-contracts",
 		"@sg/eventbus",
@@ -65,6 +71,21 @@ const nextConfig: NextConfig = {
 			}),
 		);
 
+		// Ignore server-only packages in client bundles
+		if (!isServer) {
+			config.plugins.push(
+				new webpack.IgnorePlugin({
+					resourceRegExp: /^pg-format$|^@prisma\/client$/,
+				}),
+			);
+
+			// Mark database package as external for client bundles
+			config.externals = config.externals || [];
+			if (Array.isArray(config.externals)) {
+				config.externals.push("@repo/database");
+			}
+		}
+
 		if (isServer) {
 			config.plugins.push(new PrismaPlugin());
 		}
@@ -75,10 +96,6 @@ const nextConfig: NextConfig = {
 			...(config.resolve.alias || {}),
 			"@repo/api": path.resolve(__dirname, "../../packages/api"),
 			"@repo/api/*": path.resolve(__dirname, "../../packages/api"),
-			"@sg/agents-contracts": path.resolve(
-				__dirname,
-				"../../packages/agents-contracts/src",
-			),
 			"@sg/eventbus": path.resolve(
 				__dirname,
 				"../../packages/eventbus/src",
