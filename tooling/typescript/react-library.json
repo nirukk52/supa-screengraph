@@ -4,6 +4,7 @@
 		"jsx": "preserve",
 		"lib": ["ES2021", "DOM"],
 		"module": "ESNext",
+		"moduleResolution": "Bundler",
 		"target": "ES6"
 	},
 	"display": "React Library",

@@ -1,3 +1,5 @@
+import type { PrismaClient } from "@repo/database";
+import { db } from "@repo/database";
 import { EVENT_SOURCES, EVENT_TYPES } from "@sg/agents-contracts";
 import type { AwilixContainer } from "awilix";
 import { RunEventRepo } from "../../infra/repos/run-event-repo";
@@ -14,15 +16,17 @@ export const QUEUE_NAME = AGENTS_RUN_QUEUE_NAME;
 export async function startRun(
 	runId: string,
 	container?: AwilixContainer<AgentsRunContainerCradle>,
+	testDb?: PrismaClient,
 ) {
 	logFn("start-run");
 	if (!runId || typeof runId !== "string") {
 		throw new Error("Invalid runId");
 	}
 	const ts = Date.now();
+	const dbClient = testDb ?? db;
 	const infra = container?.cradle ?? getInfra(container);
 	// Initialize run and outbox
-	await RunRepo.createRun(runId, ts, infra.db);
+	await RunRepo.createRun(runId, ts, dbClient);
 	// Seed RunStarted as seq=1; orchestrator will continue from seq>=2
 	await RunEventRepo.appendEvent(
 		{
@@ -33,7 +37,7 @@ export async function startRun(
 			v: 1,
 			source: EVENT_SOURCES.api,
 		} as any,
-		infra.db,
+		dbClient,
 	);
 	// Prime in-memory sequencer so worker emits seq starting from 2
 	setNextSeq(runId, 2);

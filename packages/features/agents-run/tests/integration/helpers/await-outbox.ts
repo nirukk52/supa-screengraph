@@ -1,15 +1,18 @@
-import type { PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "@repo/database";
 import { db } from "@repo/database";
 import type { AwilixContainer } from "awilix";
 import type { AgentsRunContainerCradle } from "../../../src/application/container.types";
-import { drainOutboxForRun } from "../../../src/infra/workers/outbox-publisher";
+import { getInfra } from "../../../src/application/infra";
+import {
+	drainOutboxForRun,
+	publishPendingOutboxEventsOnce,
+} from "../../../src/infra/workers/outbox-publisher";
 
 /**
  * Integration test helper – requires real Prisma/Postgres.
  * DO NOT use with db-mock; this helper calls Prisma-specific APIs.
  * For unit tests, seed data directly via the mock instead.
  */
-const prisma: PrismaClient = db as unknown as PrismaClient;
 
 export type AwaitOutboxOptions = {
 	pollMs?: number;
@@ -17,6 +20,14 @@ export type AwaitOutboxOptions = {
 	signal?: AbortSignal;
 	container?: AwilixContainer<AgentsRunContainerCradle>;
 };
+
+function resolvePrismaClient(opts: AwaitOutboxOptions): PrismaClient {
+	const containerDb = opts.container?.cradle.db;
+	if (containerDb) {
+		return containerDb as PrismaClient;
+	}
+	return db as unknown as PrismaClient;
+}
 
 /**
  * Wait until the outbox has advanced past targetSeq for a run.
@@ -28,6 +39,7 @@ export async function awaitOutboxFlush(
 	targetSeq?: number,
 	opts: AwaitOutboxOptions = {},
 ): Promise<{ nextSeq: number; lastSeq: number }> {
+	const prisma = resolvePrismaClient(opts);
 	const pollMs = opts.pollMs ?? 25;
 	const timeoutMs = opts.timeoutMs ?? 10_000;
 	const start = Date.now();
@@ -75,11 +87,25 @@ export async function awaitOutboxFlush(
 		}
 
 		if (Date.now() - start > timeoutMs) {
+			const runNow = await prisma.run.findUnique({
+				where: { id: runId },
+			});
+			const outboxNow = await prisma.runOutbox.findUnique({
+				where: { runId },
+			});
 			throw new Error(
-				`awaitOutboxFlush timeout after ${timeoutMs}ms (runId=${runId}, targetSeq=${targetSeq ?? "<last>"})`,
+				`awaitOutboxFlush timeout after ${timeoutMs}ms (runId=${runId}, run exists: ${!!runNow}, outbox exists: ${!!outboxNow}, lastSeq=${runNow?.lastSeq ?? 0}, nextSeq=${outboxNow?.nextSeq ?? 0})`,
 			);
 		}
-		await drainOutboxForRun(runId, opts.container);
+		// Prefer deterministic stepping using the same infra as the test container
+		if (opts.container) {
+			await publishPendingOutboxEventsOnce(
+				runId,
+				getInfra(opts.container),
+			);
+		} else {
+			await drainOutboxForRun(runId, opts.container);
+		}
 		await new Promise((resolve) => setTimeout(resolve, pollMs));
 	}
 }
@@ -115,6 +141,7 @@ export async function waitForRunCompletion(
 	runId: string,
 	opts: AwaitOutboxOptions = {},
 ): Promise<{ state: string; lastSeq: number; nextSeq: number }> {
+	const prisma = resolvePrismaClient(opts);
 	const pollMs = opts.pollMs ?? 100;
 	const timeoutMs = opts.timeoutMs ?? 20_000;
 	const start = Date.now();

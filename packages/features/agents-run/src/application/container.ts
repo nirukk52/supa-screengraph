@@ -2,12 +2,15 @@
 // Dependencies: awilix, in-memory ports, outbox worker helpers.
 // Public API: createAgentsRunContainer (returns configured Awilix container).
 
-import { PrismaClient } from "@repo/database/prisma/generated/client";
+import { PrismaClient } from "@repo/database";
 import { InMemoryEventBus } from "@sg/eventbus-inmemory";
 import { InMemoryQueue } from "@sg/queue-inmemory";
 import { asClass, asValue, createContainer } from "awilix";
 import { enqueueDrain } from "../infra/workers/outbox-drain";
-import { drainOutboxForRun } from "../infra/workers/outbox-publisher";
+import {
+	createOutboxController,
+	drainOutboxForRun,
+} from "../infra/workers/outbox-publisher";
 import type {
 	AgentsRunContainerCradle,
 	AgentsRunContainerOverrides,
@@ -32,6 +35,9 @@ export function createAgentsRunContainer(
 		),
 		enqueueOutboxDrain: asValue(
 			overrides.enqueueOutboxDrain ?? enqueueDrain,
+		),
+		outboxController: asValue(
+			overrides.outboxController ?? createOutboxController(container),
 		),
 	});
 

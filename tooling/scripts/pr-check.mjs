@@ -6,8 +6,9 @@
  * - Runs DB generate
  * - Lints first (fast-fail), then builds, tests, and e2e
  * - Supports local escape hatches via env flags without weakening CI
- *   Flags (local only):
+ *   Flags:
  *     PR_PRECHECK_ONLY=1 → run format/lint only, then exit 0
+ *     SKIP_LINT=1 → skip format/lint steps (use when lint already validated in prior job)
  *     SKIP_COVERAGE=1 → skip vitest coverage run
  *     SKIP_BACKEND_E2E=1 → skip backend e2e
  *     SKIP_FRONTEND_E2E=1 → skip web Playwright e2e
@@ -58,6 +59,8 @@ async function main() {
 		const PRECHECK_ONLY =
 			process.env.PR_PRECHECK_ONLY === "1" ||
 			process.env.PR_PRECHECK_ONLY === "true";
+		const SKIP_LINT =
+			process.env.SKIP_LINT === "1" || process.env.SKIP_LINT === "true";
 		const SKIP_E2E =
 			process.env.SKIP_E2E === "1" || process.env.SKIP_E2E === "true";
 		const SKIP_BACKEND_E2E =
@@ -85,10 +88,14 @@ async function main() {
 
 		// Lint first: format + Biome + backend lint (match CI and requirement)
 		// Biome file selection is configured in biome.json (files.includes)
-		run("pnpm run format");
-		run("pnpm biome lint . --write");
-		run("pnpm biome ci .");
-		run("pnpm -w run backend:lint");
+		if (!SKIP_LINT) {
+			run("pnpm run format");
+			run("pnpm biome lint . --write");
+			run("pnpm biome ci .");
+			run("pnpm -w run backend:lint");
+		} else {
+			console.log("\nSKIP_LINT set: Skipping format/lint steps.");
+		}
 
 		if (PRECHECK_ONLY) {
 			console.log(

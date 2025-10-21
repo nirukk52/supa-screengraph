@@ -9,7 +9,8 @@ import type {
 	EventType,
 	Tracer,
 } from "@repo/agents-core";
-import type { PrismaClient } from "@repo/database/prisma/generated/client";
+import type { PrismaClient } from "@repo/database";
+import { db } from "@repo/database";
 import type { AgentEvent } from "@sg/agents-contracts";
 import { EVENT_SOURCES, SCHEMA_VERSION } from "@sg/agents-contracts";
 import { nextSeq } from "../../application/usecases/sequencer";
@@ -40,7 +41,7 @@ export class FeatureLayerTracer implements Tracer {
 		const prev = appendChains.get(key) ?? Promise.resolve();
 		const next = prev
 			.then(async () => {
-				await RunEventRepo.appendEvent(event, this.dbClient);
+				await RunEventRepo.appendEvent(event, this.dbClient ?? db);
 			})
 			.catch((_error) => {
 				// keep chain alive on error to not block subsequent events
@@ -57,6 +58,11 @@ export class FeatureLayerTracer implements Tracer {
 	async waitForCompletion(runId: string): Promise<void> {
 		await appendChains.get(runId);
 	}
+}
+
+// Reset tracer state (for test isolation)
+export function resetTracerState(): void {
+	appendChains.clear();
 }
 
 export class StubCancellationToken implements CancellationToken {

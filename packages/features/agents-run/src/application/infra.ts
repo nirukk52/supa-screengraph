@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@repo/database/prisma/generated/client";
+import type { PrismaClient } from "@repo/database";
 import type { EventBusPort } from "@sg/eventbus";
 import type { QueuePort } from "@sg/queue";
 import { createBullMqInfra } from "@sg/queue-bullmq";
@@ -91,7 +91,11 @@ export function setInfra(next: Infra): void {
 export async function resetInfra(
 	container?: AwilixContainer<AgentsRunContainerCradle>,
 ): Promise<void> {
-	const infra = getInfra(container);
+	const infra = container ? getInfra(container) : currentContainer?.cradle as Infra | undefined;
+	if (!infra) {
+		currentContainer = undefined;
+		return;
+	}
 	(infra.bus as { reset?: () => void }).reset?.();
 	(infra.queue as { reset?: () => void }).reset?.();
 	await (infra.db as { $disconnect?: () => Promise<void> }).$disconnect?.();

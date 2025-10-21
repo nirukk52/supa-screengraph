@@ -1,4 +1,5 @@
 import { orchestrateRun } from "@repo/agents-core";
+import type { PrismaClient } from "@repo/database";
 import type { AwilixContainer } from "awilix";
 import type { AgentsRunContainerCradle } from "../../application/container.types";
 import { getInfra } from "../../application/infra";
@@ -9,7 +10,7 @@ import {
 	InMemoryClock,
 	StubCancellationToken,
 } from "./adapters";
-import { startOutboxWorker } from "./outbox-publisher";
+import { createOutboxController } from "./outbox-publisher";
 
 /**
  * Start the run orchestrator worker.
@@ -20,21 +21,36 @@ import { startOutboxWorker } from "./outbox-publisher";
  */
 export function startWorker(
 	container?: AwilixContainer<AgentsRunContainerCradle>,
+	dbClient?: PrismaClient,
 ) {
-	const { queue, db } = getInfra(container);
+	const { queue } = getInfra(container);
+	const tracers = new Map<string, FeatureLayerTracer>();
+
 	queue.worker<{ runId: string }>(QUEUE_NAME, async ({ runId }) => {
 		logFn("worker:job:start");
+
+		const tracer = new FeatureLayerTracer(dbClient);
+		tracers.set(runId, tracer);
 
 		await orchestrateRun({
 			runId,
 			clock: new InMemoryClock(),
-			tracer: new FeatureLayerTracer(db),
+			tracer,
 			cancelToken: new StubCancellationToken(),
 		});
+
+		// Wait for all events to be persisted
+		await tracer.waitForCompletion(runId);
+		tracers.delete(runId);
 	});
 
-	const stopOutbox = startOutboxWorker(container);
+	// Outbox controller available for deterministic stepping in tests
+	const outbox = createOutboxController(container);
+	// Only start subscriber in production; tests use stepAll/stepOnce
+	if (!container) {
+		outbox.start();
+	}
 	return async () => {
-		await stopOutbox();
+		await outbox.stop();
 	};
 }

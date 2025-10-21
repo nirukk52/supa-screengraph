@@ -1,16 +1,10 @@
-import type { Prisma } from "@repo/database";
-import { db } from "@repo/database";
-import type { PrismaClient } from "@repo/database/prisma/generated/client";
+import type { Prisma, PrismaClient } from "@repo/database";
 import type { AgentEvent } from "@sg/agents-contracts";
 import { AGENTS_RUN_OUTBOX_CHANNEL } from "../../application/constants";
 
 export const RunEventRepo = {
-	async appendEvent(
-		event: AgentEvent,
-		dbClient?: PrismaClient,
-	): Promise<void> {
-		const client = dbClient ?? db;
-		await client.$transaction(async (tx: Prisma.TransactionClient) => {
+	async appendEvent(event: AgentEvent, db: PrismaClient): Promise<void> {
+		await db.$transaction(async (tx: Prisma.TransactionClient) => {
 			// Assumes run and outbox were initialized by RunRepo.createRun via startRun
 
 			// Monotonicity: seq == lastSeq + 1
@@ -44,7 +38,15 @@ export const RunEventRepo = {
 
 			await tx.run.update({
 				where: { id: event.runId },
-				data: { lastSeq: event.seq },
+				data: {
+					lastSeq: event.seq,
+					...(event.type === "RunFinished"
+						? {
+								state: "finished" as const,
+								finishedAt: new Date(event.ts),
+							}
+						: {}),
+				},
 			});
 
 			await tx.$executeRaw`

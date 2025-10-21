@@ -5,7 +5,11 @@
 		"outDir": "dist",
 		"composite": true
 	},
-	"references": [{ "path": "../database" }],
+	"references": [
+		{ "path": "../database" },
+		{ "path": "../i18n" },
+		{ "path": "../utils" }
+	],
 	"include": ["**/*.ts"],
 	"exclude": ["dist", "build", "node_modules"]
 }

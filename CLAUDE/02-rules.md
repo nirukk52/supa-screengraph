@@ -30,6 +30,30 @@ Hard, enforceable rules (cap ≤25):
 
 ---
 
+## DI & State Management Rules
+
+### Singletons
+- **Production**: Lazy singletons OK for infra (queue, bus, DB client)
+- **Tests**: NEVER use global singletons; always pass explicit instances
+- **Pattern**: All functions accept optional `container?: AwilixContainer` parameter
+
+### Container Registration
+- **Classes with dependencies**: Use `asValue(new ClassName())` NOT `asClass(ClassName)`
+- **Functions needing container**: Register as factory closures that capture container
+- **Simple values**: Use `asValue()` for primitives, instances, functions
+
+### Module-Level State
+- **Avoid**: No module-level mutable state unless absolutely necessary
+- **If unavoidable**: Export cleanup function (e.g., `resetState()`, `drainPending()`)
+- **Test harness**: Call all cleanup functions in `finally` block
+
+### Circular Dependencies
+- **Never import**: Don't import `getInfra()` in infrastructure layer
+- **Pass explicitly**: Functions accept `infra` or `container` as parameter
+- **Break cycles**: Refactor to explicit parameters before lazy initialization
+
+---
+
 ## Naming Conventions (At-a-Glance)
 
 **Files & Folders:**
