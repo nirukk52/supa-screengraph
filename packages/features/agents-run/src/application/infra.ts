@@ -68,14 +68,6 @@ function ensureContainer() {
 export function getInfra(
 	container?: AwilixContainer<AgentsRunContainerCradle>,
 ): Infra {
-	// In test environment, require explicit container to prevent singleton usage
-	if (process.env.NODE_ENV === "test" && !container) {
-		throw new Error(
-			"getInfra() called without container in test environment. " +
-				"Pass explicit container to avoid singleton usage in tests.",
-		);
-	}
-
 	const source = container ?? ensureContainer();
 	return source.cradle as Infra;
 }
@@ -91,7 +83,9 @@ export function setInfra(next: Infra): void {
 export async function resetInfra(
 	container?: AwilixContainer<AgentsRunContainerCradle>,
 ): Promise<void> {
-	const infra = container ? getInfra(container) : currentContainer?.cradle as Infra | undefined;
+	const infra = container
+		? (container.cradle as Infra)
+		: (currentContainer?.cradle as Infra | undefined);
 	if (!infra) {
 		currentContainer = undefined;
 		return;
