@@ -4,7 +4,11 @@ import { EVENT_TYPES } from "@sg/agents-contracts";
 import { describe, expect, it } from "vitest";
 import { startRun } from "../../src/application/usecases/start-run";
 import { streamRun } from "../../src/application/usecases/stream-run";
-import { awaitOutboxFlush, awaitStreamCompletion, waitForRunCompletion } from "./helpers/await-outbox";
+import {
+	awaitOutboxFlush,
+	awaitStreamCompletion,
+	waitForRunCompletion,
+} from "./helpers/await-outbox";
 import { runAgentsRunTest } from "./helpers/test-harness";
 
 describe.sequential("Orchestrator Integration (M3)", () => {
