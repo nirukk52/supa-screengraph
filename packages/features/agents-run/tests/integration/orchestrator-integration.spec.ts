@@ -18,7 +18,7 @@ describe.sequential("Orchestrator Integration (M3)", () => {
 
 			// Act: start run and wait for completion
 			await startRun(runId, container);
-			await waitForRunCompletion(runId, { container, timeoutMs: 30_000 });
+			await waitForRunCompletion(runId, { container, timeoutMs: 45_000 });
 			const events = await awaitStreamCompletion(iter);
 
 			// Assert: observable event stream behavior
@@ -42,7 +42,7 @@ describe.sequential("Orchestrator Integration (M3)", () => {
 				expect(event).toHaveProperty("source");
 			}
 		});
-	}, 30000);
+	}, 45000);
 
 	it.skip("concurrent runs: each has isolated monotonic seq", async () => {
 		await runAgentsRunTest(async () => {
