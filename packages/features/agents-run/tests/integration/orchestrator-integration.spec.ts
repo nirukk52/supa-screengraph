@@ -60,20 +60,57 @@ describe.sequential("Orchestrator Integration (M3)", () => {
 
 	it("concurrent runs: each has isolated monotonic seq", async () => {
 		await runAgentsRunTest(async ({ container, db }) => {
-			// Arrange
+			// Arrange: create two independent run IDs
 			const runId1 = randomUUID();
 			const runId2 = randomUUID();
 
+			console.error(
+				`[CONCURRENT TEST] Starting runs: ${runId1}, ${runId2}`,
+			);
+
 			// Act: start runs sequentially (single-thread mode constraint)
 			await startRun(runId1, container, db);
+			console.error(`[CONCURRENT TEST] Run 1 started: ${runId1}`);
 			await startRun(runId2, container, db);
+			console.error(`[CONCURRENT TEST] Run 2 started: ${runId2}`);
 
 			// Get outbox controller for deterministic stepping
 			const outbox = container.cradle.outboxController;
 
-			// Step until both runs complete
-			await outbox.stepAll(runId1);
-			await outbox.stepAll(runId2);
+			// Step until both runs complete (deterministic loop)
+			const runIds = [runId1, runId2];
+			for (const id of runIds) {
+				console.error(`[CONCURRENT TEST] Processing run: ${id}`);
+				let attempts = 0;
+				let run = null;
+				while (attempts < 100) {
+					await outbox.stepAll(id);
+					run = await db.run.findUnique({ where: { id } });
+					if (run?.state === "finished") {
+						console.error(
+							`[CONCURRENT TEST] Run finished after ${attempts} attempts: ${id}`,
+						);
+						break;
+					}
+					attempts++;
+				}
+
+				// Debug: Check if run completed successfully
+				if (!run || run.state !== "finished") {
+					const events = await db.runEvent.findMany({
+						where: { runId: id },
+						orderBy: { seq: "asc" },
+					});
+					console.error(
+						`[CONCURRENT TEST] Run did NOT complete: ${id}, state=${run?.state}, events=${events.length}`,
+					);
+					throw new Error(
+						`Run ${id} did not complete after 100 attempts. ` +
+							`Final state: ${run?.state || "not found"}, ` +
+							`Events: ${events.length}`,
+					);
+				}
+			}
 
 			// Assert: check database state directly
 			const events1 = await db.runEvent.findMany({
@@ -84,6 +121,14 @@ describe.sequential("Orchestrator Integration (M3)", () => {
 				where: { runId: runId2 },
 				orderBy: { seq: "asc" },
 			});
+
+			// Debug: Log event counts for CI debugging
+			console.error(
+				`[CONCURRENT TEST] Run ${runId1}: ${events1.length} events`,
+			);
+			console.error(
+				`[CONCURRENT TEST] Run ${runId2}: ${events2.length} events`,
+			);
 
 			// Assert: each run maintains monotonic seq isolation
 			const seqs1 = events1.map((e) => e.seq);
@@ -96,7 +141,7 @@ describe.sequential("Orchestrator Integration (M3)", () => {
 				expect(seqs2[i]).toBeGreaterThanOrEqual(seqs2[i - 1]);
 			}
 
-			// Assert: similar event counts (observable parity)
+			// Assert: each run emits canonical sequence (observable parity)
 			expect(events1.length).toBeGreaterThanOrEqual(3);
 			expect(events2.length).toBeGreaterThanOrEqual(3);
 		});

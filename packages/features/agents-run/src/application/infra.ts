@@ -80,10 +80,10 @@ export function setInfra(next: Infra): void {
 	});
 }
 
-export function resetInfra(): void {
+export async function resetInfra(): Promise<void> {
 	const infra = getInfra();
 	(infra.bus as { reset?: () => void }).reset?.();
 	(infra.queue as { reset?: () => void }).reset?.();
-	(infra.db as { $disconnect?: () => Promise<void> }).$disconnect?.();
+	await (infra.db as { $disconnect?: () => Promise<void> }).$disconnect?.();
 	currentContainer = undefined;
 }

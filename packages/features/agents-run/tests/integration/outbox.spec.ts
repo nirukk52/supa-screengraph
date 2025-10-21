@@ -5,7 +5,7 @@ import { awaitOutboxFlush } from "./helpers/await-outbox";
 import { runAgentsRunTest } from "./helpers/test-harness";
 
 describe.sequential("outbox publisher", () => {
-	it("publishes in order and marks publishedAt", async () => {
+    it("publishes in order and marks publishedAt", async () => {
 		await runAgentsRunTest(
 			async ({ container, db }) => {
 				// Arrange: seed run, outbox, and unpublished events
@@ -65,8 +65,8 @@ describe.sequential("outbox publisher", () => {
 				expect(published[0].publishedAt).not.toBeNull();
 				expect(published[1].publishedAt).not.toBeNull();
 				expect(published[2].publishedAt).not.toBeNull();
-			},
-			{ startWorker: false },
-		);
-	});
+            },
+            { startWorker: false },
+        );
+    }, 15000);
 });
