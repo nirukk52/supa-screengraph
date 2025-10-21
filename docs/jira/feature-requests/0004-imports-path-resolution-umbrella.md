@@ -2,7 +2,7 @@
 
 **Status:** Proposed  
 **Priority:** High  
-**Effort:** Large (5-8 days total across stories)  
+**Effort:** Not scoped yet
 **Created:** 2025-10-21  
 **Owner:** @platform-tooling
 
