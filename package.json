@@ -20,7 +20,7 @@
 		"scaffold": "ts-node tooling/scripts/scaffold/index.ts",
 		"pr:checks": "pnpm run pr:check",
 		"pr:check": "node tooling/scripts/pr-check.mjs",
-		"build:backend": "tsc -b tooling/typescript/tsconfig.backend.json",
+		"build:backend": "tsc -b tooling/typescript/tsconfig.backend.json && node tooling/scripts/postbuild-rewrite-paths.mjs",
 		"backend:lint": "pnpm run lint:tsconfig && pnpm run lint:arch && pnpm run lint:publint && pnpm run lint:deps",
 		"lint:publint": "node tooling/scripts/run-publint.mjs",
 		"lint:deps": "dependency-cruiser --config tooling/arch/dependency-cruiser.cjs .",
@@ -54,7 +54,8 @@
 		"typescript": "5.9.3",
 		"vitest": "^2.0.5",
 		"vite-tsconfig-paths": "^5.1.1",
-		"zod": "^4.1.11"
+		"zod": "^4.1.11",
+		"tsc-alias": "^1.8.8"
 	},
 	"pnpm": {
 		"overrides": {

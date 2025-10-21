@@ -1,6 +1,6 @@
 # [FEATURE-0007] Next.js Alias Parity CI Check
 
-**Status:** Proposed  
+**Status:** Completed  
 **Priority:** Medium  
 **Effort:** Small (< 1 day)  
 **Created:** 2025-10-21  
