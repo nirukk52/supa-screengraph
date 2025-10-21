@@ -54,12 +54,19 @@ function buildDefaultContainer() {
 	return createAgentsRunContainer();
 }
 
-let currentContainer = buildDefaultContainer();
+let currentContainer: AwilixContainer<AgentsRunContainerCradle> | undefined;
+
+function ensureContainer() {
+	if (!currentContainer) {
+		currentContainer = buildDefaultContainer();
+	}
+	return currentContainer;
+}
 
 export function getInfra(
 	container?: AwilixContainer<AgentsRunContainerCradle>,
 ): Infra {
-	const source = container ?? currentContainer;
+	const source = container ?? ensureContainer();
 	return source.cradle as Infra;
 }
 
@@ -74,4 +81,5 @@ export function resetInfra(): void {
 	const infra = getInfra();
 	(infra.bus as { reset?: () => void }).reset?.();
 	(infra.queue as { reset?: () => void }).reset?.();
+	currentContainer = undefined;
 }

@@ -8,6 +8,7 @@ import { RedisContainer } from "testcontainers";
 import { createAgentsRunContainer } from "../../../src/application/container";
 import type { AgentsRunContainerCradle } from "../../../src/application/container.types";
 import { resetInfra, setInfra } from "../../../src/application/infra";
+import { drainPending } from "../../../src/infra/workers/outbox-drain";
 import { startWorker } from "../../../src/infra/workers/run-worker";
 
 const DEFAULT_DRIVER = process.env.AGENTS_RUN_QUEUE_DRIVER ?? "memory";
@@ -107,6 +108,7 @@ export async function runAgentsRunTest<T>(
 		for (const dispose of disposers.reverse()) {
 			await dispose();
 		}
+		await drainPending();
 		await clearDatabase();
 		if (driver === "bullmq") {
 			await disposeRedis();

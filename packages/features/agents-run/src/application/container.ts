@@ -25,7 +25,8 @@ export function createAgentsRunContainer(
 			? asValue(overrides.queue)
 			: asClass(InMemoryQueue).singleton(),
 		drainOutboxForRun: asValue(
-			overrides.drainOutboxForRun ?? drainOutboxForRun,
+			overrides.drainOutboxForRun ??
+				((runId: string) => drainOutboxForRun(runId, container)),
 		),
 		enqueueOutboxDrain: asValue(
 			overrides.enqueueOutboxDrain ?? enqueueDrain,

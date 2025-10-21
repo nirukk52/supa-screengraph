@@ -36,7 +36,7 @@ export async function* streamRun(
 	}
 
 	// Then subscribe for live events; de-dupe on seq
-	const { bus } = getInfra(container);
+	const { bus } = container?.cradle ?? getInfra();
 	for await (const evt of bus.subscribe(TOPIC_AGENTS_RUN)) {
 		if (evt.runId !== runId) {
 			continue;

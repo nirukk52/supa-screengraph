@@ -1,4 +1,5 @@
 import { logger } from "@repo/logs";
+import { getInfra } from "../../application/infra";
 import { publishPendingOutboxEventsOnce } from "./outbox-events";
 
 const pendingRuns = new Map<string, Promise<void>>();
@@ -10,7 +11,8 @@ export function enqueueDrain(runId?: string) {
 		const next = current
 			.catch(() => undefined)
 			.then(async () => {
-				await publishPendingOutboxEventsOnce(runId);
+				const infra = getInfra();
+				await publishPendingOutboxEventsOnce(runId, infra);
 			})
 			.catch((error) => {
 				logger.error("outbox.publish.error", { runId, error });
@@ -27,7 +29,8 @@ export function enqueueDrain(runId?: string) {
 	globalDrain = (globalDrain ?? Promise.resolve())
 		.catch(() => undefined)
 		.then(async () => {
-			await publishPendingOutboxEventsOnce();
+			const infra = getInfra();
+			await publishPendingOutboxEventsOnce(undefined, infra);
 		})
 		.catch((error) => {
 			logger.error("outbox.publish.error", { error });
