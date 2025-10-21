@@ -10,3 +10,8 @@ export function nextSeq(runId: string): number {
 export function setNextSeq(runId: string, next: number): void {
 	nextByRun.set(runId, next);
 }
+
+// Reset sequencer state (for test isolation)
+export function resetSequencer(): void {
+	nextByRun.clear();
+}

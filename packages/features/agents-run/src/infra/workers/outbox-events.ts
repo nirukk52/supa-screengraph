@@ -1,5 +1,4 @@
-import type { Prisma } from "@repo/database";
-import { db } from "@repo/database";
+import type { Prisma, PrismaClient } from "@repo/database";
 import { logger } from "@repo/logs";
 import type { AgentEvent } from "@sg/agents-contracts";
 import {
@@ -9,10 +8,10 @@ import {
 } from "@sg/agents-contracts";
 import type { EventBusPort } from "@sg/eventbus";
 
-type OutboxInfra = { bus: EventBusPort };
+type OutboxInfra = { bus: EventBusPort; db: PrismaClient };
 
 async function publishNextOutboxEvent(runId: string, infra: OutboxInfra) {
-	return db.$transaction(
+	return infra.db.$transaction(
 		async (tx: Prisma.TransactionClient) => {
 			const outbox = await tx.runOutbox.findUnique({ where: { runId } });
 			if (!outbox) {
@@ -95,7 +94,7 @@ export async function publishPendingOutboxEventsOnce(
 ) {
 	const candidates = runId
 		? [{ runId }]
-		: await db.runOutbox.findMany({
+		: await infra.db.runOutbox.findMany({
 				take: 50,
 				orderBy: { updatedAt: "asc" },
 			});

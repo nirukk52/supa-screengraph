@@ -1,3 +1,4 @@
+import type { PrismaClient } from "@repo/database";
 import type { EventBusPort } from "@sg/eventbus";
 import type { QueuePort } from "@sg/queue";
 import { createBullMqInfra } from "@sg/queue-bullmq";
@@ -9,6 +10,7 @@ import type { AgentsRunContainerCradle } from "./container.types";
 export interface Infra {
 	bus: EventBusPort;
 	queue: QueuePort;
+	db: PrismaClient;
 }
 
 interface RedisConnectionOptions {
@@ -74,6 +76,7 @@ export function setInfra(next: Infra): void {
 	currentContainer = createAgentsRunContainer({
 		bus: next.bus,
 		queue: next.queue,
+		db: next.db,
 	});
 }
 
@@ -81,5 +84,6 @@ export function resetInfra(): void {
 	const infra = getInfra();
 	(infra.bus as { reset?: () => void }).reset?.();
 	(infra.queue as { reset?: () => void }).reset?.();
+	(infra.db as { $disconnect?: () => Promise<void> }).$disconnect?.();
 	currentContainer = undefined;
 }

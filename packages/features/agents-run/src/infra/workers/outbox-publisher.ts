@@ -7,24 +7,49 @@ import { createOutboxSubscriber } from "./outbox-subscriber";
 
 let subscriber: ReturnType<typeof createOutboxSubscriber> | undefined;
 
-export function startOutboxWorker() {
-	if (subscriber) {
-		return async () => {
-			await drainPending();
-			await subscriber?.close();
-			subscriber = undefined;
-		};
+export type OutboxController = {
+	start: () => void;
+	stop: () => Promise<void>;
+	stepOnce: (runId?: string) => Promise<void>;
+	stepAll: (runId?: string) => Promise<void>;
+};
+
+export function createOutboxController(
+	container?: AwilixContainer<AgentsRunContainerCradle>,
+): OutboxController {
+	const infra = container?.cradle ?? getInfra();
+
+	function start(): void {
+		// Only start subscriber if not already active (avoid test interference)
+		if (subscriber) {
+			return;
+		}
+		subscriber = createOutboxSubscriber((runId) => {
+			enqueueDrain(runId, infra);
+		});
 	}
 
-	subscriber = createOutboxSubscriber((runId) => {
-		enqueueDrain(runId);
-	});
-
-	return async () => {
+	async function stop(): Promise<void> {
 		await drainPending();
 		await subscriber?.close();
 		subscriber = undefined;
-	};
+	}
+
+	async function stepOnce(runId?: string): Promise<void> {
+		await publishPendingOutboxEventsOnce(runId, infra);
+	}
+
+	async function stepAll(runId?: string): Promise<void> {
+		await publishPendingOutboxEventsOnce(runId, infra);
+	}
+
+	return { start, stop, stepOnce, stepAll };
+}
+
+export function startOutboxWorker() {
+	const controller = createOutboxController();
+	controller.start();
+	return controller.stop;
 }
 
 export async function drainOutboxForRun(
@@ -36,3 +61,8 @@ export async function drainOutboxForRun(
 }
 
 export { publishPendingOutboxEventsOnce } from "./outbox-events";
+
+// Reset outbox publisher state (for test isolation)
+export function resetOutboxPublisher(): void {
+	subscriber = undefined;
+}
