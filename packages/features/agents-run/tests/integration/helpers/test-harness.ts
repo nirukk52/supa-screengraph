@@ -8,7 +8,7 @@ import type { AwilixContainer } from "awilix";
 import { GenericContainer, type StartedTestContainer } from "testcontainers";
 import { createAgentsRunContainer } from "../../../src/application/container";
 import type { AgentsRunContainerCradle } from "../../../src/application/container.types";
-import { getInfra, resetInfra, setInfra } from "../../../src/application/infra";
+import { resetInfra, setInfra } from "../../../src/application/infra";
 import { resetSequencer } from "../../../src/application/usecases/sequencer";
 import { resetTracerState } from "../../../src/infra/workers/adapters";
 import { drainPending } from "../../../src/infra/workers/outbox-drain";
@@ -124,11 +124,11 @@ export async function runAgentsRunTest<T>(
 	const disposeInfra = await configureInfra(driver, db);
 	disposers.push(disposeInfra);
 
-	// Create fresh bus/queue/db instances per test to avoid cross-test interference
-	const infra = getInfra();
+	// Create container with fresh bus/queue/db instances per test
+	// configureInfra calls setInfra which creates the container, retrieve it
 	const container = createAgentsRunContainer({
-		bus: infra.bus,
-		queue: infra.queue,
+		bus: new InMemoryEventBus(),
+		queue: new InMemoryQueue(),
 		db: db,
 	});
 	disposers.push(async () => {
