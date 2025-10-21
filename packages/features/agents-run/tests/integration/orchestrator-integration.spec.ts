@@ -75,13 +75,27 @@ describe.sequential("Orchestrator Integration (M3)", () => {
 			const runIds = [runId1, runId2];
 			for (const id of runIds) {
 				let attempts = 0;
+				let run = null;
 				while (attempts < 100) {
 					await outbox.stepAll(id);
-					const run = await db.run.findUnique({ where: { id } });
+					run = await db.run.findUnique({ where: { id } });
 					if (run?.state === "finished") {
 						break;
 					}
 					attempts++;
+				}
+				
+				// Debug: Check if run completed successfully
+				if (!run || run.state !== "finished") {
+					const events = await db.runEvent.findMany({
+						where: { runId: id },
+						orderBy: { seq: "asc" },
+					});
+					throw new Error(
+						`Run ${id} did not complete after 100 attempts. ` +
+						`Final state: ${run?.state || "not found"}, ` +
+						`Events: ${events.length}`
+					);
 				}
 			}
 
@@ -94,6 +108,10 @@ describe.sequential("Orchestrator Integration (M3)", () => {
 				where: { runId: runId2 },
 				orderBy: { seq: "asc" },
 			});
+
+			// Debug: Log event counts for CI debugging
+			console.log(`[CI Debug] Run ${runId1}: ${events1.length} events`);
+			console.log(`[CI Debug] Run ${runId2}: ${events2.length} events`);
 
 			// Assert: each run maintains monotonic seq isolation
 			const seqs1 = events1.map((e) => e.seq);
