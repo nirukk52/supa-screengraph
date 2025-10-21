@@ -9,7 +9,7 @@ import {
 	InMemoryClock,
 	StubCancellationToken,
 } from "./adapters";
-import { startOutboxWorker } from "./outbox-publisher";
+import { createOutboxController } from "./outbox-publisher";
 
 /**
  * Start the run orchestrator worker.
@@ -19,22 +19,24 @@ import { startOutboxWorker } from "./outbox-publisher";
  * flush persisted events to the event bus.
  */
 export function startWorker(
-	container?: AwilixContainer<AgentsRunContainerCradle>,
+    container?: AwilixContainer<AgentsRunContainerCradle>,
 ) {
-	const { queue } = getInfra(container);
-	queue.worker<{ runId: string }>(QUEUE_NAME, async ({ runId }) => {
-		logFn("worker:job:start");
+    const { queue } = getInfra(container);
+    queue.worker<{ runId: string }>(QUEUE_NAME, async ({ runId }) => {
+        logFn("worker:job:start");
 
-		await orchestrateRun({
-			runId,
-			clock: new InMemoryClock(),
-			tracer: new FeatureLayerTracer(),
-			cancelToken: new StubCancellationToken(),
-		});
-	});
+        await orchestrateRun({
+            runId,
+            clock: new InMemoryClock(),
+            tracer: new FeatureLayerTracer(),
+            cancelToken: new StubCancellationToken(),
+        });
+    });
 
-	const stopOutbox = startOutboxWorker();
-	return async () => {
-		await stopOutbox();
-	};
+    // Outbox controller available for deterministic stepping in tests
+    const outbox = createOutboxController(container);
+    outbox.start();
+    return async () => {
+        await outbox.stop();
+    };
 }
