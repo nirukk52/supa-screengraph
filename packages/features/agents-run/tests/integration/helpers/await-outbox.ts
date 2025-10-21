@@ -1,5 +1,7 @@
 import type { PrismaClient } from "@prisma/client";
 import { db } from "@repo/database";
+import type { AwilixContainer } from "awilix";
+import type { AgentsRunContainerCradle } from "../../../src/application/container.types";
 import { drainOutboxForRun } from "../../../src/infra/workers/outbox-publisher";
 
 /**
@@ -13,6 +15,7 @@ export type AwaitOutboxOptions = {
 	pollMs?: number;
 	timeoutMs?: number;
 	signal?: AbortSignal;
+	container?: AwilixContainer<AgentsRunContainerCradle>;
 };
 
 /**
@@ -76,7 +79,7 @@ export async function awaitOutboxFlush(
 				`awaitOutboxFlush timeout after ${timeoutMs}ms (runId=${runId}, targetSeq=${targetSeq ?? "<last>"})`,
 			);
 		}
-		await drainOutboxForRun(runId);
+		await drainOutboxForRun(runId, opts.container);
 		await new Promise((resolve) => setTimeout(resolve, pollMs));
 	}
 }
@@ -135,6 +138,7 @@ export async function waitForRunCompletion(
 					`waitForRunCompletion timeout after ${timeoutMs}ms (runId=${runId}, run exists: ${!!run}, outbox exists: ${!!outbox})`,
 				);
 			}
+			await drainOutboxForRun(runId, opts.container);
 			await new Promise((resolve) => setTimeout(resolve, pollMs));
 			continue;
 		}
@@ -159,6 +163,7 @@ export async function waitForRunCompletion(
 			);
 		}
 
+		await drainOutboxForRun(runId, opts.container);
 		await new Promise((resolve) => setTimeout(resolve, pollMs));
 	}
 }

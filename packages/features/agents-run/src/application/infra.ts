@@ -81,4 +81,5 @@ export function resetInfra(): void {
 	const infra = getInfra();
 	(infra.bus as { reset?: () => void }).reset?.();
 	(infra.queue as { reset?: () => void }).reset?.();
+	currentContainer = undefined;
 }

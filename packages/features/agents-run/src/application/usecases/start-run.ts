@@ -33,7 +33,7 @@ export async function startRun(
 	} as any);
 	// Prime in-memory sequencer so worker emits seq starting from 2
 	setNextSeq(runId, 2);
-	const { queue } = getInfra(container);
+	const { queue } = container?.cradle ?? getInfra();
 	await queue.enqueue(QUEUE_NAME, { runId });
 	return { accepted: true };
 }
