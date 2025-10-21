@@ -65,6 +65,21 @@ const nextConfig: NextConfig = {
 			}),
 		);
 
+		// Ignore server-only packages in client bundles
+		if (!isServer) {
+			config.plugins.push(
+				new webpack.IgnorePlugin({
+					resourceRegExp: /^pg-format$|^@prisma\/client$/,
+				}),
+			);
+			
+			// Mark database package as external for client bundles
+			config.externals = config.externals || [];
+			if (Array.isArray(config.externals)) {
+				config.externals.push("@repo/database");
+			}
+		}
+
 		if (isServer) {
 			config.plugins.push(new PrismaPlugin());
 		}
