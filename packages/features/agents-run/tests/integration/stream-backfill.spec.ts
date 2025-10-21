@@ -1,5 +1,4 @@
 import { randomUUID } from "node:crypto";
-import { db } from "@repo/database";
 import { EVENT_TYPES } from "@sg/agents-contracts";
 import { describe, expect, it } from "vitest";
 import { startRun } from "../../src/application/usecases/start-run";
@@ -16,16 +15,16 @@ async function collect<T>(iter: AsyncIterable<T>): Promise<T[]> {
 
 describe.sequential("SSE stream backfill", () => {
 	it("backfills from fromSeq and de-dupes live", async () => {
-		await runAgentsRunTest(async ({ container }) => {
+		await runAgentsRunTest(async ({ container, db }) => {
 			// Arrange
 			const runId = randomUUID();
 
 			// Act: start run and process deterministically
-			await startRun(runId, container);
-			
+			await startRun(runId, container, db);
+
 			// Get outbox controller for deterministic stepping
 			const outbox = container.cradle.outboxController;
-			
+
 			// Step until completion
 			let attempts = 0;
 			while (attempts < 100) {
@@ -54,16 +53,16 @@ describe.sequential("SSE stream backfill", () => {
 	}, 30000);
 
 	it("subscribes for live events after backfill", async () => {
-		await runAgentsRunTest(async ({ container }) => {
+		await runAgentsRunTest(async ({ container, db }) => {
 			// Arrange
 			const runId = randomUUID();
 
 			// Act: start run and process deterministically
-			await startRun(runId, container);
-			
+			await startRun(runId, container, db);
+
 			// Get outbox controller for deterministic stepping
 			const outbox = container.cradle.outboxController;
-			
+
 			// Step until completion
 			let attempts = 0;
 			while (attempts < 100) {

@@ -1,14 +1,12 @@
 # Agents-Run Feature - Test Architecture
 
-**Last Updated**: 2025-10-21 (PR-05 - M5.5 Phase 1)
+**Last Updated**: 2025-10-21 (M5.5 Phase 1 Complete)
 
 ## Overview
 
-This document captures the test architecture, patterns, and critical learnings from M5.5 Phase 1 (PR-05), specifically around:
-- Test harness design for state isolation
-- DI container lifecycle in tests
-- Integration test patterns
-- Debugging flaky tests
+Test architecture for integration/unit tests. Covers test harness, state isolation, debugging patterns.
+
+**Status**: All integration tests passing (6 tests, single-threaded).
 
 ---
 
@@ -16,246 +14,28 @@ This document captures the test architecture, patterns, and critical learnings f
 
 ### Core Responsibilities
 
-1. **Database Cleanup**: Clear all run-related tables before/after each test
-2. **Infra Configuration**: Set up in-memory or BullMQ-backed infrastructure
-3. **Container Lifecycle**: Create and dispose per-test containers
-4. **Worker Management**: Start/stop run workers per test
-5. **State Isolation**: Ensure no test state leaks to other tests
+1. Database cleanup (before/after each test)
+2. Infrastructure configuration (in-memory or BullMQ)
+3. Container lifecycle (create/dispose per test)
+4. Worker management (start/stop per test)
+5. State isolation (reset module-level state)
 
-### Test Harness Pattern
+### Isolation Guarantees
 
-```typescript
-export async function runAgentsRunTest<T>(
-	fn: (ctx: TestContext) => Promise<T>,
-	options: TestOptions = {},
-): Promise<T> {
-	const driver = options.driver ?? (DEFAULT_DRIVER as "memory" | "bullmq");
-	const shouldStartWorker = options.startWorker ?? true;
+**Per-Test Isolation**:
+- Database: `clearDatabase()` before/after
+- DI Container: Fresh `createAgentsRunContainer()` 
+- Infrastructure: New `bus`/`queue` instances via `setInfra()`
+- Workers: New subscriptions via `startWorker()`
+- PrismaClient: Global singleton (unique schema per worker)
 
-	// 1. Clean slate: Clear database before test
-	await clearDatabase();
-
-	const disposers: Dispose[] = [];
-
-	// 2. Configure infrastructure (memory or BullMQ)
-	const disposeInfra = await configureInfra(driver);
-	disposers.push(disposeInfra);
-
-	// 3. Create per-test container
-	const container = createAgentsRunContainer();
-	disposers.push(async () => {
-		await container.dispose();
-	});
-
-	// 4. Optionally start worker
-	if (shouldStartWorker) {
-		const stopRunWorker = startWorker(container);
-		disposers.push(stopRunWorker);
-	}
-
-	try {
-		// 5. Run the test
-		const result = await fn({ container });
-		return result;
-	} finally {
-		// 6. Cleanup in reverse order
-		for (const dispose of disposers.reverse()) {
-			await dispose();
-		}
-		// 7. CRITICAL: Drain module-level state
-		await drainPending();
-		// 8. Final database cleanup
-		await clearDatabase();
-		// 9. Dispose Redis container if used
-		if (driver === "bullmq") {
-			await disposeRedis();
-		}
-	}
-}
-```
-
-### State Isolation Guarantees
-
-#### What's Isolated Per Test:
-1. **Database**: `clearDatabase()` runs before and after each test
-2. **DI Container**: Fresh `createAgentsRunContainer()` per test
-3. **Infrastructure**: `setInfra()` creates new bus/queue instances
-4. **Workers**: `startWorker()` creates new worker subscriptions
-
-#### What's NOT Isolated (Without Explicit Cleanup):
-1. **Module-Level State**: `pendingRuns` Map in `outbox-drain.ts`
-2. **Global Container**: `currentContainer` in `infra.ts` (if not reset)
-3. **Redis Containers**: Shared testcontainer across tests (but data is flushed)
-
----
-
-## Critical Cleanup Pattern (PR-05 Fix)
-
-### Problem: Module-Level State Pollution
-
-**Initial Symptom**: Tests timeout or fail with `AwilixResolutionError: Could not resolve 'cradle'`
-
-**Root Cause**: `outbox-drain.ts` maintains module-level state:
-```typescript
-const pendingRuns = new Map<string, Promise<void>>();
-let globalDrain: Promise<void> | undefined;
-```
-
-These promises persist across tests, causing:
-- Stale references to disposed containers
-- Pending drains that never resolve
-- Race conditions between tests
-
-**Resolution**: Added `drainPending()` to test harness cleanup:
-```typescript
-finally {
-	for (const dispose of disposers.reverse()) {
-		await dispose();
-	}
-	await drainPending(); // ✅ CRITICAL: Clear module-level state
-	await clearDatabase();
-}
-```
-
-### `resetInfra()` Pattern
-
-**Must Clear Global Container**:
-```typescript
-export function resetInfra(): void {
-	const infra = getInfra();
-	(infra.bus as { reset?: () => void }).reset?.();
-	(infra.queue as { reset?: () => void }).reset?.();
-	currentContainer = undefined; // ✅ CRITICAL: Clear reference
-}
-```
-
-**Why This Matters**:
-- Without this, `ensureContainer()` returns stale container from previous test
-- Stale container has disposed resources → crashes on next test
-- Setting `undefined` forces lazy re-initialization
-
----
-
-## Integration Test Patterns
-
-### Pattern 1: Container Propagation
-
-**Always pass container to test helpers:**
-```typescript
-it("emits event via outbox", async () => {
-	await runAgentsRunTest(async ({ container }) => {
-		const runId = await createRun();
-
-		// ✅ GOOD: Pass container explicitly
-		await container.cradle.drainOutboxForRun(runId);
-
-		// ❌ BAD: Uses global getInfra() → stale state
-		await drainOutboxForRun(runId);
-	});
-});
-```
-
-### Pattern 2: Defensive Test Helpers (`await-outbox.ts`)
-
-**Accept optional container parameter:**
-```typescript
-export interface AwaitOutboxOptions {
-	container?: AwilixContainer<AgentsRunContainerCradle>;
-	timeoutMs?: number;
-	pollMs?: number;
-}
-
-export async function awaitOutboxFlush(
-	runId: string,
-	opts: AwaitOutboxOptions = {},
-) {
-	// ✅ Use provided container or fallback
-	await drainOutboxForRun(runId, opts.container);
-	// ... polling logic
-}
-```
-
-**Usage in tests:**
-```typescript
-await awaitOutboxFlush(runId, { container });
-```
-
-### Pattern 3: Two-Phase Assertions
-
-**Structure tests to verify state at multiple points:**
-```typescript
-it("appends event and publishes via outbox", async () => {
-	await runAgentsRunTest(async ({ container }) => {
-		// Phase 1: Setup
-		const runId = await createRun();
-
-		// Phase 2: Append event (database state)
-		await appendEventToRun(runId, { type: "StepStarted" });
-		const evtRow = await db.runEvent.findFirst({ where: { runId } });
-		expect(evtRow).not.toBeNull();
-		expect(evtRow?.publishedAt).toBeNull(); // ✅ Not yet published
-
-		// Phase 3: Drain outbox (bus state)
-		await container.cradle.drainOutboxForRun(runId);
-		const published = await db.runEvent.findFirst({ where: { runId } });
-		expect(published?.publishedAt).not.toBeNull(); // ✅ Now published
-	});
-});
-```
-
----
-
-## Flaky Test Debugging (PR-05 Stream Regression)
-
-### Symptom: Test passes in isolation, fails in suite
-
-**Initial Status (PR-05)**:
-- `outbox.spec.ts`: ✅ Unskipped, passes
-- `stream.spec.ts`: ❌ Unskipped, flaky (timeout)
-- `stream-backfill.spec.ts`: ❌ Unskipped, flaky (timeout)
-
-**Why It Flakes**:
-1. Stream tests subscribe to event bus
-2. Events from previous tests may still be pending
-3. Bus subscription doesn't terminate cleanly
-4. Test times out waiting for expected event
-
-**Temporary Fix (PR-05)**:
-- Re-skipped stream tests
-- Documented as PR-06 in milestone plan
-
-### Debugging Checklist for Flaky Tests
-
-1. **Run test in isolation**:
-   ```bash
-   pnpm vitest run packages/features/agents-run/tests/integration/stream.spec.ts
-   ```
-
-2. **Run test in suite**:
-   ```bash
-   pnpm vitest run packages/features/agents-run/tests/integration/
-   ```
-
-3. **Check for module-level state**:
-   - Search for `const` or `let` at module level
-   - Ensure cleanup functions exist for all stateful modules
-
-4. **Verify container propagation**:
-   - All test helpers accept `container` parameter
-   - No direct `getInfra()` calls in test assertions
-
-5. **Add debug logging**:
-   ```typescript
-   console.log("Container ID:", container.cradle.bus);
-   console.log("Infra ID:", getInfra().bus);
-   // Should be different instances per test
-   ```
-
-6. **Check database state**:
-   ```typescript
-   const remaining = await db.run.count();
-   expect(remaining).toBe(0); // Should be clean between tests
-   ```
+**Module-Level State Resets**:
+- `drainPending()` - outbox drain promises
+- `resetSequencer()` - sequencer state
+- `resetTracerState()` - tracer state
+- `resetOutboxSubscriber()` - subscriber state
+- `resetOutboxPublisher()` - publisher state
+- `resetInfra()` - global container (sets `currentContainer = undefined`)
 
 ---
 
@@ -263,170 +43,186 @@ it("appends event and publishes via outbox", async () => {
 
 ### Memory Driver (Default)
 
-**Fast, isolated, no external dependencies:**
+**Facts**: Fast, isolated, no external dependencies.
+
 ```typescript
 setInfra({
-	bus: new InMemoryEventBus(),
-	queue: new InMemoryQueue(),
+  bus: new InMemoryEventBus(),
+  queue: new InMemoryQueue(), // Synchronous enqueue() for determinism
 });
 ```
 
-**Cleanup**:
-```typescript
-return async () => {
-	resetInfra(); // Clears currentContainer and resets ports
-};
-```
+### BullMQ Driver (Optional)
 
-### BullMQ Driver (CI/Production Parity)
+**Facts**: Uses Redis testcontainer; slower but production-like.
 
-**Uses testcontainers for Redis:**
-```typescript
-const container = await initRedis();
-const infra = createBullMqInfra({
-	queueName: "agents.run",
-	connection: {
-		host: container.getHost(),
-		port: container.getMappedPort(6379),
-	},
-});
-setInfra({
-	bus: new InMemoryEventBus(), // Still in-memory for bus
-	queue: infra.port, // BullMQ-backed queue
-});
-```
-
-**Cleanup**:
-```typescript
-return async () => {
-	await infra.close(); // Close BullMQ connections
-	resetInfra(); // Reset global state
-};
-```
-
-**Trade-offs**:
-- ✅ **Pros**: Realistic queue behavior, catches Redis-specific bugs
-- ❌ **Cons**: Slower (container startup), flaky in CI (port conflicts)
+**Procedure**: Set `AGENTS_RUN_QUEUE_DRIVER=bullmq` env var.
 
 ---
 
-## Best Practices (Learned from PR-05)
+## Integration Test Patterns
+
+### Pattern 1: Container Propagation
+
+**Preference**: Pass `container` explicitly to all helpers.
+
+```typescript
+await runAgentsRunTest(async ({ container, db }) => {
+  await container.cradle.drainOutboxForRun(runId); // ✅ GOOD
+  await drainOutboxForRun(runId); // ❌ BAD: uses global
+});
+```
+
+### Pattern 2: Deterministic Stepping
+
+**Preference**: Use `outboxController.stepAll()` instead of polling.
+
+```typescript
+const outbox = container.cradle.outboxController;
+await outbox.stepAll(runId); // Process all pending events
+```
+
+### Pattern 3: Per-Test DB Client
+
+**Procedure**: Test context provides `db` client; pass to repositories.
+
+```typescript
+await runAgentsRunTest(async ({ container, db }) => {
+  await RunRepo.createRun(runId, Date.now(), db);
+  await startRun(runId, container, db);
+});
+```
+
+---
+
+## Database Lifecycle
+
+### Global Setup
+
+**Procedure**: Vitest `globalSetup` creates unique schema per worker.
+
+**Schema Format**: `test_${timestamp}_${workerId}_${uuid}`
+
+**Decision**: Use global `PrismaClient` singleton (not per-test instances) to avoid connection churn.
+
+### Connection Stability
+
+**Procedure**: `clearDatabase()` includes 100ms delay + connection test.
+
+```typescript
+await new Promise((resolve) => setTimeout(resolve, 100));
+await db.$queryRaw`SELECT 1`; // Verify connection
+```
+
+---
+
+## Parallel Execution
+
+### Current State
+
+**Fact**: Tests run single-threaded (`singleThread: true` in vitest.config.ts).
+
+**Decision**: Disabled parallelism during M5.5 Phase 1 for DI migration stability.
+
+### Future Readiness
+
+**Fact**: Infrastructure supports parallel execution:
+- Per-worker schemas (already exists)
+- Per-test state isolation (implemented)
+- Module-level state resets (exported)
+
+**Procedure**: To enable parallel tests, remove `singleThread: true` from vitest.config.ts.
+
+---
+
+## Key Decisions (M5.5 Phase 1)
+
+1. **Global PrismaClient Singleton**: Reduces connection overhead; unique schema per worker provides isolation
+2. **Module-Level State Exports**: All stateful modules export cleanup functions called by test harness
+3. **Synchronous InMemoryQueue**: `enqueue()` processes jobs synchronously for deterministic test execution
+4. **Defensive Test Helpers**: All helpers accept optional `container` parameter with fallback to global
+5. **Single-Threaded Tests**: Disabled parallelism until Phase 2 validates isolation under concurrent load
+6. **Deterministic Stepping**: Replace polling (`waitForRunCompletion`) with explicit stepping (`outboxController.stepAll`)
+
+---
+
+## Flaky Test Debugging
+
+### Debugging Checklist
+
+**Procedure**:
+1. Run test in isolation: `pnpm vitest run <file>`
+2. Run in full suite: `pnpm vitest run packages/features/agents-run/tests/integration/`
+3. Check module-level state (search for `const`/`let` at module level)
+4. Verify container propagation (no direct `getInfra()` calls)
+5. Add debug logging (compare container IDs)
+6. Check database state (count records before/after)
+
+### Common Flakiness Causes
+
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| Test passes alone, fails in suite | Module state pollution | Export cleanup function, call in harness |
+| Timeout (20000ms) | Pending promises not drained | Call `drainPending()` |
+| Events not found | Wrong DB schema/client | Pass per-test `db` client |
+| Race condition errors | Concurrent transactions | Use `updateMany()` with defensive `where` |
+
+---
+
+## Best Practices
 
 ### ✅ Do's
 
-1. **Always use `runAgentsRunTest` wrapper**: Ensures proper setup/cleanup
-2. **Pass `container` to all helpers**: Prevents stale singleton references
-3. **Clean database before AND after**: Catches tests that forget to clean up
-4. **Drain pending promises**: Call `drainPending()` in harness cleanup
-5. **Reset global container**: Set `currentContainer = undefined` in `resetInfra()`
-6. **Use defensive assertions**: Check both database state and bus events
-7. **Test in isolation first**: Verify test passes alone before running in suite
-8. **Document regressions**: If test becomes flaky, re-skip and document as new task
+1. **Use `runAgentsRunTest` wrapper**: Ensures proper setup/cleanup
+2. **Pass `container` to all helpers**: Prevents stale singleton refs
+3. **Pass `db` to repositories**: Ensures correct schema
+4. **Clean database before AND after**: Catches tests that forget cleanup
+5. **Use deterministic stepping**: `outboxController.stepAll()` not polling
+6. **Test in isolation first**: Verify test passes alone before running suite
 
 ### ❌ Don'ts
 
-1. **No direct `getInfra()` in tests**: Use `container.cradle` instead
-2. **No shared state across tests**: Every test should be independent
-3. **No assuming cleanup happened**: Always verify database is empty after test
-4. **No global workers**: Start workers per-test via harness options
-5. **No mixing drivers**: Stick to one driver per test (memory or bullmq)
+1. **No direct `getInfra()` in tests**: Use `container.cradle`
+2. **No shared state across tests**: Tests must be independent
+3. **No assuming cleanup happened**: Verify DB empty after test
+4. **No global workers**: Start workers per-test via harness
+5. **No mixing drivers**: One driver per test (memory or bullmq)
 6. **No ignoring timeouts**: Timeout = state pollution; debug immediately
-7. **No leaving tests skipped**: Every `.skip` must have a JIRA ticket and plan to unskip
-
----
-
-## Key Learnings (PR-05)
-
-### Issue 1: Circular Dependency
-**Symptom**: `TypeError: createAgentsRunContainer is not a function`  
-**Cause**: `infra.ts` → `container.ts` → `outbox-publisher` → `outbox-events` → `getInfra()` → back to `infra.ts`  
-**Fix**: Refactored `outbox-events.ts` to accept `infra` as parameter
-
-### Issue 2: Stale Container References
-**Symptom**: `AwilixResolutionError: Could not resolve 'cradle'`  
-**Cause**: `drainOutboxForRun` registered as direct value, captured global `getInfra()` at module load  
-**Fix**: Register as factory closure that captures container instance
-
-### Issue 3: Module-Level State Pollution
-**Symptom**: Tests timeout; pending promises never resolve  
-**Cause**: `pendingRuns` Map in `outbox-drain.ts` persists across tests  
-**Fix**: Export `drainPending()` and call it in test harness cleanup
-
-### Issue 4: Concurrent Transaction Races
-**Symptom**: `PrismaClientKnownRequestError: No record was found for an update`  
-**Cause**: Multiple tests/workers attempting concurrent updates  
-**Fix**: Use `updateMany()` with defensive `where` clauses
-
-### Issue 5: Stream Test Flakiness
-**Symptom**: Stream tests timeout when run in suite  
-**Cause**: Bus subscriptions don't terminate cleanly; pending events from previous tests  
-**Fix**: Re-skipped for PR-06; needs deeper investigation of bus lifecycle
 
 ---
 
 ## Test Helper Inventory
 
 ### `test-harness.ts`
-- `runAgentsRunTest()`: Main test wrapper (setup/cleanup)
-- `afterAllAgentsRun()`: Suite-level cleanup (disposes Redis)
+- `runAgentsRunTest()`: Main wrapper (setup/cleanup/state reset)
+- `clearDatabase()`: Delete all run-related records
+- `configureInfra()`: Set up memory/BullMQ infrastructure
 
 ### `await-outbox.ts`
-- `awaitOutboxFlush()`: Poll until all events published for a run
-- `waitForRunCompletion()`: Poll until run state = "finished"
+- `awaitOutboxFlush()`: Poll until events published (legacy, prefer deterministic)
+- `waitForRunCompletion()`: Poll until run finishes (legacy, prefer deterministic)
 
-### `mock-agent.ts`
-- `createMockAgent()`: Factory for test agent configurations
-- `mockAgentWithSteps()`: Agent with predefined step sequence
-
----
-
-## Future Test Improvements (M5.5 Roadmap)
-
-See `docs/jira/milestones/milestone-5.5-di-unskips.md` for:
-
-### PR-06: Fix Stream.spec Regression
-- Investigate bus subscription lifecycle
-- Ensure clean termination of async iterators
-- Verify no pending events leak between tests
-
-### PR-07-09: Unskip Orchestrator & Backfill Tests
-- Apply same container propagation patterns
-- Verify defensive updates handle concurrent scenarios
-
-### PR-10: Remove Test-Time Singleton Usage
-- Eliminate all `getInfra()` calls from tests
-- Pure container-based dependency injection
-
-### PR-11: Documentation & Hygiene
-- Update all test README files
-- Add examples for common test patterns
-- Document known flaky test patterns
+### `process-run.ts`
+- `processRunDeterministically()`: Step through run without polling
 
 ---
 
 ## Running Tests
 
-### Run all integration tests:
 ```bash
+# All integration tests
 pnpm vitest run packages/features/agents-run/tests/integration/
-```
 
-### Run specific test file:
-```bash
+# Specific test file
 pnpm vitest run packages/features/agents-run/tests/integration/outbox.spec.ts
-```
 
-### Run with BullMQ driver:
-```bash
+# With BullMQ driver
 AGENTS_RUN_QUEUE_DRIVER=bullmq pnpm vitest run packages/features/agents-run/tests/integration/
-```
 
-### Watch mode (development):
-```bash
+# Watch mode
 pnpm vitest watch packages/features/agents-run/tests/integration/
 ```
 
 ---
 
-**Status**: ✅ PR-05 Complete (27 passed | 6 skipped)  
-**Next**: PR-06 - Fix Stream.spec Regression
+**Status**: ✅ M5.5 Phase 1 Complete - 6/6 integration tests passing, PR checks green

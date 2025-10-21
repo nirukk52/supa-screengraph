@@ -12,49 +12,61 @@ describe("RunEventRepo", () => {
 
 	it("appends seq monotonically and bumps lastSeq", async () => {
 		const runId = "r1";
-		await RunRepo.createRun(runId, Date.now());
-		await RunEventRepo.appendEvent({
-			runId,
-			seq: 1,
-			ts: Date.now(),
-			type: EVENT_TYPES.RunStarted,
-			v: 1,
-			source: EVENT_SOURCES.api,
-		} as any);
-		await RunEventRepo.appendEvent({
-			runId,
-			seq: 2,
-			ts: Date.now(),
-			type: EVENT_TYPES.NodeStarted,
-			v: 1,
-			source: EVENT_SOURCES.worker,
-			name: "EnsureDevice",
-		} as any);
+		await RunRepo.createRun(runId, Date.now(), db);
+		await RunEventRepo.appendEvent(
+			{
+				runId,
+				seq: 1,
+				ts: Date.now(),
+				type: EVENT_TYPES.RunStarted,
+				v: 1,
+				source: EVENT_SOURCES.api,
+			} as any,
+			db,
+		);
+		await RunEventRepo.appendEvent(
+			{
+				runId,
+				seq: 2,
+				ts: Date.now(),
+				type: EVENT_TYPES.NodeStarted,
+				v: 1,
+				source: EVENT_SOURCES.worker,
+				name: "EnsureDevice",
+			} as any,
+			db,
+		);
 		const run = await db.run.findUniqueOrThrow({ where: { id: runId } });
 		expect(run.lastSeq).toBe(2);
 	});
 
 	it("rejects non-monotonic append", async () => {
 		const runId = "r2";
-		await RunRepo.createRun(runId, Date.now());
-		await RunEventRepo.appendEvent({
-			runId,
-			seq: 1,
-			ts: Date.now(),
-			type: EVENT_TYPES.RunStarted,
-			v: 1,
-			source: EVENT_SOURCES.api,
-		} as any);
-		await expect(
-			RunEventRepo.appendEvent({
+		await RunRepo.createRun(runId, Date.now(), db);
+		await RunEventRepo.appendEvent(
+			{
 				runId,
-				seq: 3,
+				seq: 1,
 				ts: Date.now(),
-				type: EVENT_TYPES.NodeStarted,
+				type: EVENT_TYPES.RunStarted,
 				v: 1,
-				source: EVENT_SOURCES.worker,
-				name: "Warmup",
-			} as any),
+				source: EVENT_SOURCES.api,
+			} as any,
+			db,
+		);
+		await expect(
+			RunEventRepo.appendEvent(
+				{
+					runId,
+					seq: 3,
+					ts: Date.now(),
+					type: EVENT_TYPES.NodeStarted,
+					v: 1,
+					source: EVENT_SOURCES.worker,
+					name: "Warmup",
+				} as any,
+				db,
+			),
 		).rejects.toThrow();
 	});
 });

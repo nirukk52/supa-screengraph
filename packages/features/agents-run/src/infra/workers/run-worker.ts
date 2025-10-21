@@ -1,4 +1,5 @@
 import { orchestrateRun } from "@repo/agents-core";
+import type { PrismaClient } from "@repo/database";
 import type { AwilixContainer } from "awilix";
 import type { AgentsRunContainerCradle } from "../../application/container.types";
 import { getInfra } from "../../application/infra";
@@ -20,14 +21,15 @@ import { createOutboxController } from "./outbox-publisher";
  */
 export function startWorker(
 	container?: AwilixContainer<AgentsRunContainerCradle>,
+	dbClient?: PrismaClient,
 ) {
 	const { queue } = getInfra(container);
 	const tracers = new Map<string, FeatureLayerTracer>();
-	
+
 	queue.worker<{ runId: string }>(QUEUE_NAME, async ({ runId }) => {
 		logFn("worker:job:start");
 
-		const tracer = new FeatureLayerTracer();
+		const tracer = new FeatureLayerTracer(dbClient);
 		tracers.set(runId, tracer);
 
 		await orchestrateRun({
@@ -36,7 +38,7 @@ export function startWorker(
 			tracer,
 			cancelToken: new StubCancellationToken(),
 		});
-		
+
 		// Wait for all events to be persisted
 		await tracer.waitForCompletion(runId);
 		tracers.delete(runId);

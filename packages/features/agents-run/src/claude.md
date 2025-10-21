@@ -1,16 +1,12 @@
 # Agents-Run Feature - Source Code Architecture
 
-**Last Updated**: 2025-10-21 (PR-05 - M5.5 Phase 1)
+**Last Updated**: 2025-10-21 (M5.5 Phase 1 Complete)
 
 ## Overview
 
-The `agents-run` feature manages the lifecycle of agent execution runs, including:
-- Creating and persisting run events
-- Publishing events to the event bus
-- Maintaining an outbox for deterministic event ordering
-- Processing runs via queue workers
+The `agents-run` feature manages agent execution run lifecycle: event persistence, outbox publishing, queue processing.
 
-This document captures the architectural patterns, DI container design, and critical learnings from M5.5 Phase 1 (PR-05).
+**Key Components**: Use cases, repositories, workers, DI container, infrastructure facade.
 
 ---
 
@@ -37,60 +33,32 @@ This document captures the architectural patterns, DI container design, and crit
 └──────────────────────────────────────────┘
 ```
 
-**Key Principles**:
-- **Ports-First**: Infra depends on abstract ports, not concrete implementations
-- **DI Container**: Awilix manages dependencies; tests inject custom implementations
-- **Clean Architecture**: Domain → Infra → Application (no reverse dependencies)
+---
+
+## Architectural Principles
+
+- **Ports-First**: Infrastructure depends on abstract ports
+- **DI Container**: Awilix manages dependencies; tests inject overrides
+- **Clean Architecture**: Domain → Infra → Application (no reverse deps)
+- **Per-Test Isolation**: Fresh PrismaClient, bus, queue, container per test
 
 ---
 
-## DI Container Design (`application/container.ts`)
+## DI Container (`application/container.ts`)
 
-### Problem: Circular Dependencies
-**Initial Issue (PR-05)**:
-```
-infra.ts → container.ts → outbox-publisher → outbox-events → getInfra() → infra.ts
-```
-
-**Resolution**: 
-1. Refactored `outbox-events.ts` to accept `infra` as an explicit parameter (broke the cycle)
-2. Used factory functions in container registration to capture container closure
-
-### Container Registration Pattern
+### Registration Pattern
 
 ```typescript
-export function createAgentsRunContainer(
-	overrides: AgentsRunContainerOverrides = {},
-) {
-	const container = createContainer<AgentsRunContainerCradle>();
-
-	container.register({
-		bus: overrides.bus
-			? asValue(overrides.bus)
-			: asClass(InMemoryEventBus).singleton(),
-		queue: overrides.queue
-			? asValue(overrides.queue)
-			: asClass(InMemoryQueue).singleton(),
-		drainOutboxForRun: asValue(
-			overrides.drainOutboxForRun ??
-				((runId: string) => drainOutboxForRun(runId, container)), // Factory captures container
-		),
-		enqueueOutboxDrain: asValue(
-			overrides.enqueueOutboxDrain ?? enqueueDrain,
-		),
-	});
-
-	return container;
-}
+db: overrides.db ? asValue(overrides.db) : asValue(new PrismaClient()),
+drainOutboxForRun: asValue(
+  overrides.drainOutboxForRun ??
+    ((runId: string) => drainOutboxForRun(runId, container))
+),
 ```
 
-**Critical Pattern**: `drainOutboxForRun` is registered as a **factory closure** that captures the container itself. This ensures the function always uses the correct per-test container, not the global one.
+**Decision**: PrismaClient registered as `asValue(new PrismaClient())` not `asClass(PrismaClient)` to avoid Awilix DI resolution errors.
 
-**Why This Works**:
-- At registration time, `container` is the newly created instance
-- The closure captures this specific instance
-- When `cradle.drainOutboxForRun(runId)` is called, it uses the captured container
-- Prevents stale references to global singletons
+**Decision**: Functions registered as factory closures that capture container instance for correct per-test resolution.
 
 ---
 
@@ -99,273 +67,171 @@ export function createAgentsRunContainer(
 ### Global Container Lifecycle
 
 ```typescript
-let currentContainer: AwilixContainer<AgentsRunContainerCradle> | undefined;
-
-function ensureContainer() {
-	if (!currentContainer) {
-		currentContainer = buildDefaultContainer();
-	}
-	return currentContainer;
-}
-
-export function getInfra(
-	container?: AwilixContainer<AgentsRunContainerCradle>,
-): Infra {
-	const source = container ?? ensureContainer();
-	return source.cradle as Infra;
-}
-
-export function setInfra(next: Infra): void {
-	currentContainer = createAgentsRunContainer({
-		bus: next.bus,
-		queue: next.queue,
-	});
-}
+let currentContainer: AwilixContainer | undefined;
 
 export function resetInfra(): void {
-	const infra = getInfra();
-	(infra.bus as { reset?: () => void }).reset?.();
-	(infra.queue as { reset?: () => void }).reset?.();
-	currentContainer = undefined; // CRITICAL: Clear reference
+  (infra.bus as { reset?: () => void }).reset?.();
+  (infra.queue as { reset?: () => void }).reset?.();
+  currentContainer = undefined; // CRITICAL: prevents stale refs
 }
 ```
 
-### State Isolation Rules
+**Procedure**: All functions accept optional `container?: AwilixContainer` and use `container?.cradle ?? getInfra()` pattern.
 
-1. **Optional Container Parameter**: All functions accept `container?: AwilixContainer<AgentsRunContainerCradle>`
-2. **Fallback Pattern**: Use `container?.cradle ?? getInfra()` to prioritize explicit container
-3. **Test Reset**: `resetInfra()` MUST set `currentContainer = undefined` to prevent stale state
-4. **Module-Level State**: Avoid at all costs; if unavoidable, export cleanup functions (see `outbox-drain.ts`)
+**Procedure**: `resetInfra()` MUST clear `currentContainer = undefined` in test cleanup.
+
+---
+
+## Repository Layer
+
+### Per-Test Database Client
+
+**Decision**: All repository methods accept `PrismaClient` instance as parameter.
+
+```typescript
+export async function createRun(runId: string, ts: number, db: PrismaClient) {
+  return db.run.create({ data: { id: runId, startedAt: new Date(ts) } });
+}
+```
+
+**Preference**: Pass `db` client explicitly rather than global singleton to support parallel test workers with isolated schemas.
 
 ---
 
 ## Outbox Worker System
 
-### File Responsibilities
+### Defensive Updates (`outbox-events.ts`)
 
-#### `outbox-events.ts` (Core Transaction Logic)
-**Purpose**: Publish events from outbox in deterministic order
+**Procedure**: Use `updateMany()` with conditional `where` clauses for concurrent scenarios.
 
-**Key Pattern**: Defensive Updates with `updateMany`
 ```typescript
-async function publishNextOutboxEvent(runId: string, infra: OutboxInfra) {
-	return db.$transaction(
-		async (tx: Prisma.TransactionClient) => {
-			// 1. Find next unpublished event
-			const outbox = await tx.runOutbox.findUnique({ where: { runId } });
-			if (!outbox) return false;
-
-			const evtRow = await tx.runEvent.findUnique({
-				where: { runId_seq: { runId, seq: outbox.nextSeq } },
-			});
-			if (!evtRow || evtRow.publishedAt) return false;
-
-			// 2. Publish to bus
-			await infra.bus.publish(TOPIC_AGENTS_RUN, evt);
-
-			// 3. Defensive update: only if publishedAt is null
-			const updated = await tx.runEvent.updateMany({
-				where: {
-					runId,
-					seq: outbox.nextSeq,
-					publishedAt: null, // Prevents race condition
-				},
-				data: { publishedAt: new Date() },
-			});
-			if (updated.count === 0) {
-				// Event already published by concurrent transaction
-				return false;
-			}
-
-			// 4. Defensive update: only if outbox still exists
-			const outboxUpdated = await tx.runOutbox.updateMany({
-				where: { runId },
-				data: {
-					nextSeq: outbox.nextSeq + 1,
-					updatedAt: new Date(),
-				},
-			});
-			if (outboxUpdated.count === 0) {
-				// Outbox deleted (test cleanup race)
-				return false;
-			}
-
-			return true;
-		},
-		{ timeout: 5000 },
-	);
-}
+const updated = await tx.runEvent.updateMany({
+  where: { runId, seq, publishedAt: null }, // Prevents race
+  data: { publishedAt: new Date() },
+});
+if (updated.count === 0) return false; // Already published
 ```
 
-**Why `updateMany` Instead of `update`**:
-- `update()` throws `PrismaClientKnownRequestError` if record not found or condition fails
-- `updateMany()` returns `{ count: 0 }` if no records match, allowing graceful handling
-- Prevents race conditions when multiple tests/workers attempt concurrent updates
+**Decision**: `updateMany()` returns `{ count: 0 }` instead of throwing on no-match (unlike `update()`).
 
-**Infra Parameter Pattern**:
-```typescript
-// ❌ BAD: Direct import creates circular dependency
-import { getInfra } from "../../application/infra";
-await infra.bus.publish(...); // Where does infra come from?
+### Module-Level State (`outbox-drain.ts`)
 
-// ✅ GOOD: Explicit parameter breaks circular dependency
-async function publishNextOutboxEvent(runId: string, infra: OutboxInfra) {
-	await infra.bus.publish(TOPIC_AGENTS_RUN, evt);
-}
-```
+**Fact**: `pendingRuns` Map and `globalDrain` Promise persist at module level.
 
-#### `outbox-drain.ts` (Queue Management)
-**Purpose**: Manage pending drain promises; prevent concurrent drains for same run
+**Procedure**: Export `drainPending()` to clear state; test harness calls it in cleanup.
 
-**Module-Level State**:
-```typescript
-const pendingRuns = new Map<string, Promise<void>>();
-let globalDrain: Promise<void> | undefined;
-```
-
-**Why Module-Level State Exists**:
-- `enqueueDrain` must prevent duplicate concurrent drains for the same `runId`
-- Promise chaining ensures deterministic ordering
-- Global drain handles the "catch-all" case (no specific runId)
-
-**Critical Export for Tests**:
 ```typescript
 export async function drainPending(): Promise<void> {
-	const drains: Promise<void>[] = [];
-	for (const promise of pendingRuns.values()) {
-		drains.push(promise.catch(() => undefined));
-	}
-	if (globalDrain) {
-		drains.push(globalDrain.catch(() => undefined));
-	}
-	if (drains.length > 0) {
-		await Promise.allSettled(drains);
-	}
-	pendingRuns.clear();
-	globalDrain = undefined;
+  await Promise.allSettled([...pendingRuns.values(), globalDrain]);
+  pendingRuns.clear();
+  globalDrain = undefined;
 }
 ```
 
-**Test Harness Integration**:
-```typescript
-finally {
-	await drainPending(); // CRITICAL: Clear module-level state between tests
-	await clearDatabase();
-}
-```
+### Infra Parameter Pattern
 
-#### `outbox-publisher.ts` (Public API)
-**Purpose**: Facade for test helpers and external consumers
+**Preference**: Workers accept `infra` as explicit parameter to break circular dependencies.
 
-**Container Propagation**:
 ```typescript
-export async function drainOutboxForRun(
-	runId: string,
-	container?: AwilixContainer<AgentsRunContainerCradle>,
-) {
-	const infra = container?.cradle ?? getInfra(); // Prefer explicit container
-	await publishPendingOutboxEventsOnce(runId, infra);
-}
+// ✅ GOOD
+async function publishNextOutboxEvent(runId: string, infra: OutboxInfra)
+
+// ❌ BAD: creates circular import
+import { getInfra } from "../../application/infra";
 ```
 
 ---
 
 ## Use Case Patterns
 
-### `start-run.ts` - Container Propagation
+### Container Propagation
+
+**Procedure**: All use cases accept optional container and propagate to downstream calls.
+
 ```typescript
 export async function startRun(
-	runId: string,
-	container?: AwilixContainer<AgentsRunContainerCradle>,
+  runId: string,
+  container?: AwilixContainer,
+  testDb?: PrismaClient
 ) {
-	const { queue } = container?.cradle ?? getInfra(); // Use provided container
-	await queue.enqueue(QUEUE_NAME, { runId });
-	return { accepted: true };
+  const db = testDb ?? getInfra().db;
+  const { queue } = container?.cradle ?? getInfra();
+  await RunRepo.createRun(runId, Date.now(), db);
+  await queue.enqueue(QUEUE_NAME, { runId });
 }
 ```
 
-### `stream-run.ts` - AsyncIterable Pattern
+---
+
+## Test Infrastructure
+
+### State Resets
+
+**Procedure**: Test harness resets all module-level state in cleanup:
+
+- `drainPending()` - outbox drain promises
+- `resetSequencer()` - sequencer state
+- `resetTracerState()` - tracer state
+- `resetOutboxSubscriber()` - subscriber state
+- `resetOutboxPublisher()` - publisher state
+- `resetInfra()` - global container
+
+### Database Lifecycle
+
+**Decision**: Use global `PrismaClient` singleton configured by Vitest `globalSetup`.
+
+**Procedure**: `globalSetup` creates unique schema per worker: `test_${timestamp}_${workerId}_${uuid}`.
+
+**Fact**: Tests run single-threaded (`singleThread: true` in vitest.config.ts) to avoid cross-test interference during M5.5 Phase 1.
+
+**Future**: Parallel execution ready (per-worker schemas exist), but disabled for stability during DI migration.
+
+### PrismaClient Connection
+
+**Procedure**: Add 100ms delay + connection test in `clearDatabase()` to ensure DB ready before operations.
+
 ```typescript
-export async function* streamRun(
-	runId: string,
-	fromSeq?: number,
-	container?: AwilixContainer<AgentsRunContainerCradle>,
-): AsyncIterable<AgentEvent> {
-	const { bus } = container?.cradle ?? getInfra();
-	for await (const evt of bus.subscribe(TOPIC_AGENTS_RUN)) {
-		if (evt.runId === runId && evt.seq >= fromSeq) {
-			yield evt;
-		}
-	}
-}
+await new Promise((resolve) => setTimeout(resolve, 100));
+await db.$queryRaw`SELECT 1`;
 ```
 
 ---
 
-## Key Learnings (PR-05)
+## Key Decisions (M5.5 Phase 1)
 
-### ✅ Do's
-
-1. **Accept Container Everywhere**: Every function that uses infra should accept `container?: AwilixContainer<AgentsRunContainerCradle>`
-2. **Use Factory Closures**: Register DI functions that capture the container instance (see `drainOutboxForRun`)
-3. **Defensive Updates**: Use `updateMany` with specific `where` clauses for concurrent scenarios
-4. **Export Cleanup Functions**: If module-level state is unavoidable, export a cleanup function for tests
-5. **Reset Global State**: `resetInfra()` must clear `currentContainer = undefined`
-6. **Break Circular Dependencies**: Refactor to accept `infra` as explicit parameter instead of importing `getInfra()`
-
-### ❌ Don'ts
-
-1. **No Direct `getInfra()` in Infra Layer**: Workers should accept `infra` as parameter
-2. **No Module-Level Globals Without Cleanup**: Every module-level state must have a cleanup function
-3. **No `update()` in Concurrent Scenarios**: Use `updateMany()` with conditional `where` clauses
-4. **No Container Instantiation at Module Load**: Use lazy initialization via `ensureContainer()`
-5. **No Assuming Record Exists**: Always check `updateMany.count === 0` for defensive updates
+1. **PrismaClient as asValue()**: Prevents Awilix internal dependency resolution errors
+2. **Factory Closures**: Captures correct container instance for per-test isolation
+3. **Defensive updateMany()**: Handles concurrent transactions gracefully
+4. **Explicit Infra Parameters**: Breaks circular dependencies in worker layer
+5. **Module-Level State Exports**: All stateful modules export cleanup functions
+6. **Per-Test DB Client**: Repositories accept PrismaClient parameter
+7. **Synchronous InMemoryQueue**: `enqueue()` processes jobs synchronously for determinism
+8. **Single-Threaded Tests**: Disabled parallelism until Phase 2 validates isolation
 
 ---
 
-## Circular Dependency Resolution Checklist
+## Circular Dependency Resolution
 
-If you encounter a circular dependency:
-
-1. **Identify the cycle**: Use `pnpm why` or trace imports manually
-2. **Refactor to explicit parameters**: Change `getInfra()` calls to `infra` parameter
-3. **Use factory closures**: Register functions that capture container at creation time
-4. **Test in isolation**: Verify each module can import independently
-5. **Verify container propagation**: Ensure `container?.cradle ?? getInfra()` pattern is consistent
+**Procedure**:
+1. Identify cycle via `pnpm why` or import trace
+2. Refactor `getInfra()` calls to explicit `infra` parameter
+3. Use factory closures for container-dependent registrations
+4. Verify lazy initialization via `ensureContainer()`
 
 ---
 
-## Debugging Tips
+## Common Issues & Fixes
 
-### Symptom: `TypeError: createAgentsRunContainer is not a function`
-**Cause**: Circular dependency during module initialization  
-**Fix**: Refactor to explicit parameters; use lazy initialization
-
-### Symptom: `AwilixResolutionError: Could not resolve 'cradle'`
-**Cause**: Stale reference to global container instead of per-test container  
-**Fix**: Use factory closure pattern in container registration
-
-### Symptom: `PrismaClientKnownRequestError: No record was found for an update`
-**Cause**: Race condition; concurrent transaction already modified/deleted record  
-**Fix**: Use `updateMany()` with defensive `where` clauses and check `count === 0`
-
-### Symptom: Tests timeout (20000ms)
-**Cause**: Module-level state pollution; pending promises not drained  
-**Fix**: Call `drainPending()` in test harness cleanup
+| Symptom | Cause | Fix |
+|---------|-------|-----|
+| `TypeError: createAgentsRunContainer is not a function` | Circular dependency | Explicit `infra` parameter |
+| `AwilixResolutionError: Could not resolve 'cradle'` | Stale global container | Factory closure pattern |
+| `PrismaClientKnownRequestError: No record found` | Race condition | `updateMany()` + check count |
+| Tests timeout | Module state pollution | Call `drainPending()` |
+| `Response from the Engine was empty` | DB not ready | Add delay + connection test |
+| `PrismaClient is not a constructor` | Wrong DI registration | Use `asValue(new PrismaClient())` |
 
 ---
 
-## Future Work
-
-See `docs/jira/milestones/milestone-5.5-di-unskips.md` for:
-- PR-06: Fix Stream.spec Regression (flakiness after DI changes)
-- PR-07: Unskip Orchestrator Golden Path tests
-- PR-08: Unskip Orchestrator Concurrent tests
-- PR-09: Unskip Stream Backfill tests
-- PR-10: Remove test-time singleton usage
-- PR-11: Documentation & hygiene pass
-
----
-
-**Status**: ✅ PR-05 Complete (27 passed | 6 skipped)
+**Status**: ✅ M5.5 Phase 1 Complete - All integration tests passing, PR checks green
 

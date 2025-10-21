@@ -5,14 +5,14 @@ import { publishPendingOutboxEventsOnce } from "./outbox-events";
 const pendingRuns = new Map<string, Promise<void>>();
 let globalDrain: Promise<void> | undefined;
 
-export function enqueueDrain(runId?: string) {
+export function enqueueDrain(runId?: string, infra?: { bus: any; db: any }) {
 	if (runId) {
 		const current = pendingRuns.get(runId) ?? Promise.resolve();
 		const next = current
 			.catch(() => undefined)
 			.then(async () => {
-				const infra = getInfra();
-				await publishPendingOutboxEventsOnce(runId, infra);
+				const infraToUse = infra ?? getInfra();
+				await publishPendingOutboxEventsOnce(runId, infraToUse);
 			})
 			.catch((error) => {
 				logger.error("outbox.publish.error", { runId, error });
@@ -29,8 +29,8 @@ export function enqueueDrain(runId?: string) {
 	globalDrain = (globalDrain ?? Promise.resolve())
 		.catch(() => undefined)
 		.then(async () => {
-			const infra = getInfra();
-			await publishPendingOutboxEventsOnce(undefined, infra);
+			const infraToUse = infra ?? getInfra();
+			await publishPendingOutboxEventsOnce(undefined, infraToUse);
 		})
 		.catch((error) => {
 			logger.error("outbox.publish.error", { error });

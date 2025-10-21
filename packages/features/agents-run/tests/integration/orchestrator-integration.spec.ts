@@ -1,27 +1,24 @@
 import { randomUUID } from "node:crypto";
-import { db } from "@repo/database";
 import { EVENT_TYPES } from "@sg/agents-contracts";
 import { describe, expect, it } from "vitest";
 import { startRun } from "../../src/application/usecases/start-run";
-import { streamRun } from "../../src/application/usecases/stream-run";
-import {
-	awaitStreamCompletion,
-	waitForRunCompletion,
-} from "./helpers/await-outbox";
 import { runAgentsRunTest } from "./helpers/test-harness";
 
 describe.sequential("Orchestrator Integration (M3)", () => {
 	it("golden path: emits RunStarted → nodes → RunFinished with monotonic seq", async () => {
-		await runAgentsRunTest(async ({ container }) => {
+		await runAgentsRunTest(async ({ container, db }) => {
 			// Arrange
 			const runId = randomUUID();
 
 			// Act: start run and process deterministically
-			await startRun(runId, container);
-			
+			await startRun(runId, container, db);
+
+			// Check if run was created
+			const _run = await db.run.findUnique({ where: { id: runId } });
+
 			// Get outbox controller for deterministic stepping
 			const outbox = container.cradle.outboxController;
-			
+
 			// Step until completion
 			let attempts = 0;
 			while (attempts < 100) {
@@ -32,7 +29,7 @@ describe.sequential("Orchestrator Integration (M3)", () => {
 				}
 				attempts++;
 			}
-			
+
 			const events = await db.runEvent.findMany({
 				where: { runId },
 				orderBy: { seq: "asc" },
@@ -62,30 +59,31 @@ describe.sequential("Orchestrator Integration (M3)", () => {
 	}, 45000);
 
 	it("concurrent runs: each has isolated monotonic seq", async () => {
-		await runAgentsRunTest(async ({ container }) => {
+		await runAgentsRunTest(async ({ container, db }) => {
 			// Arrange
 			const runId1 = randomUUID();
 			const runId2 = randomUUID();
 
 			// Act: start runs sequentially (single-thread mode constraint)
-			await startRun(runId1, container);
-			await startRun(runId2, container);
+			await startRun(runId1, container, db);
+			await startRun(runId2, container, db);
 
-			const iter1 = streamRun(runId1, undefined, container);
-			const iter2 = streamRun(runId2, undefined, container);
+			// Get outbox controller for deterministic stepping
+			const outbox = container.cradle.outboxController;
 
-			const collecting1 = awaitStreamCompletion(iter1);
-			const collecting2 = awaitStreamCompletion(iter2);
+			// Step until both runs complete
+			await outbox.stepAll(runId1);
+			await outbox.stepAll(runId2);
 
-			await Promise.all([
-				waitForRunCompletion(runId1, { container, timeoutMs: 60_000 }),
-				waitForRunCompletion(runId2, { container, timeoutMs: 60_000 }),
-			]);
-
-			const [events1, events2] = await Promise.all([
-				collecting1,
-				collecting2,
-			]);
+			// Assert: check database state directly
+			const events1 = await db.runEvent.findMany({
+				where: { runId: runId1 },
+				orderBy: { seq: "asc" },
+			});
+			const events2 = await db.runEvent.findMany({
+				where: { runId: runId2 },
+				orderBy: { seq: "asc" },
+			});
 
 			// Assert: each run maintains monotonic seq isolation
 			const seqs1 = events1.map((e) => e.seq);

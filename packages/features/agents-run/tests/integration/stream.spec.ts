@@ -1,26 +1,23 @@
 import { randomUUID } from "node:crypto";
-import { db } from "@repo/database";
 import { describe, expect, it } from "vitest";
 import { startRun } from "../../src/application/usecases/start-run";
 import { streamRun } from "../../src/application/usecases/stream-run";
-import {
-	awaitStreamCompletion,
-} from "./helpers/await-outbox";
+import { awaitStreamCompletion } from "./helpers/await-outbox";
 import { runAgentsRunTest } from "./helpers/test-harness";
 
 describe.sequential("stream run", () => {
 	it("emits canonical sequence and terminates", async () => {
-		await runAgentsRunTest(async ({ container }) => {
+		await runAgentsRunTest(async ({ container, db }) => {
 			// Arrange
 			const runId = randomUUID();
 			const iter = streamRun(runId, undefined, container);
 
 			// Act: start run and process deterministically
-			await startRun(runId, container);
-			
+			await startRun(runId, container, db);
+
 			// Get outbox controller for deterministic stepping
 			const outbox = container.cradle.outboxController;
-			
+
 			// Step until completion
 			let attempts = 0;
 			while (attempts < 100) {
@@ -31,7 +28,7 @@ describe.sequential("stream run", () => {
 				}
 				attempts++;
 			}
-			
+
 			const events = await awaitStreamCompletion(iter);
 
 			// Assert: observable behavior only

@@ -25,7 +25,7 @@ export function createOutboxController(
 			return;
 		}
 		subscriber = createOutboxSubscriber((runId) => {
-			enqueueDrain(runId);
+			enqueueDrain(runId, infra);
 		});
 	}
 
@@ -61,3 +61,8 @@ export async function drainOutboxForRun(
 }
 
 export { publishPendingOutboxEventsOnce } from "./outbox-events";
+
+// Reset outbox publisher state (for test isolation)
+export function resetOutboxPublisher(): void {
+	subscriber = undefined;
+}
