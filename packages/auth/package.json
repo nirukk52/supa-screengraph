@@ -11,9 +11,9 @@
 		"cookie": "^1.0.2"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.2.5",
+		"@biomejs/biome": "2.2.6",
 		"@repo/tsconfig": "workspace:*",
-		"@types/node": "^24.7.2"
+		"@types/node": "^24.9.1"
 	},
 	"main": "./index.ts",
 	"name": "@repo/auth",
