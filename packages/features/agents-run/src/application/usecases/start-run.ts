@@ -1,7 +1,9 @@
 import { EVENT_SOURCES, EVENT_TYPES } from "@sg/agents-contracts";
+import type { AwilixContainer } from "awilix";
 import { RunEventRepo } from "../../infra/repos/run-event-repo";
 import { RunRepo } from "../../infra/repos/run-repo";
 import { AGENTS_RUN_QUEUE_NAME } from "../constants";
+import type { AgentsRunContainerCradle } from "../container.types";
 import { getInfra } from "../infra";
 import { logFn } from "./log";
 import { setNextSeq } from "./sequencer";
@@ -9,7 +11,10 @@ import { setNextSeq } from "./sequencer";
 // Exported constant names must not be string literals per repo rule.
 export const QUEUE_NAME = AGENTS_RUN_QUEUE_NAME;
 
-export async function startRun(runId: string) {
+export async function startRun(
+	runId: string,
+	container?: AwilixContainer<AgentsRunContainerCradle>,
+) {
 	logFn("start-run");
 	if (!runId || typeof runId !== "string") {
 		throw new Error("Invalid runId");
@@ -28,7 +33,7 @@ export async function startRun(runId: string) {
 	} as any);
 	// Prime in-memory sequencer so worker emits seq starting from 2
 	setNextSeq(runId, 2);
-	const { queue } = getInfra();
+	const { queue } = container?.cradle ?? getInfra();
 	await queue.enqueue(QUEUE_NAME, { runId });
 	return { accepted: true };
 }

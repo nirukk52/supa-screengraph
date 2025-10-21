@@ -2,13 +2,12 @@ import { randomUUID } from "node:crypto";
 import { db } from "@repo/database";
 import { EVENT_SOURCES, EVENT_TYPES } from "@sg/agents-contracts";
 import { describe, expect, it } from "vitest";
-import { drainOutboxForRun } from "../../src/infra/workers/outbox-publisher";
 import { runAgentsRunTest } from "./helpers/test-harness";
 
 describe.sequential("outbox publisher", () => {
-	it.skip("publishes in order and marks publishedAt", async () => {
+	it("publishes in order and marks publishedAt", async () => {
 		await runAgentsRunTest(
-			async () => {
+			async ({ container }) => {
 				// Arrange: seed run, outbox, and unpublished events
 				const runId = randomUUID();
 				await db.$transaction(async (tx) => {
@@ -50,9 +49,9 @@ describe.sequential("outbox publisher", () => {
 					});
 				});
 
-				// Act: drain outbox synchronously
-				await drainOutboxForRun(runId);
-				await drainOutboxForRun(runId);
+				// Act: drain outbox synchronously using DI container
+				await container.cradle.drainOutboxForRun(runId);
+				await container.cradle.drainOutboxForRun(runId);
 
 				// Assert: all events published in order (observable DB state)
 				const published = await db.runEvent.findMany({

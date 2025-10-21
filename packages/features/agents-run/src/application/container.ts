@@ -1,33 +1,36 @@
+// Purpose: Factory for agents-run Awilix container registrations.
+// Dependencies: awilix, in-memory ports, outbox worker helpers.
+// Public API: createAgentsRunContainer (returns configured Awilix container).
+
 import { InMemoryEventBus } from "@sg/eventbus-inmemory";
 import { InMemoryQueue } from "@sg/queue-inmemory";
 import { asClass, asValue, createContainer } from "awilix";
+import { enqueueDrain } from "../infra/workers/outbox-drain";
+import { drainOutboxForRun } from "../infra/workers/outbox-publisher";
+import type {
+	AgentsRunContainerCradle,
+	AgentsRunContainerOverrides,
+} from "./container.types";
 
-import type { Infra } from "./infra";
-
-export interface AgentsRunContainerOptions {
-	bus?: Infra["bus"];
-	queue?: Infra["queue"];
-}
-
-/**
- * Create a new Awilix container for agents-run with default in-memory registrations.
- *
- * Default scope: singleton (one instance per container).
- * Tests create a fresh container per test for isolation.
- * Production uses a single container with optional Redis/BullMQ registrations.
- */
 export function createAgentsRunContainer(
-	options: AgentsRunContainerOptions = {},
+	overrides: AgentsRunContainerOverrides = {},
 ) {
-	const container = createContainer();
+	const container = createContainer<AgentsRunContainerCradle>();
 
 	container.register({
-		bus: options.bus
-			? asValue(options.bus)
+		bus: overrides.bus
+			? asValue(overrides.bus)
 			: asClass(InMemoryEventBus).singleton(),
-		queue: options.queue
-			? asValue(options.queue)
+		queue: overrides.queue
+			? asValue(overrides.queue)
 			: asClass(InMemoryQueue).singleton(),
+		drainOutboxForRun: asValue(
+			overrides.drainOutboxForRun ??
+				((runId: string) => drainOutboxForRun(runId, container)),
+		),
+		enqueueOutboxDrain: asValue(
+			overrides.enqueueOutboxDrain ?? enqueueDrain,
+		),
 	});
 
 	return container;

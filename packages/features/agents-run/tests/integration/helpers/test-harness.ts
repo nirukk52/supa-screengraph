@@ -5,8 +5,10 @@ import { InMemoryEventBus } from "@sg/eventbus-inmemory";
 import { createBullMqInfra } from "@sg/queue-bullmq";
 import { InMemoryQueue } from "@sg/queue-inmemory";
 import { RedisContainer } from "testcontainers";
-
+import { createAgentsRunContainer } from "../../../src/application/container";
+import type { AgentsRunContainerCradle } from "../../../src/application/container.types";
 import { resetInfra, setInfra } from "../../../src/application/infra";
+import { drainPending } from "../../../src/infra/workers/outbox-drain";
 import { startWorker } from "../../../src/infra/workers/run-worker";
 
 const DEFAULT_DRIVER = process.env.AGENTS_RUN_QUEUE_DRIVER ?? "memory";
@@ -14,6 +16,13 @@ const DEFAULT_DRIVER = process.env.AGENTS_RUN_QUEUE_DRIVER ?? "memory";
 type TestOptions = {
 	driver?: "memory" | "bullmq";
 	startWorker?: boolean;
+};
+
+type TestContext = {
+	container: {
+		cradle: AgentsRunContainerCradle;
+		dispose: () => Promise<void>;
+	};
 };
 
 let redisContainer: RedisContainer | undefined;
@@ -72,7 +81,7 @@ async function configureInfra(driver: "memory" | "bullmq") {
 }
 
 export async function runAgentsRunTest<T>(
-	fn: () => Promise<T>,
+	fn: (ctx: TestContext) => Promise<T>,
 	options: TestOptions = {},
 ): Promise<T> {
 	const driver = options.driver ?? (DEFAULT_DRIVER as "memory" | "bullmq");
@@ -81,18 +90,25 @@ export async function runAgentsRunTest<T>(
 	const disposers: Dispose[] = [];
 	const disposeInfra = await configureInfra(driver);
 	disposers.push(disposeInfra);
+
+	const container = createAgentsRunContainer();
+	disposers.push(async () => {
+		await container.dispose();
+	});
+
 	if (shouldStartWorker) {
-		const stopRunWorker = startWorker();
+		const stopRunWorker = startWorker(container);
 		disposers.push(stopRunWorker);
 	}
 
 	try {
-		const result = await fn();
+		const result = await fn({ container });
 		return result;
 	} finally {
 		for (const dispose of disposers.reverse()) {
 			await dispose();
 		}
+		await drainPending();
 		await clearDatabase();
 		if (driver === "bullmq") {
 			await disposeRedis();

@@ -1,4 +1,6 @@
 import { orchestrateRun } from "@repo/agents-core";
+import type { AwilixContainer } from "awilix";
+import type { AgentsRunContainerCradle } from "../../application/container.types";
 import { getInfra } from "../../application/infra";
 import { logFn } from "../../application/usecases/log";
 import { QUEUE_NAME } from "../../application/usecases/start-run";
@@ -16,8 +18,10 @@ import { startOutboxWorker } from "./outbox-publisher";
  * invoking the domain orchestrator. Also starts the outbox publisher worker to
  * flush persisted events to the event bus.
  */
-export function startWorker() {
-	const { queue } = getInfra();
+export function startWorker(
+	container?: AwilixContainer<AgentsRunContainerCradle>,
+) {
+	const { queue } = getInfra(container);
 	queue.worker<{ runId: string }>(QUEUE_NAME, async ({ runId }) => {
 		logFn("worker:job:start");
 
