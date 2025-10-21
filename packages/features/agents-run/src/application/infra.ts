@@ -1,8 +1,10 @@
 import type { EventBusPort } from "@sg/eventbus";
 import type { QueuePort } from "@sg/queue";
 import { createBullMqInfra } from "@sg/queue-bullmq";
+import type { AwilixContainer } from "awilix";
 import { AGENTS_RUN_CONFIG_KEYS, AGENTS_RUN_QUEUE_NAME } from "./constants";
 import { createAgentsRunContainer } from "./container";
+import type { AgentsRunContainerCradle } from "./container.types";
 
 export interface Infra {
 	bus: EventBusPort;
@@ -54,8 +56,11 @@ function buildDefaultContainer() {
 
 let currentContainer = buildDefaultContainer();
 
-export function getInfra(): Infra {
-	return currentContainer.cradle as Infra;
+export function getInfra(
+	container?: AwilixContainer<AgentsRunContainerCradle>,
+): Infra {
+	const source = container ?? currentContainer;
+	return source.cradle as Infra;
 }
 
 export function setInfra(next: Infra): void {
