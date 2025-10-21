@@ -10,15 +10,15 @@ import {
 import { runAgentsRunTest } from "./helpers/test-harness";
 
 describe.sequential("Orchestrator Integration (M3)", () => {
-	it.skip("golden path: emits RunStarted → nodes → RunFinished with monotonic seq", async () => {
-		await runAgentsRunTest(async () => {
+	it("golden path: emits RunStarted → nodes → RunFinished with monotonic seq", async () => {
+		await runAgentsRunTest(async ({ container }) => {
 			// Arrange
 			const runId = randomUUID();
-			const iter = streamRun(runId);
+			const iter = streamRun(runId, undefined, container);
 
 			// Act: start run and wait for completion
-			await startRun(runId);
-			await waitForRunCompletion(runId);
+			await startRun(runId, container);
+			await waitForRunCompletion(runId, { container, timeoutMs: 30_000 });
 			const events = await awaitStreamCompletion(iter);
 
 			// Assert: observable event stream behavior

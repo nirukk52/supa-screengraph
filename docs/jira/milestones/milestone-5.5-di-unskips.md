@@ -196,10 +196,10 @@ Milestone 5.5 completes the Awilix DI container migration started in M5 Phase 1.
 
 ---
 
-### ⏸️ PR-06: Unskip Orchestrator Golden Path
+### 🔵 PR-06: Unskip Orchestrator Golden Path
 **Files:** `orchestrator-integration.spec.ts`  
-**Branch:** `feature/pr06-orchestrator-golden`  
-**Status:** Pending  
+**Branch:** `feature/pr06-unskip-orchestrator-golden-path`  
+**Status:** In Progress  
 
 **Changes:**
 - Unskip first test only (golden path)
