@@ -64,7 +64,9 @@ describe.sequential("Orchestrator Integration (M3)", () => {
 			const runId1 = randomUUID();
 			const runId2 = randomUUID();
 
-			console.error(`[CONCURRENT TEST] Starting runs: ${runId1}, ${runId2}`);
+			console.error(
+				`[CONCURRENT TEST] Starting runs: ${runId1}, ${runId2}`,
+			);
 
 			// Act: start runs sequentially (single-thread mode constraint)
 			await startRun(runId1, container, db);
@@ -85,19 +87,23 @@ describe.sequential("Orchestrator Integration (M3)", () => {
 					await outbox.stepAll(id);
 					run = await db.run.findUnique({ where: { id } });
 					if (run?.state === "finished") {
-						console.error(`[CONCURRENT TEST] Run finished after ${attempts} attempts: ${id}`);
+						console.error(
+							`[CONCURRENT TEST] Run finished after ${attempts} attempts: ${id}`,
+						);
 						break;
 					}
 					attempts++;
 				}
-				
+
 				// Debug: Check if run completed successfully
 				if (!run || run.state !== "finished") {
 					const events = await db.runEvent.findMany({
 						where: { runId: id },
 						orderBy: { seq: "asc" },
 					});
-					console.error(`[CONCURRENT TEST] Run did NOT complete: ${id}, state=${run?.state}, events=${events.length}`);
+					console.error(
+						`[CONCURRENT TEST] Run did NOT complete: ${id}, state=${run?.state}, events=${events.length}`,
+					);
 					throw new Error(
 						`Run ${id} did not complete after 100 attempts. ` +
 							`Final state: ${run?.state || "not found"}, ` +
@@ -117,8 +123,12 @@ describe.sequential("Orchestrator Integration (M3)", () => {
 			});
 
 			// Debug: Log event counts for CI debugging
-			console.error(`[CONCURRENT TEST] Run ${runId1}: ${events1.length} events`);
-			console.error(`[CONCURRENT TEST] Run ${runId2}: ${events2.length} events`);
+			console.error(
+				`[CONCURRENT TEST] Run ${runId1}: ${events1.length} events`,
+			);
+			console.error(
+				`[CONCURRENT TEST] Run ${runId2}: ${events2.length} events`,
+			);
 
 			// Assert: each run maintains monotonic seq isolation
 			const seqs1 = events1.map((e) => e.seq);
