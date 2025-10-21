@@ -71,9 +71,19 @@ describe.sequential("Orchestrator Integration (M3)", () => {
 			// Get outbox controller for deterministic stepping
 			const outbox = container.cradle.outboxController;
 
-			// Step until both runs complete
-			await outbox.stepAll(runId1);
-			await outbox.stepAll(runId2);
+			// Step until both runs complete (deterministic loop)
+			const runIds = [runId1, runId2];
+			for (const id of runIds) {
+				let attempts = 0;
+				while (attempts < 100) {
+					await outbox.stepAll(id);
+					const run = await db.run.findUnique({ where: { id } });
+					if (run?.state === "finished") {
+						break;
+					}
+					attempts++;
+				}
+			}
 
 			// Assert: check database state directly
 			const events1 = await db.runEvent.findMany({
@@ -96,7 +106,7 @@ describe.sequential("Orchestrator Integration (M3)", () => {
 				expect(seqs2[i]).toBeGreaterThanOrEqual(seqs2[i - 1]);
 			}
 
-			// Assert: similar event counts (observable parity)
+			// Assert: each run emits canonical sequence (observable parity)
 			expect(events1.length).toBeGreaterThanOrEqual(3);
 			expect(events2.length).toBeGreaterThanOrEqual(3);
 		});

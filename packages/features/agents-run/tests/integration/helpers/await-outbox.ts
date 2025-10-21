@@ -9,7 +9,6 @@ import { drainOutboxForRun } from "../../../src/infra/workers/outbox-publisher";
  * DO NOT use with db-mock; this helper calls Prisma-specific APIs.
  * For unit tests, seed data directly via the mock instead.
  */
-const prisma: PrismaClient = db as unknown as PrismaClient;
 
 export type AwaitOutboxOptions = {
 	pollMs?: number;
@@ -17,6 +16,14 @@ export type AwaitOutboxOptions = {
 	signal?: AbortSignal;
 	container?: AwilixContainer<AgentsRunContainerCradle>;
 };
+
+function resolvePrismaClient(opts: AwaitOutboxOptions): PrismaClient {
+	const containerDb = opts.container?.cradle.db;
+	if (containerDb) {
+		return containerDb as PrismaClient;
+	}
+	return db as unknown as PrismaClient;
+}
 
 /**
  * Wait until the outbox has advanced past targetSeq for a run.
@@ -28,6 +35,7 @@ export async function awaitOutboxFlush(
 	targetSeq?: number,
 	opts: AwaitOutboxOptions = {},
 ): Promise<{ nextSeq: number; lastSeq: number }> {
+	const prisma = resolvePrismaClient(opts);
 	const pollMs = opts.pollMs ?? 25;
 	const timeoutMs = opts.timeoutMs ?? 10_000;
 	const start = Date.now();
@@ -115,6 +123,7 @@ export async function waitForRunCompletion(
 	runId: string,
 	opts: AwaitOutboxOptions = {},
 ): Promise<{ state: string; lastSeq: number; nextSeq: number }> {
+	const prisma = resolvePrismaClient(opts);
 	const pollMs = opts.pollMs ?? 100;
 	const timeoutMs = opts.timeoutMs ?? 20_000;
 	const start = Date.now();

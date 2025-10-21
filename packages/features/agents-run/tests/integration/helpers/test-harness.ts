@@ -93,7 +93,7 @@ async function configureInfra(driver: "memory" | "bullmq", db: PrismaClient) {
 		});
 		return async () => {
 			await infra.close();
-			resetInfra();
+			await resetInfra();
 		};
 	}
 	setInfra({
@@ -102,7 +102,7 @@ async function configureInfra(driver: "memory" | "bullmq", db: PrismaClient) {
 		db: db,
 	});
 	return async () => {
-		resetInfra();
+		await resetInfra();
 	};
 }
 
@@ -153,7 +153,8 @@ export async function runAgentsRunTest<T>(
 		resetTracerState(); // Clear tracer state for test isolation
 		resetOutboxSubscriber(); // Clear outbox subscriber state for test isolation
 		resetOutboxPublisher(); // Clear outbox publisher state for test isolation
-
+		await db.$disconnect();
+		await resetInfra();
 		if (driver === "bullmq") {
 			await disposeRedis();
 		}
