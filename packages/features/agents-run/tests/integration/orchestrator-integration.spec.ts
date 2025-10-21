@@ -60,7 +60,7 @@ describe.sequential("Orchestrator Integration (M3)", () => {
 
 	it("concurrent runs: each has isolated monotonic seq", async () => {
 		await runAgentsRunTest(async ({ container, db }) => {
-			// Arrange
+			// Arrange: create two independent run IDs
 			const runId1 = randomUUID();
 			const runId2 = randomUUID();
 
