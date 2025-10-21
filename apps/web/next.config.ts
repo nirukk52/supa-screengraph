@@ -11,6 +11,9 @@ const nextConfig: NextConfig = {
 	typescript: {
 		ignoreBuildErrors: true,
 	},
+	experimental: {
+		serverComponentsExternalPackages: ["pg", "pg-format", "pg-listen"],
+	},
 	transpilePackages: [
 		"@repo/api",
 		"@repo/auth",
@@ -67,6 +70,11 @@ const nextConfig: NextConfig = {
 
 		if (isServer) {
 			config.plugins.push(new PrismaPlugin());
+			// Ensure problematic CJS package with __dirname requires is kept external
+			// to avoid Next.js bundler attempting to resolve server-relative imports.
+			config.externals = config.externals || [];
+			config.externals.push({ "pg-format": "commonjs pg-format" });
+			config.externals.push({ pg: "commonjs pg" });
 		}
 
 		// Resolve local workspace packages without publishing

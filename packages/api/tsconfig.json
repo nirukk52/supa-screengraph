@@ -11,7 +11,11 @@
 	},
 	"references": [
 		{ "path": "../database" },
-		{ "path": "../features/agents-run" }
+		{ "path": "../features/agents-run" },
+		{ "path": "../storage" },
+		{ "path": "../i18n" },
+		{ "path": "../auth" },
+		{ "path": "../ai" }
 	],
 	"include": [
 		"index.ts",

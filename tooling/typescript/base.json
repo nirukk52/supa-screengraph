@@ -16,16 +16,161 @@
 		"preserveWatchOutput": true,
 		"resolveJsonModule": true,
 		"skipLibCheck": true,
+		"disableSourceOfProjectReferenceRedirect": true,
 		"strict": true,
 		"strictNullChecks": true,
 		"paths": {
+			"@repo/agents-contracts": [
+				"../../packages/agents-contracts/src",
+				"../../packages/agents-contracts"
+			],
+			"@repo/agents-contracts/*": [
+				"../../packages/agents-contracts/src/*",
+				"../../packages/agents-contracts/*"
+			],
+			"@repo/agents-core": [
+				"../../packages/agents-core/src",
+				"../../packages/agents-core"
+			],
+			"@repo/agents-core/*": [
+				"../../packages/agents-core/src/*",
+				"../../packages/agents-core/*"
+			],
+			"@repo/ai": ["../../packages/ai/src", "../../packages/ai"],
+			"@repo/ai/*": ["../../packages/ai/src/*", "../../packages/ai/*"],
+			"@repo/api": ["../../packages/api/src", "../../packages/api"],
+			"@repo/api/*": ["../../packages/api/src/*", "../../packages/api/*"],
+			"@repo/auth": ["../../packages/auth/src", "../../packages/auth"],
+			"@repo/auth/*": [
+				"../../packages/auth/src/*",
+				"../../packages/auth/*"
+			],
 			"@repo/database": ["../../packages/database"],
 			"@repo/database/*": ["../../packages/database/*"],
 			"@repo/database/prisma/*": ["../../packages/database/prisma/*"],
-			"@sg/feature-agents-run": ["../../packages/features/agents-run"],
-			"@sg/queue": ["../../packages/queue"],
-			"@sg/queue-bullmq": ["../../packages/queue-bullmq"],
-			"@sg/queue-inmemory": ["../../packages/queue-inmemory"]
+			"@repo/eventbus": [
+				"../../packages/eventbus/src",
+				"../../packages/eventbus"
+			],
+			"@repo/eventbus/*": [
+				"../../packages/eventbus/src/*",
+				"../../packages/eventbus/*"
+			],
+			"@repo/eventbus-inmemory": [
+				"../../packages/eventbus-inmemory/src",
+				"../../packages/eventbus-inmemory"
+			],
+			"@repo/eventbus-inmemory/*": [
+				"../../packages/eventbus-inmemory/src/*",
+				"../../packages/eventbus-inmemory/*"
+			],
+			"@repo/i18n": ["../../packages/i18n/src", "../../packages/i18n"],
+			"@repo/i18n/*": [
+				"../../packages/i18n/src/*",
+				"../../packages/i18n/*"
+			],
+			"@repo/logs": ["../../packages/logs/src", "../../packages/logs"],
+			"@repo/logs/*": [
+				"../../packages/logs/src/*",
+				"../../packages/logs/*"
+			],
+			"@repo/mail": ["../../packages/mail/src", "../../packages/mail"],
+			"@repo/mail/*": [
+				"../../packages/mail/src/*",
+				"../../packages/mail/*"
+			],
+			"@repo/payments": [
+				"../../packages/payments/src",
+				"../../packages/payments"
+			],
+			"@repo/payments/*": [
+				"../../packages/payments/src/*",
+				"../../packages/payments/*"
+			],
+			"@repo/queue": ["../../packages/queue/src", "../../packages/queue"],
+			"@repo/queue/*": [
+				"../../packages/queue/src/*",
+				"../../packages/queue/*"
+			],
+			"@repo/queue-bullmq": [
+				"../../packages/queue-bullmq/src",
+				"../../packages/queue-bullmq"
+			],
+			"@repo/queue-bullmq/*": [
+				"../../packages/queue-bullmq/src/*",
+				"../../packages/queue-bullmq/*"
+			],
+			"@repo/queue-inmemory": [
+				"../../packages/queue-inmemory/src",
+				"../../packages/queue-inmemory"
+			],
+			"@repo/queue-inmemory/*": [
+				"../../packages/queue-inmemory/src/*",
+				"../../packages/queue-inmemory/*"
+			],
+			"@repo/storage": [
+				"../../packages/storage/src",
+				"../../packages/storage"
+			],
+			"@repo/storage/*": [
+				"../../packages/storage/src/*",
+				"../../packages/storage/*"
+			],
+			"@repo/utils": ["../../packages/utils"],
+			"@repo/utils/*": ["../../packages/utils/*"],
+			"@sg/agents-contracts": [
+				"../../packages/agents-contracts/src",
+				"../../packages/agents-contracts"
+			],
+			"@sg/agents-contracts/*": [
+				"../../packages/agents-contracts/src/*",
+				"../../packages/agents-contracts/*"
+			],
+			"@sg/feature-agents-run": [
+				"../../packages/features/agents-run/src",
+				"../../packages/features/agents-run"
+			],
+			"@sg/feature-agents-run/*": [
+				"../../packages/features/agents-run/src/*",
+				"../../packages/features/agents-run/*"
+			],
+			"@sg/eventbus": [
+				"../../packages/eventbus/src",
+				"../../packages/eventbus"
+			],
+			"@sg/eventbus/*": [
+				"../../packages/eventbus/src/*",
+				"../../packages/eventbus/*"
+			],
+			"@sg/eventbus-inmemory": [
+				"../../packages/eventbus-inmemory/src",
+				"../../packages/eventbus-inmemory"
+			],
+			"@sg/eventbus-inmemory/*": [
+				"../../packages/eventbus-inmemory/src/*",
+				"../../packages/eventbus-inmemory/*"
+			],
+			"@sg/queue": ["../../packages/queue/src", "../../packages/queue"],
+			"@sg/queue/*": [
+				"../../packages/queue/src/*",
+				"../../packages/queue/*"
+			],
+			"@sg/queue-bullmq": [
+				"../../packages/queue-bullmq/src",
+				"../../packages/queue-bullmq"
+			],
+			"@sg/queue-bullmq/*": [
+				"../../packages/queue-bullmq/src/*",
+				"../../packages/queue-bullmq/*"
+			],
+			"@sg/queue-inmemory": [
+				"../../packages/queue-inmemory/src",
+				"../../packages/queue-inmemory"
+			],
+			"@sg/queue-inmemory/*": [
+				"../../packages/queue-inmemory/src/*",
+				"../../packages/queue-inmemory/*"
+			]
 		}
 	},
 	"display": "Default",
