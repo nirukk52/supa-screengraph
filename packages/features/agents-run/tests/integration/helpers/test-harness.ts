@@ -7,7 +7,7 @@ import { InMemoryQueue } from "@sg/queue-inmemory";
 import { RedisContainer } from "testcontainers";
 import { createAgentsRunContainer } from "../../../src/application/container";
 import type { AgentsRunContainerCradle } from "../../../src/application/container.types";
-import { resetInfra, setInfra } from "../../../src/application/infra";
+import { getInfra, resetInfra, setInfra } from "../../../src/application/infra";
 import { drainPending } from "../../../src/infra/workers/outbox-drain";
 import { startWorker } from "../../../src/infra/workers/run-worker";
 
@@ -91,7 +91,12 @@ export async function runAgentsRunTest<T>(
 	const disposeInfra = await configureInfra(driver);
 	disposers.push(disposeInfra);
 
-	const container = createAgentsRunContainer();
+	// Use the same bus/queue instances from global infra for per-test container
+	const infra = getInfra();
+	const container = createAgentsRunContainer({
+		bus: infra.bus,
+		queue: infra.queue,
+	});
 	disposers.push(async () => {
 		await container.dispose();
 	});

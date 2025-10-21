@@ -3,20 +3,24 @@ import { db } from "@repo/database";
 import { EVENT_TYPES } from "@sg/agents-contracts";
 import { describe, expect, it } from "vitest";
 import { startRun } from "../../src/application/usecases/start-run";
-import { awaitOutboxFlush } from "./helpers/await-outbox";
+import { awaitOutboxFlush, waitForRunCompletion } from "./helpers/await-outbox";
 import { runAgentsRunTest } from "./helpers/test-harness";
 
 describe.sequential("Orchestrator Integration (M3)", () => {
-	it.skip("golden path: emits RunStarted → nodes → RunFinished with monotonic seq", async () => {
+	it("golden path: emits RunStarted → nodes → RunFinished with monotonic seq", async () => {
 		await runAgentsRunTest(async ({ container }) => {
 			// Arrange
 			const runId = randomUUID();
 
-			// Act: start run and deterministically flush outbox
+			// Act: start run, wait for completion, ensure outbox drained
 			await startRun(runId, container);
+			await waitForRunCompletion(runId, {
+				container,
+				timeoutMs: 60_000,
+			});
 			await awaitOutboxFlush(runId, undefined, {
 				container,
-				timeoutMs: 30_000,
+				timeoutMs: 10_000,
 			});
 			const events = await db.runEvent.findMany({
 				where: { runId },
