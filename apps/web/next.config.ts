@@ -11,10 +11,16 @@ const nextConfig: NextConfig = {
 	typescript: {
 		ignoreBuildErrors: true,
 	},
+	// Keep server-only packages external (not bundled for client)
+	serverComponentsExternalPackages: [
+		"@repo/database",
+		"@prisma/client",
+		"prisma",
+		"pg-format",
+	],
 	transpilePackages: [
 		"@repo/api",
 		"@repo/auth",
-		"@repo/database",
 		"@sg/feature-agents-run",
 		"@sg/agents-contracts",
 		"@sg/eventbus",
@@ -72,7 +78,7 @@ const nextConfig: NextConfig = {
 					resourceRegExp: /^pg-format$|^@prisma\/client$/,
 				}),
 			);
-			
+
 			// Mark database package as external for client bundles
 			config.externals = config.externals || [];
 			if (Array.isArray(config.externals)) {
