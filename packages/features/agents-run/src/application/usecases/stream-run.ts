@@ -1,11 +1,14 @@
 import { db } from "@repo/database";
 import type { AgentEvent } from "@sg/agents-contracts";
 import { EVENT_SOURCES, TOPIC_AGENTS_RUN } from "@sg/agents-contracts";
+import type { AwilixContainer } from "awilix";
+import type { AgentsRunContainerCradle } from "../container.types";
 import { getInfra } from "../infra";
 
 export async function* streamRun(
 	runId: string,
 	fromSeq?: number,
+	container?: AwilixContainer<AgentsRunContainerCradle>,
 ): AsyncIterable<AgentEvent> {
 	// Backfill first: only published events
 	const start = (fromSeq ?? 0) + 1;
@@ -33,7 +36,7 @@ export async function* streamRun(
 	}
 
 	// Then subscribe for live events; de-dupe on seq
-	const { bus } = getInfra();
+	const { bus } = getInfra(container);
 	for await (const evt of bus.subscribe(TOPIC_AGENTS_RUN)) {
 		if (evt.runId !== runId) {
 			continue;

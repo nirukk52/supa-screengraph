@@ -96,7 +96,7 @@ export async function runAgentsRunTest<T>(
 	});
 
 	if (shouldStartWorker) {
-		const stopRunWorker = startWorker();
+		const stopRunWorker = startWorker(container);
 		disposers.push(stopRunWorker);
 	}
 

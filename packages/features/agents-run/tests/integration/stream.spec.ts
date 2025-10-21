@@ -9,14 +9,14 @@ import {
 import { runAgentsRunTest } from "./helpers/test-harness";
 
 describe.sequential("stream run", () => {
-	it.skip("emits canonical sequence and terminates", async () => {
-		await runAgentsRunTest(async () => {
+	it("emits canonical sequence and terminates", async () => {
+		await runAgentsRunTest(async ({ container }) => {
 			// Arrange
 			const runId = randomUUID();
-			const iter = streamRun(runId);
+			const iter = streamRun(runId, undefined, container);
 
 			// Act
-			await startRun(runId);
+			await startRun(runId, container);
 			await waitForRunCompletion(runId);
 			const events = await awaitStreamCompletion(iter);
 
