@@ -1,9 +1,15 @@
 import type { Prisma } from "@repo/database";
 import { db } from "@repo/database";
+import type { PrismaClient } from "@repo/database/prisma/generated/client";
 
 export const RunRepo = {
-	async createRun(runId: string, startedAt: number): Promise<void> {
-		await db.$transaction(async (tx: Prisma.TransactionClient) => {
+	async createRun(
+		runId: string,
+		startedAt: number,
+		dbClient?: PrismaClient,
+	): Promise<void> {
+		const client = dbClient ?? db;
+		await client.$transaction(async (tx: Prisma.TransactionClient) => {
 			await tx.run.upsert({
 				where: { id: runId },
 				update: {},

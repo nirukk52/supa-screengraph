@@ -9,6 +9,7 @@ import type {
 	EventType,
 	Tracer,
 } from "@repo/agents-core";
+import type { PrismaClient } from "@repo/database/prisma/generated/client";
 import type { AgentEvent } from "@sg/agents-contracts";
 import { EVENT_SOURCES, SCHEMA_VERSION } from "@sg/agents-contracts";
 import { nextSeq } from "../../application/usecases/sequencer";
@@ -23,6 +24,8 @@ export class InMemoryClock implements Clock {
 const appendChains = new Map<string, Promise<void>>();
 
 export class FeatureLayerTracer implements Tracer {
+	constructor(private dbClient?: PrismaClient) {}
+
 	emit(_type: EventType, payload: CanonicalEvent): void {
 		// Map canonical event to M2 schema with seq/v/source
 		const event: AgentEvent = {
@@ -37,9 +40,9 @@ export class FeatureLayerTracer implements Tracer {
 		const prev = appendChains.get(key) ?? Promise.resolve();
 		const next = prev
 			.then(async () => {
-				await RunEventRepo.appendEvent(event);
+				await RunEventRepo.appendEvent(event, this.dbClient);
 			})
-			.catch(() => {
+			.catch((_error) => {
 				// keep chain alive on error to not block subsequent events
 			})
 			.finally(() => {

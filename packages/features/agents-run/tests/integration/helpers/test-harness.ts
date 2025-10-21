@@ -52,31 +52,33 @@ async function clearDatabase() {
 	await db.run.deleteMany({});
 }
 
-async function configureInfra(driver: "memory" | "bullmq") {
+async function configureInfra(driver: "memory" | "bullmq", container?: any) {
 	if (driver === "bullmq") {
-		const container = await initRedis();
+		const redisContainer = await initRedis();
 		const infra = createBullMqInfra({
 			queueName: "agents.run",
 			connection: {
-				host: container.getHost(),
-				port: container.getMappedPort(6379),
+				host: redisContainer.getHost(),
+				port: redisContainer.getMappedPort(6379),
 			},
 		});
 		setInfra({
 			bus: new InMemoryEventBus(),
 			queue: infra.port,
+			db: db,
 		});
 		return async () => {
 			await infra.close();
-			resetInfra();
+			await resetInfra(container);
 		};
 	}
 	setInfra({
 		bus: new InMemoryEventBus(),
 		queue: new InMemoryQueue(),
+		db: db,
 	});
 	return async () => {
-		resetInfra();
+		await resetInfra(container);
 	};
 }
 
@@ -87,11 +89,13 @@ export async function runAgentsRunTest<T>(
 	const driver = options.driver ?? (DEFAULT_DRIVER as "memory" | "bullmq");
 	const shouldStartWorker = options.startWorker ?? true;
 	await clearDatabase();
-	const disposers: Dispose[] = [];
-	const disposeInfra = await configureInfra(driver);
-	disposers.push(disposeInfra);
 
 	const container = createAgentsRunContainer();
+	const disposers: Dispose[] = [];
+
+	const disposeInfra = await configureInfra(driver, container);
+	disposers.push(disposeInfra);
+
 	disposers.push(async () => {
 		await container.dispose();
 	});

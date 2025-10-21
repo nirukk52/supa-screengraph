@@ -7,7 +7,9 @@ import { createOutboxSubscriber } from "./outbox-subscriber";
 
 let subscriber: ReturnType<typeof createOutboxSubscriber> | undefined;
 
-export function startOutboxWorker() {
+export function startOutboxWorker(
+	container?: AwilixContainer<AgentsRunContainerCradle>,
+) {
 	if (subscriber) {
 		return async () => {
 			await drainPending();
@@ -17,7 +19,7 @@ export function startOutboxWorker() {
 	}
 
 	subscriber = createOutboxSubscriber((runId) => {
-		enqueueDrain(runId);
+		enqueueDrain(runId, container);
 	});
 
 	return async () => {

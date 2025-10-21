@@ -1,3 +1,4 @@
+import type { PrismaClient } from "@repo/database/prisma/generated/client";
 import type { EventBusPort } from "@sg/eventbus";
 import type { QueuePort } from "@sg/queue";
 import { createBullMqInfra } from "@sg/queue-bullmq";
@@ -9,6 +10,7 @@ import type { AgentsRunContainerCradle } from "./container.types";
 export interface Infra {
 	bus: EventBusPort;
 	queue: QueuePort;
+	db: PrismaClient;
 }
 
 interface RedisConnectionOptions {
@@ -66,6 +68,14 @@ function ensureContainer() {
 export function getInfra(
 	container?: AwilixContainer<AgentsRunContainerCradle>,
 ): Infra {
+	// In test environment, require explicit container to prevent singleton usage
+	if (process.env.NODE_ENV === "test" && !container) {
+		throw new Error(
+			"getInfra() called without container in test environment. " +
+				"Pass explicit container to avoid singleton usage in tests.",
+		);
+	}
+
 	const source = container ?? ensureContainer();
 	return source.cradle as Infra;
 }
@@ -74,12 +84,16 @@ export function setInfra(next: Infra): void {
 	currentContainer = createAgentsRunContainer({
 		bus: next.bus,
 		queue: next.queue,
+		db: next.db,
 	});
 }
 
-export function resetInfra(): void {
-	const infra = getInfra();
+export async function resetInfra(
+	container?: AwilixContainer<AgentsRunContainerCradle>,
+): Promise<void> {
+	const infra = getInfra(container);
 	(infra.bus as { reset?: () => void }).reset?.();
 	(infra.queue as { reset?: () => void }).reset?.();
+	await (infra.db as { $disconnect?: () => Promise<void> }).$disconnect?.();
 	currentContainer = undefined;
 }

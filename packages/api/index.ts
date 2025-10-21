@@ -27,7 +27,8 @@ function startWorkersOnce() {
 	// Dynamic import to avoid circular dependencies
 	import("@sg/feature-agents-run")
 		.then((mod) => {
-			disposeWorkers = mod.startWorker();
+			const container = mod.createAgentsRunContainer();
+			disposeWorkers = mod.startWorker(container);
 			logger.info("[api] agents-run workers started");
 		})
 		.catch((err) => {

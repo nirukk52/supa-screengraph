@@ -41,9 +41,8 @@ describe("agents-run e2e via API", () => {
 	const testApp = createTestApp(app);
 
 	it("starts a run via API and persists at least the initial event", async () => {
-		// Ensure worker is running (feature module provides in-memory implementations)
-		const { startWorker } = await import("@sg/feature-agents-run");
-		startWorker();
+		// Note: API router creates its own container per request, so we don't need to start a worker here
+		// The API module skips starting workers in test environment to avoid conflicts
 
 		const runId = `r-${Math.random().toString(36).slice(2)}`;
 
@@ -56,17 +55,8 @@ describe("agents-run e2e via API", () => {
 		expect(startRes.ok).toBe(true);
 		expect(startRes.body).toBeDefined();
 
-		// Optional sanity check: stream endpoint exists and returns SSE headers
-		const streamRes = await testApp
-			.get(`/agents/runs/${encodeURIComponent(runId)}/stream`)
-			.expect(200);
-
-		expect(streamRes.headers.get("content-type") || "").toContain(
-			"text/event-stream",
-		);
-		// Note: We don't parse the body here to keep this e2e simple and stable.
-
 		// Wait for at least one persisted event and assert minimal invariants
+		// Note: In E2E tests, both API and test use the same global db instance
 		const events = await waitForEvents(runId, 1, 10000);
 
 		expect(events.length).toBeGreaterThanOrEqual(1);

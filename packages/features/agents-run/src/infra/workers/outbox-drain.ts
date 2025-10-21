@@ -1,17 +1,22 @@
 import { logger } from "@repo/logs";
+import type { AwilixContainer } from "awilix";
+import type { AgentsRunContainerCradle } from "../../application/container.types";
 import { getInfra } from "../../application/infra";
 import { publishPendingOutboxEventsOnce } from "./outbox-events";
 
 const pendingRuns = new Map<string, Promise<void>>();
 let globalDrain: Promise<void> | undefined;
 
-export function enqueueDrain(runId?: string) {
+export function enqueueDrain(
+	runId?: string,
+	container?: AwilixContainer<AgentsRunContainerCradle>,
+) {
 	if (runId) {
 		const current = pendingRuns.get(runId) ?? Promise.resolve();
 		const next = current
 			.catch(() => undefined)
 			.then(async () => {
-				const infra = getInfra();
+				const infra = getInfra(container);
 				await publishPendingOutboxEventsOnce(runId, infra);
 			})
 			.catch((error) => {
@@ -29,7 +34,7 @@ export function enqueueDrain(runId?: string) {
 	globalDrain = (globalDrain ?? Promise.resolve())
 		.catch(() => undefined)
 		.then(async () => {
-			const infra = getInfra();
+			const infra = getInfra(container);
 			await publishPendingOutboxEventsOnce(undefined, infra);
 		})
 		.catch((error) => {

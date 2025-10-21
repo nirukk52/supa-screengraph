@@ -5,10 +5,15 @@ import {
 	SCHEMA_VERSION,
 	TOPIC_AGENTS_RUN,
 } from "@sg/agents-contracts";
+import type { AwilixContainer } from "awilix";
+import type { AgentsRunContainerCradle } from "../container.types";
 import { getInfra } from "../infra";
 import { nextSeq } from "./sequencer";
 
-export async function cancelRun(runId: string) {
+export async function cancelRun(
+	runId: string,
+	container?: AwilixContainer<AgentsRunContainerCradle>,
+) {
 	if (!runId) {
 		throw new Error("Invalid runId");
 	}
@@ -21,7 +26,7 @@ export async function cancelRun(runId: string) {
 		source: EVENT_SOURCES.api,
 		fn: "cancelRequested",
 	};
-	const { bus } = getInfra();
+	const { bus } = getInfra(container);
 	await bus.publish(TOPIC_AGENTS_RUN, evt);
 	return { accepted: true };
 }

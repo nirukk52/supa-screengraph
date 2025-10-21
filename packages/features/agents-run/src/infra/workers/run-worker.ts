@@ -21,19 +21,19 @@ import { startOutboxWorker } from "./outbox-publisher";
 export function startWorker(
 	container?: AwilixContainer<AgentsRunContainerCradle>,
 ) {
-	const { queue } = getInfra(container);
+	const { queue, db } = getInfra(container);
 	queue.worker<{ runId: string }>(QUEUE_NAME, async ({ runId }) => {
 		logFn("worker:job:start");
 
 		await orchestrateRun({
 			runId,
 			clock: new InMemoryClock(),
-			tracer: new FeatureLayerTracer(),
+			tracer: new FeatureLayerTracer(db),
 			cancelToken: new StubCancellationToken(),
 		});
 	});
 
-	const stopOutbox = startOutboxWorker();
+	const stopOutbox = startOutboxWorker(container);
 	return async () => {
 		await stopOutbox();
 	};

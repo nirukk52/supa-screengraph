@@ -20,20 +20,24 @@ export async function startRun(
 		throw new Error("Invalid runId");
 	}
 	const ts = Date.now();
+	const infra = container?.cradle ?? getInfra(container);
 	// Initialize run and outbox
-	await RunRepo.createRun(runId, ts);
+	await RunRepo.createRun(runId, ts, infra.db);
 	// Seed RunStarted as seq=1; orchestrator will continue from seq>=2
-	await RunEventRepo.appendEvent({
-		runId,
-		seq: 1,
-		ts,
-		type: EVENT_TYPES.RunStarted,
-		v: 1,
-		source: EVENT_SOURCES.api,
-	} as any);
+	await RunEventRepo.appendEvent(
+		{
+			runId,
+			seq: 1,
+			ts,
+			type: EVENT_TYPES.RunStarted,
+			v: 1,
+			source: EVENT_SOURCES.api,
+		} as any,
+		infra.db,
+	);
 	// Prime in-memory sequencer so worker emits seq starting from 2
 	setNextSeq(runId, 2);
-	const { queue } = container?.cradle ?? getInfra();
+	const { queue } = infra;
 	await queue.enqueue(QUEUE_NAME, { runId });
 	return { accepted: true };
 }
