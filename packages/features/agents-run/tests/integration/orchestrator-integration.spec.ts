@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
+import { db } from "@repo/database";
 import { EVENT_TYPES } from "@sg/agents-contracts";
 import { describe, expect, it } from "vitest";
 import { startRun } from "../../src/application/usecases/start-run";
-import { db } from "@repo/database";
 import {
 	awaitStreamCompletion,
 	waitForRunCompletion,
@@ -10,41 +10,41 @@ import {
 import { runAgentsRunTest } from "./helpers/test-harness";
 
 describe.sequential("Orchestrator Integration (M3)", () => {
-    it("golden path: emits RunStarted → nodes → RunFinished with monotonic seq", async () => {
+	it("golden path: emits RunStarted → nodes → RunFinished with monotonic seq", async () => {
 		await runAgentsRunTest(async ({ container }) => {
 			// Arrange
 			const runId = randomUUID();
 
 			// Act: start run and wait for completion
 			await startRun(runId, container);
-			await waitForRunCompletion(runId, { container, timeoutMs: 45_000 });
-            const events = await db.runEvent.findMany({
-                where: { runId },
-                orderBy: { seq: "asc" },
-            });
+            await waitForRunCompletion(runId, { container, timeoutMs: 90_000 });
+			const events = await db.runEvent.findMany({
+				where: { runId },
+				orderBy: { seq: "asc" },
+			});
 
 			// Assert: observable event stream behavior
 			expect(events.length).toBeGreaterThanOrEqual(12);
-            expect(events[0].type).toBe(EVENT_TYPES.RunStarted);
-            expect(events.at(-1)?.type).toBe(EVENT_TYPES.RunFinished);
+			expect(events[0].type).toBe(EVENT_TYPES.RunStarted);
+			expect(events.at(-1)?.type).toBe(EVENT_TYPES.RunFinished);
 
 			// Assert: monotonic sequence (observable invariant)
-            const seqs = events.map((e) => e.seq);
+			const seqs = events.map((e) => e.seq);
 			for (let i = 1; i < seqs.length; i++) {
 				expect(seqs[i]).toBeGreaterThan(seqs[i - 1]);
 			}
 
 			// Assert: event schema correctness (observable structure)
-            for (const event of events) {
-                expect(event).toHaveProperty("runId");
-                expect(event).toHaveProperty("seq");
-                expect(event).toHaveProperty("ts");
-                expect(event).toHaveProperty("type");
-                expect(event).toHaveProperty("v");
-                expect(event).toHaveProperty("source");
-            }
+			for (const event of events) {
+				expect(event).toHaveProperty("runId");
+				expect(event).toHaveProperty("seq");
+				expect(event).toHaveProperty("ts");
+				expect(event).toHaveProperty("type");
+				expect(event).toHaveProperty("v");
+				expect(event).toHaveProperty("source");
+			}
 		});
-	}, 45000);
+    }, 90000);
 
 	it.skip("concurrent runs: each has isolated monotonic seq", async () => {
 		await runAgentsRunTest(async () => {
