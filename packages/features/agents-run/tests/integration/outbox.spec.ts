@@ -2,8 +2,8 @@ import { randomUUID } from "node:crypto";
 import { db } from "@repo/database";
 import { EVENT_SOURCES, EVENT_TYPES } from "@sg/agents-contracts";
 import { describe, expect, it } from "vitest";
-import { runAgentsRunTest } from "./helpers/test-harness";
 import { awaitOutboxFlush } from "./helpers/await-outbox";
+import { runAgentsRunTest } from "./helpers/test-harness";
 
 describe.sequential("outbox publisher", () => {
 	it("publishes in order and marks publishedAt", async () => {

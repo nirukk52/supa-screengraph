@@ -12,10 +12,13 @@ describe.sequential("Orchestrator Integration (M3)", () => {
 			// Arrange
 			const runId = randomUUID();
 
-        // Act: start run and deterministically flush outbox
-            await startRun(runId, container);
-            await awaitOutboxFlush(runId, undefined, { container, timeoutMs: 30_000 });
-            const events = await db.runEvent.findMany({
+			// Act: start run and deterministically flush outbox
+			await startRun(runId, container);
+			await awaitOutboxFlush(runId, undefined, {
+				container,
+				timeoutMs: 30_000,
+			});
+			const events = await db.runEvent.findMany({
 				where: { runId },
 				orderBy: { seq: "asc" },
 			});
@@ -41,7 +44,7 @@ describe.sequential("Orchestrator Integration (M3)", () => {
 				expect(event).toHaveProperty("source");
 			}
 		});
-    }, 45000);
+	}, 45000);
 
 	it.skip("concurrent runs: each has isolated monotonic seq", async () => {
 		await runAgentsRunTest(async () => {
