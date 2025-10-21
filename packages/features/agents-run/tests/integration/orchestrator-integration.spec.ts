@@ -84,7 +84,7 @@ describe.sequential("Orchestrator Integration (M3)", () => {
 					}
 					attempts++;
 				}
-				
+
 				// Debug: Check if run completed successfully
 				if (!run || run.state !== "finished") {
 					const events = await db.runEvent.findMany({
@@ -93,8 +93,8 @@ describe.sequential("Orchestrator Integration (M3)", () => {
 					});
 					throw new Error(
 						`Run ${id} did not complete after 100 attempts. ` +
-						`Final state: ${run?.state || "not found"}, ` +
-						`Events: ${events.length}`
+							`Final state: ${run?.state || "not found"}, ` +
+							`Events: ${events.length}`,
 					);
 				}
 			}
