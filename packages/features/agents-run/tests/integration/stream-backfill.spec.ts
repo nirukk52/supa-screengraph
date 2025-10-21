@@ -39,16 +39,16 @@ describe.sequential("SSE stream backfill", () => {
 	}, 30000);
 
 	it("subscribes for live events after backfill", async () => {
-		await runAgentsRunTest(async () => {
+		await runAgentsRunTest(async ({ container }) => {
 			// Arrange
 			const runId = randomUUID();
 
 			// Act: start run and wait for completion
-			await startRun(runId);
+			await startRun(runId, container);
 			await waitForRunCompletion(runId);
 
 			// Assert: stream delivers all events
-			const iter = streamRun(runId);
+			const iter = streamRun(runId, undefined, container);
 			const events: any[] = [];
 			const collector = (async () => {
 				for await (const evt of iter) {
@@ -65,7 +65,9 @@ describe.sequential("SSE stream backfill", () => {
 
 			// Assert: subscribing from near-end returns only final event
 			const lastSeq = events.at(-1)?.seq ?? 0;
-			const liveTail = await collect(streamRun(runId, lastSeq - 1));
+			const liveTail = await collect(
+				streamRun(runId, lastSeq - 1, container),
+			);
 			expect(liveTail.map((event) => event.seq)).toEqual([lastSeq]);
 			expect(liveTail.at(-1)?.type).toBe(EVENT_TYPES.RunFinished);
 		});
