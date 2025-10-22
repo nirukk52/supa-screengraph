@@ -23,7 +23,8 @@ export async function startRun(
 		throw new Error("Invalid runId");
 	}
 	const ts = Date.now();
-	const dbClient = testDb ?? db; // Use provided testDb parameter or fallback to global db import
+	const dbClient = testDb ?? db;
+	const infra = container?.cradle ?? getInfra(container);
 	// Initialize run and outbox
 	await RunRepo.createRun(runId, ts, dbClient);
 	// Seed RunStarted as seq=1; orchestrator will continue from seq>=2
@@ -40,7 +41,7 @@ export async function startRun(
 	);
 	// Prime in-memory sequencer so worker emits seq starting from 2
 	setNextSeq(runId, 2);
-	const { queue } = container?.cradle ?? getInfra();
+	const { queue } = infra;
 	await queue.enqueue(QUEUE_NAME, { runId });
 	return { accepted: true };
 }
