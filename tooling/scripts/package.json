@@ -17,7 +17,7 @@
 	"name": "@repo/scripts",
 	"private": true,
 	"scripts": {
-		"create:user": "dotenv -c -e ../../.env -- tsx ./src/create-user.ts",
+		"create:user": "dotenv -c -e ../../.env -- tsx --tsconfig-paths ./src/create-user.ts",
 		"type-check": "tsc --noEmit"
 	},
 	"version": "0.0.0"
