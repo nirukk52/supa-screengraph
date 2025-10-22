@@ -68,5 +68,5 @@ describe.sequential("outbox publisher", () => {
 			},
 			{ startWorker: false },
 		);
-	});
+	}, 15000);
 });

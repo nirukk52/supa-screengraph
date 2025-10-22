@@ -28,6 +28,11 @@
 			"types": "./prisma/client.ts",
 			"import": "./prisma/client.ts",
 			"default": "./prisma/client.ts"
+		},
+		"./prisma/generated/client": {
+			"types": "./prisma/generated/client/index.d.ts",
+			"import": "./prisma/generated/client/index.js",
+			"default": "./prisma/generated/client/index.js"
 		}
 	},
 	"scripts": {

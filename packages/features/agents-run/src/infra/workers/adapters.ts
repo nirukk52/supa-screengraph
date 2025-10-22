@@ -43,7 +43,7 @@ export class FeatureLayerTracer implements Tracer {
 			.then(async () => {
 				await RunEventRepo.appendEvent(event, this.dbClient ?? db);
 			})
-			.catch(() => {
+			.catch((_error) => {
 				// keep chain alive on error to not block subsequent events
 			})
 			.finally(() => {

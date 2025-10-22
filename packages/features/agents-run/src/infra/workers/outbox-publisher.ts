@@ -17,7 +17,7 @@ export type OutboxController = {
 export function createOutboxController(
 	container?: AwilixContainer<AgentsRunContainerCradle>,
 ): OutboxController {
-	const infra = container?.cradle ?? getInfra();
+	const infra = getInfra(container);
 
 	function start(): void {
 		// Only start subscriber if not already active (avoid test interference)
@@ -56,7 +56,7 @@ export async function drainOutboxForRun(
 	runId: string,
 	container?: AwilixContainer<AgentsRunContainerCradle>,
 ) {
-	const infra = container?.cradle ?? getInfra();
+	const infra = getInfra(container);
 	await publishPendingOutboxEventsOnce(runId, infra);
 }
 

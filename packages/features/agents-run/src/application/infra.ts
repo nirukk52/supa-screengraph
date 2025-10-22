@@ -80,10 +80,18 @@ export function setInfra(next: Infra): void {
 	});
 }
 
-export function resetInfra(): void {
-	const infra = getInfra();
+export async function resetInfra(
+	container?: AwilixContainer<AgentsRunContainerCradle>,
+): Promise<void> {
+	const infra = container
+		? (container.cradle as Infra)
+		: (currentContainer?.cradle as Infra | undefined);
+	if (!infra) {
+		currentContainer = undefined;
+		return;
+	}
 	(infra.bus as { reset?: () => void }).reset?.();
 	(infra.queue as { reset?: () => void }).reset?.();
-	(infra.db as { $disconnect?: () => Promise<void> }).$disconnect?.();
+	await (infra.db as { $disconnect?: () => Promise<void> }).$disconnect?.();
 	currentContainer = undefined;
 }

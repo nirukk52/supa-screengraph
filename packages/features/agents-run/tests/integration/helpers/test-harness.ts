@@ -78,12 +78,12 @@ async function clearDatabase(db: PrismaClient) {
 
 async function configureInfra(driver: "memory" | "bullmq", db: PrismaClient) {
 	if (driver === "bullmq") {
-		const container = await initRedis();
+		const redisContainer = await initRedis();
 		const infra = createBullMqInfra({
 			queueName: "agents.run",
 			connection: {
-				host: container.getHost(),
-				port: container.getMappedPort(6379),
+				host: redisContainer.getHost(),
+				port: redisContainer.getMappedPort(6379),
 			},
 		});
 		setInfra({
@@ -93,7 +93,7 @@ async function configureInfra(driver: "memory" | "bullmq", db: PrismaClient) {
 		});
 		return async () => {
 			await infra.close();
-			resetInfra();
+			await resetInfra();
 		};
 	}
 	setInfra({
@@ -102,7 +102,7 @@ async function configureInfra(driver: "memory" | "bullmq", db: PrismaClient) {
 		db: db,
 	});
 	return async () => {
-		resetInfra();
+		await resetInfra();
 	};
 }
 
@@ -124,7 +124,7 @@ export async function runAgentsRunTest<T>(
 	const disposeInfra = await configureInfra(driver, db);
 	disposers.push(disposeInfra);
 
-	// Create fresh bus/queue/db instances per test to avoid cross-test interference
+	// Reuse the container created by configureInfra/setInfra to ensure worker and startRun use same instances
 	const infra = getInfra();
 	const container = createAgentsRunContainer({
 		bus: infra.bus,
@@ -153,7 +153,8 @@ export async function runAgentsRunTest<T>(
 		resetTracerState(); // Clear tracer state for test isolation
 		resetOutboxSubscriber(); // Clear outbox subscriber state for test isolation
 		resetOutboxPublisher(); // Clear outbox publisher state for test isolation
-
+		await db.$disconnect();
+		await resetInfra();
 		if (driver === "bullmq") {
 			await disposeRedis();
 		}
