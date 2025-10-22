@@ -7,12 +7,12 @@
 		"zod": "^4.1.11"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.2.5",
+		"@biomejs/biome": "2.2.6",
 		"@repo/tsconfig": "workspace:*",
-		"@types/node": "24.7.2",
+		"@types/node": "24.9.1",
 		"dotenv-cli": "^10.0.0",
 		"prisma": "6.17.1",
-		"prisma-zod-generator": "^1.25.0"
+		"prisma-zod-generator": "^1.29.1"
 	},
 	"name": "@repo/database",
 	"version": "0.0.0",
