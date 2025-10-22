@@ -9,9 +9,7 @@ export const agentsRouter = publicProcedure.router({
 		.handler(async ({ input }) => {
 			const mod = await import("@sg/feature-agents-run");
 			const container = mod.createAgentsRunContainer({ db });
-			// Start worker for this container to process the job
-			const _stopWorker = mod.startWorker(container);
-			// Note: In production, workers are started once at boot. In tests, we start per request.
+			// Note: Workers are started once at boot in production. No per-request worker needed.
 			return await mod.postStartRun({ runId: input.runId }, container);
 		}),
 	postCancelRun: publicProcedure
