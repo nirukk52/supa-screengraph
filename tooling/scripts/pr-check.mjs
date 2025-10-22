@@ -56,6 +56,9 @@ async function main() {
 	try {
 		assertVersions();
 
+		// 0007: Ensure Next.js webpack aliases stay in sync with TS base paths
+		run("node tooling/scripts/check-alias-parity.mjs");
+
 		const PRECHECK_ONLY =
 			process.env.PR_PRECHECK_ONLY === "1" ||
 			process.env.PR_PRECHECK_ONLY === "true";

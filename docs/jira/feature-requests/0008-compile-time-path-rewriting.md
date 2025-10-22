@@ -1,6 +1,6 @@
 # [FEATURE-0008] Compile-time Path Rewriting for Node/Publish
 
-**Status:** Proposed  
+**Status:** Completed  
 **Priority:** High  
 **Effort:** Medium (1–2 days)  
 **Created:** 2025-10-21  
