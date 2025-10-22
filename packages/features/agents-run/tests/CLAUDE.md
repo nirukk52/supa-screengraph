@@ -247,4 +247,4 @@ pnpm vitest watch packages/features/agents-run/tests/integration/
 
 ---
 
-**Status**: ✅ Milestone 5 Complete - 31/32 integration tests passing, infrastructure stabilized
+**Status**: ✅ Milestone 5 Complete - 31/32 integration tests passing, infrastructure stabilized, deterministic suite
