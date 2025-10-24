@@ -10,8 +10,8 @@
 	},
 	"dependencies": {
 		"@sg/queue": "workspace:*",
-		"bullmq": "^5.61.0",
-		"redis": "^5.8.3"
+		"bullmq": "^5.61.2",
+		"redis": "^5.9.0"
 	},
 	"peerDependencies": {}
 }

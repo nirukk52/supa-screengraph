@@ -24,7 +24,7 @@
 		"dev:feature": "node ./src/infra/workers/run-worker.js"
 	},
 	"dependencies": {
-		"@orpc/server": "^1.9.0",
+		"@orpc/server": "^1.10.0",
 		"@repo/agents-core": "workspace:*",
 		"@repo/database": "workspace:*",
 		"@repo/logs": "workspace:*",
