@@ -39,7 +39,7 @@
 	},
 	"devDependencies": {
 		"@faker-js/faker": "^10.1.0",
-		"@types/node": "^24.8.1",
-		"testcontainers": "^10.8.2"
+		"@types/node": "^24.9.1",
+		"testcontainers": "^11.7.2"
 	}
 }
